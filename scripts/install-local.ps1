@@ -26,4 +26,7 @@ if (-not $exe -or $exe.LastWriteTime -lt $setup.LastWriteTime.AddMinutes(-5)) {
   throw "Install didn't replace $installed (still dated $($exe.LastWriteTime))."
 }
 Write-Host "Installed: $installed ($($exe.LastWriteTime))"
-Start-Process $installed
+# Started through WMI rather than as our child: when this script runs inside a packaged app's shell
+# (the Claude desktop app, say), a child would inherit its AppData redirection and open a stale or
+# empty copy of the mailbox instead of the real one.
+$null = Invoke-CimMethod -ClassName Win32_Process -MethodName Create -Arguments @{ CommandLine = "`"$installed`"" }
