@@ -6,7 +6,6 @@ import { useStore } from "../store";
 import { goFolder } from "../actions";
 import { cx } from "../util";
 import { usePresence } from "../hooks";
-import { dragJustEnded, startSectionDrag } from "../mailDrag";
 import { useMark } from "../motion";
 import { Avatar } from "./Avatar";
 import { Popover } from "./Popover";
@@ -63,10 +62,7 @@ export function SectionItem({ v, count, tab }: { v: SenderView; count?: number; 
       data-section={key}
       role="button"
       tabIndex={tab}
-      onClick={() => !dragJustEnded() && goFolder(f)}
-      onPointerDown={(e) => {
-        if (!(e.target as HTMLElement).closest(".nav-x")) startSectionDrag(e, key, v.name);
-      }}
+      onClick={() => goFolder(f)}
       onKeyDown={(e) => {
         if (e.key === "Enter" || e.key === " ") {
           e.preventDefault();

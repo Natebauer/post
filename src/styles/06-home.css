@@ -244,55 +244,6 @@
   animation: fade var(--med) var(--ease);
 }
 
-/* ---------- home: header, customize ---------- */
-
-.home-hint {
-  margin: 0 var(--s-1) var(--s-4);
-  font-size: var(--fs-2);
-  color: var(--text-2);
-}
-.home.editing .hcard {
-  outline: 1px dashed var(--border-strong);
-  outline-offset: 4px;
-  border-radius: var(--r-1);
-  transition: opacity var(--fast) var(--ease), transform var(--fast) var(--ease-move);
-}
-.home.editing .hcard .hbody {
-  pointer-events: none;
-  opacity: 0.7;
-}
-.hcard.dragging {
-  opacity: 0.45;
-  transform: scale(0.99);
-}
-.hgrip {
-  display: inline-grid;
-  place-items: center;
-  width: 22px;
-  height: 26px;
-  margin-left: -4px;
-  border-radius: var(--r-1);
-  color: var(--text-3);
-  cursor: grab;
-  touch-action: none;
-}
-.hgrip:hover {
-  background: var(--hover);
-  color: var(--text);
-}
-.home.editing {
-  user-select: none;
-}
-.home-hidden {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: var(--s-2);
-  margin-top: var(--s-5);
-  padding: 0 var(--s-1);
-  font-size: var(--fs-2);
-}
-
 /* ---------- home: rows of modules ---------- */
 .home-bar {
   display: flex;
@@ -303,14 +254,6 @@
 }
 .home-bar .sp {
   flex: 1;
-}
-.home-customize {
-  opacity: 0.55;
-  transition: opacity var(--fast) var(--ease);
-}
-.home:hover .home-customize,
-.home-customize:focus-visible {
-  opacity: 1;
 }
 .home-rows {
   display: flex;
@@ -331,44 +274,6 @@
 .hcard {
   position: relative;
 }
-/* Drop indicators while dragging */
-.hcard[class*="drop-"]::after {
-  content: "";
-  position: absolute;
-  background: var(--accent);
-  border-radius: 2px;
-  pointer-events: none;
-  animation: fade var(--fast) var(--ease);
-}
-.hcard.drop-left::after {
-  left: -14px;
-  top: 0;
-  bottom: 0;
-  width: 3px;
-}
-.hcard.drop-right::after {
-  right: -14px;
-  top: 0;
-  bottom: 0;
-  width: 3px;
-}
-.hcard.drop-above::after {
-  top: -12px;
-  left: 0;
-  right: 0;
-  height: 3px;
-}
-.hcard.drop-below::after {
-  bottom: -12px;
-  left: 0;
-  right: 0;
-  height: 3px;
-}
-.home.dragging-any,
-.home.dragging-any * {
-  cursor: grabbing !important;
-}
-
 /* ---------- inbox / reading pane resizer ---------- */
 .splitter {
   flex: none;
@@ -417,18 +322,6 @@ body.resizing iframe {
 }
 .home-rows {
   gap: var(--s-5);
-}
-.hcard.drop-left::after {
-  left: -12px;
-}
-.hcard.drop-right::after {
-  right: -12px;
-}
-.hcard.drop-above::after {
-  top: -12px;
-}
-.hcard.drop-below::after {
-  bottom: -12px;
 }
 
 /* ---------- drag an email onto home to pin it ---------- */

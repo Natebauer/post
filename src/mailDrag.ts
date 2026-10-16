@@ -1,7 +1,7 @@
 import { api } from "./api";
 import { useStore } from "./store";
 import { motionMs, reduceMotion } from "./motionTokens";
-import { addSectionToHome, setPin } from "./components/Home";
+import { setPin } from "./components/Home";
 import { addSender, addToCategory, findSection } from "./senders";
 
 /**
@@ -122,9 +122,4 @@ export function startMailDrag(
       await setPin(threadId, true);
     })();
   });
-}
-
-/** Drag a sidebar section onto Home to show its emails there. */
-export function startSectionDrag(e: React.PointerEvent, key: string, name: string) {
-  pointerDrag(e, [name, "Add to Home"], ".read-pane.bare", "dragging-section", () => void addSectionToHome(key));
 }

@@ -286,18 +286,6 @@ body.dragging-mail .sidebar-inner {
 .editor-actions .sp {
   flex: 1;
 }
-/* Dragging a sidebar section onto Home. */
-body.dragging-section .read-pane.bare.drop-over::after {
-  content: "Drop to add to Home";
-}
-.hmore {
-  display: block;
-  margin: var(--s-1) var(--s-2) 0;
-  padding: 4px 0;
-  font-size: var(--fs-2);
-  color: var(--accent-text);
-  font-weight: 550;
-}
 .hmore:hover {
   text-decoration: underline;
   text-underline-offset: 3px;
