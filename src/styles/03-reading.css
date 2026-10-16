@@ -194,8 +194,34 @@
 }
 .frame-tools {
   display: flex;
-  justify-content: flex-end;
+  justify-content: space-between;
+  align-items: center;
+  gap: var(--s-2);
   margin-top: 6px;
+}
+/* Per-email text size: out of the way until you're on the message, or once the size is changed. */
+.text-size {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  color: var(--text-3);
+  opacity: 0;
+  transition: opacity 0.15s;
+}
+.msg:hover .text-size,
+.text-size:focus-within,
+.text-size.changed {
+  opacity: 1;
+}
+.text-size-value {
+  min-width: 44px;
+  text-align: center;
+  font-variant-numeric: tabular-nums;
+}
+.text-size-value:disabled {
+  cursor: default;
+  background: none;
+  color: var(--text-3);
 }
 .link-btn {
   font-size: var(--fs-1);

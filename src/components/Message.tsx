@@ -382,7 +382,7 @@ export function MessageCard({
           <div className="msg-body">
             <InviteCard m={m} />
             {m.html ? (
-              <EmailFrame html={m.html} attachments={m.attachments} highlight={query} sender={m.from.email} />
+              <EmailFrame html={m.html} attachments={m.attachments} highlight={query} sender={m.from.email} messageId={m.id} />
             ) : (
               <PlainBody text={m.text} />
             )}

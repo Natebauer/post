@@ -456,7 +456,8 @@ body:not(.dragging-mail) .sidebar.rail .nav-sep {
 }
 
 /* ---------- emails with their web images held back ---------- */
-.images-held {
+.images-held,
+.frame-note {
   display: flex;
   align-items: center;
   flex-wrap: wrap;
@@ -469,7 +470,8 @@ body:not(.dragging-mail) .sidebar.rail .nav-sep {
   font-size: var(--fs-2);
   color: var(--text-2);
 }
-.images-held svg {
+.images-held svg,
+.frame-note svg {
   flex: none;
   color: var(--text-3);
 }

@@ -71,6 +71,21 @@ const newsletterHtml = `
 <p style="margin-top:22px"><a href="https://example.com" style="background:#1f3b2c;color:#fff;padding:10px 18px;border-radius:6px;text-decoration:none;display:inline-block">Open Figma</a></p>
 </td></tr></table></td></tr></table>`;
 
+// Sample of an email set in unreadably small type (Post should enlarge it).
+const tinyHtml = `
+<div style="font-family:Arial,sans-serif;font-size:9px;line-height:12px;color:#444">
+<p>Hi there,</p><p>Thanks for your payment. Your receipt for the October billing period is below. If you have any
+questions about this charge, reply to this email and our team will get back to you within one business day.</p>
+<table cellpadding="4" style="font-size:9px"><tr><td>Plan</td><td>Standard, 12 seats</td></tr><tr><td>Amount paid</td><td><b>$96.00</b></td></tr></table>
+<table><tr><td style="font-size:1px;line-height:1px" height="12">&nbsp;</td></tr></table>
+<p style="font-size:7px;color:#888">You're receiving this because you're a billing admin.</p></div>`;
+
+// Sample of an email set in oversized type (Post should reduce it).
+const hugeHtml = `
+<div style="font-size:34px;line-height:1.3">
+<p>Split view is here. Open two tabs side by side and keep your notes next to whatever you're reading.</p>
+<p>We also made start-up faster and fixed a long list of small things you told us about.</p></div>`;
+
 const inviteIcs = [
   "BEGIN:VCALENDAR",
   "METHOD:REQUEST",
@@ -112,7 +127,7 @@ function msg(id: string, t: ThreadSummary, i: number, n: number): Message {
     text: fromMe
       ? "Sounds great, Thursday works.\n\nI'll bring the printouts."
       : `${t.snippet}\n\nA couple more thoughts:\n- The palette feels calmer than last round\n- Type could go a touch larger on mobile\n\nhttps://example.com/board\n\nThanks!\n${p.name.split(" ")[0]}`,
-    html: t.threadId === "t3" ? newsletterHtml : null,
+    html: t.threadId === "t3" ? newsletterHtml : t.threadId === "t9" ? tinyHtml : t.threadId === "t7" ? hugeHtml : null,
     messageIdHeader: `${id}@mail.example.com`,
     references: "",
     canUnsubscribe: t.threadId === "t3",

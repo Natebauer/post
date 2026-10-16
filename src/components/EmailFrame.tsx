@@ -5,7 +5,7 @@ import { useStore } from "../store";
 import { resolvedTheme } from "../theme";
 import { fromComposeData, openCompose } from "../compose";
 import { escapeHtml, parseAddressList } from "../util";
-import { ImageOff } from "lucide-react";
+import { AArrowDown, AArrowUp, ImageOff, Type } from "lucide-react";
 import { highlightDom } from "./Highlight";
 import { prepareEmail } from "../safeHtml";
 
@@ -82,6 +82,96 @@ function adaptDark(doc: Document) {
   doc.documentElement.style.setProperty("background", "transparent", "important");
 }
 
+/* ---------- text size: per email, with an automatic fix for unreadable sizes ---------- */
+
+/** Text-size steps offered by the smaller/larger buttons, as a share of the email's own size. */
+const SCALE_STEPS = [0.5, 0.6, 0.7, 0.8, 0.9, 1, 1.1, 1.25, 1.4, 1.6, 1.8, 2, 2.25, 2.5, 3];
+const SCALE_KEY = "post.textScale";
+const SCALE_KEEP = 500;
+
+/** The text size you picked for each email, remembered on this computer (newest last). */
+function loadScales(): Record<string, number> {
+  try {
+    return JSON.parse(localStorage.getItem(SCALE_KEY) || "{}");
+  } catch {
+    return {};
+  }
+}
+
+function saveScale(id: string, scale: number | null) {
+  try {
+    const all = loadScales();
+    delete all[id];
+    if (scale !== null) all[id] = scale;
+    const ids = Object.keys(all);
+    for (const old of ids.slice(0, Math.max(0, ids.length - SCALE_KEEP))) delete all[old];
+    localStorage.setItem(SCALE_KEY, JSON.stringify(all));
+  } catch {
+    /* storage unavailable: the choice lasts until the email closes */
+  }
+}
+
+/** One element's own text, with the inline sizes it came with so they can be put back. */
+type TextBox = { el: HTMLElement; fs: number; lh: number | null; chars: number; fsInline: [string, string]; lhInline: [string, string] };
+
+/** Every visible element that holds text of its own, with its rendered font size. */
+function measureText(doc: Document): TextBox[] {
+  const win = doc.defaultView!;
+  const out: TextBox[] = [];
+  for (const el of [doc.body, ...Array.from(doc.body.querySelectorAll<HTMLElement>("*"))]) {
+    if (el.closest("svg, style, script, title")) continue;
+    let chars = 0;
+    for (const n of Array.from(el.childNodes)) if (n.nodeType === 3) chars += (n.textContent || "").replace(/[\s ‌]+/g, "").length;
+    if (!chars) continue;
+    const cs = win.getComputedStyle(el);
+    const fs = parseFloat(cs.fontSize);
+    // Leave 0–5px text alone: that's spacer cells and hidden preview text, not something to read.
+    if (!(fs >= 6) || cs.visibility === "hidden" || !el.getClientRects().length) continue;
+    const lh = cs.lineHeight.endsWith("px") ? parseFloat(cs.lineHeight) : null;
+    const inline = (p: string): [string, string] => [el.style.getPropertyValue(p), el.style.getPropertyPriority(p)];
+    out.push({ el, fs, lh, chars, fsInline: inline("font-size"), lhInline: inline("line-height") });
+  }
+  return out;
+}
+
+/** The size most of the email's words are set in (character-weighted median). */
+function typicalSize(boxes: TextBox[]) {
+  const total = boxes.reduce((n, b) => n + b.chars, 0);
+  const sorted = [...boxes].sort((a, b) => a.fs - b.fs);
+  let seen = 0;
+  for (const b of sorted) if ((seen += b.chars) >= total / 2) return { size: b.fs, chars: total };
+  return { size: 0, chars: total };
+}
+
+/** Comfortable reading sizes, in on-screen pixels. Outside these, Post adjusts the email. */
+const READABLE_MIN = 12.5;
+const READABLE_MAX = 24;
+const READABLE_TARGET_UP = 15;
+const READABLE_TARGET_DOWN = 18;
+
+/** The scale that brings unreadably small or large text to a comfortable size, or 1. */
+function autoScale(boxes: TextBox[], zoom: number) {
+  const { size, chars } = typicalSize(boxes);
+  // Too little text to judge (a picture with a short caption, say).
+  if (chars < 40 || !size) return 1;
+  const shown = size * zoom;
+  const f = shown < READABLE_MIN ? READABLE_TARGET_UP / shown : shown > READABLE_MAX ? READABLE_TARGET_DOWN / shown : 1;
+  return Math.round(Math.min(3, Math.max(0.5, f)) * 100) / 100;
+}
+
+function applyScale(boxes: TextBox[], scale: number) {
+  for (const b of boxes) {
+    if (scale === 1) {
+      b.el.style.setProperty("font-size", ...b.fsInline);
+      b.el.style.setProperty("line-height", ...b.lhInline);
+      continue;
+    }
+    // Absolute sizes on every text holder, so nested text is scaled once rather than compounding.
+    b.el.style.setProperty("font-size", `${(b.fs * scale).toFixed(2)}px`, "important");
+    if (b.lh !== null) b.el.style.setProperty("line-height", `${(b.lh * scale).toFixed(2)}px`, "important");
+  }
+}
+
 const BASE_CSS = (dark: boolean) => `
   :root { color-scheme: ${dark ? "dark" : "light"}; }
   html { overflow-x: auto; overflow-y: hidden; }
@@ -130,12 +220,15 @@ export function EmailFrame({
   attachments,
   highlight,
   sender,
+  messageId,
 }: {
   html: string;
   attachments: Attachment[];
   highlight?: string | null;
   /** The sender's address, for "always show images from this sender". */
   sender?: string;
+  /** Which email this is, so its text size is remembered. */
+  messageId?: string;
 }) {
   const ref = useRef<HTMLIFrameElement>(null);
   const settings = useStore((s) => s.settings);
@@ -153,6 +246,22 @@ export function EmailFrame({
   const [showImages, setShowImages] = useState(false);
   useEffect(() => setShowImages(false), [html]);
   const trusted = !!sender && (settings?.imageSenders ?? []).includes(sender.toLowerCase());
+  // Text size: the one you picked for this email, else Post's automatic fix (1 when none is needed).
+  const [chosen, setChosen] = useState<number | null>(() => (messageId ? loadScales()[messageId] ?? null : null));
+  const [auto, setAuto] = useState(1);
+  const scale = chosen ?? auto;
+  const chosenRef = useRef(chosen);
+  chosenRef.current = chosen;
+  const rescale = useRef<((s: number) => void) | null>(null);
+  useEffect(() => rescale.current?.(scale), [scale]);
+  const choose = (s: number | null) => {
+    setChosen(s);
+    if (messageId) saveScale(messageId, s);
+  };
+  const step = (dir: 1 | -1) => {
+    const next = dir > 0 ? SCALE_STEPS.find((x) => x > scale + 0.001) : [...SCALE_STEPS].reverse().find((x) => x < scale - 0.001);
+    if (next !== undefined) choose(next);
+  };
   const blockRemote = !(settings?.remoteImages ?? true) && !trusted && !showImages;
 
   const prepared = useMemo(() => prepareEmail(resolveCids(html, attachments), blockRemote), [html, attachments, blockRemote]);
@@ -179,6 +288,8 @@ export function EmailFrame({
     const off = new AbortController();
     const signal = off.signal;
     setReady(false);
+    rescale.current = null;
+    let boxes: TextBox[] = [];
     // Emails built wider than the reading column (some newsletters are 775px) get the room they need: the
     // email area widens evenly on both sides into the pane's spare space. Only when the pane is
     // too narrow is the email scaled down to fit, so nothing is ever cut off on the right.
@@ -231,6 +342,23 @@ export function EmailFrame({
         doc.body.style.color = "#1b1c1f";
       }
       if (highlight) highlightDom(doc.body, highlight);
+      widen();
+      try {
+        boxes = measureText(doc);
+        // Judged as it appears on screen: a wide email shrunk to fit the pane reads smaller than it's set.
+        const a = autoScale(boxes, parseFloat(doc.documentElement.style.zoom) || 1);
+        setAuto(a);
+        applyScale(boxes, chosenRef.current ?? a);
+        natural = 0;
+      } catch (e) {
+        console.warn("text size check failed", e);
+      }
+      rescale.current = (s) => {
+        applyScale(boxes, s);
+        natural = 0;
+        widen();
+        fit();
+      };
       widen();
       fit();
       setQuiet(!!ref.current?.closest(".pane-waiting, .pane-opening, .layer-in"));
@@ -325,6 +453,17 @@ export function EmailFrame({
           )}
         </div>
       )}
+      {chosen === null && auto !== 1 && (
+        <div className="frame-note" role="status">
+          <Type size={14} />
+          <span>
+            {auto > 1 ? "Post enlarged this email's small text" : "Post reduced this email's oversized text"} so it's easier to read.
+          </span>
+          <button className="link-btn" onClick={() => choose(1)}>
+            Show original size
+          </button>
+        </div>
+      )}
       <iframe
         ref={ref}
         // A fresh frame for each look (dark colors, search highlight) so nothing carries over.
@@ -341,13 +480,41 @@ export function EmailFrame({
           {hover.text}
         </div>
       )}
-      {dark && (settings?.emailDarkMode ?? true) && (
-        <div className="frame-tools">
+      <div className="frame-tools">
+        <div className={scale !== 1 ? "text-size changed" : "text-size"} role="group" aria-label="Text size for this email">
+          <button
+            className="icon-btn sm"
+            title="Smaller text"
+            aria-label="Smaller text"
+            disabled={scale <= SCALE_STEPS[0]}
+            onClick={() => step(-1)}
+          >
+            <AArrowDown size={15} />
+          </button>
+          <button
+            className="link-btn text-size-value"
+            title={chosen === null ? "Show original size" : auto !== 1 ? "Let Post pick a readable size" : "Reset to original size"}
+            disabled={chosen === null && auto === 1}
+            onClick={() => choose(chosen === null ? 1 : null)}
+          >
+            {Math.round(scale * 100)}%
+          </button>
+          <button
+            className="icon-btn sm"
+            title="Larger text"
+            aria-label="Larger text"
+            disabled={scale >= SCALE_STEPS[SCALE_STEPS.length - 1]}
+            onClick={() => step(1)}
+          >
+            <AArrowUp size={15} />
+          </button>
+        </div>
+        {dark && (settings?.emailDarkMode ?? true) && (
           <button className="link-btn" onClick={() => setOriginal((o) => !o)}>
             {original ? "Use dark colors" : "Show original colors"}
           </button>
-        </div>
-      )}
+        )}
+      </div>
     </div>
   );
 }
