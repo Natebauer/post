@@ -7,7 +7,8 @@
     "dev": "vite",
     "build": "tsc && vite build",
     "typecheck": "tsc --noEmit",
-    "tauri": "tauri"
+    "tauri": "tauri",
+    "install-local": "tauri build && powershell -NoProfile -ExecutionPolicy Bypass -File scripts/install-local.ps1"
   },
   "dependencies": {
     "@fontsource-variable/inter": "5.1.0",

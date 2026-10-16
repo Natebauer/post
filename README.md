@@ -35,6 +35,7 @@ npm install
 npm run tauri dev      # run the app with hot reload
 npm run dev            # UI only, in a browser, with fake data (src/dev-mock.ts)
 npm run tauri build    # release build + NSIS installer
+npm run install-local  # release build, then install it over your installed Post and reopen it
 ```
 
 Rust unit tests: `cargo test --manifest-path src-tauri/Cargo.toml --lib`.
