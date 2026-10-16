@@ -1,0 +1,515 @@
+/* Moods, the reading header, the icon rail, list sizes and image privacy. */
+
+/* ---------- moods: headings use the mood's display typeface ---------- */
+.thread-subject,
+.list-head h2,
+.hcard h3,
+.c-head .title,
+.settings h4 {
+  font-family: var(--font-display);
+}
+/* ---------- mood picker (Settings → Appearance) ---------- */
+.moods {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(148px, 1fr));
+  gap: var(--s-2);
+  width: 100%;
+}
+.mood {
+  display: grid;
+  gap: 4px;
+  padding: 6px 6px 8px;
+  border-radius: var(--r-2);
+  border: 1px solid var(--border);
+  text-align: left;
+  transition: border-color var(--fast) var(--ease), box-shadow var(--fast) var(--ease), background var(--fast) var(--ease);
+}
+.mood:hover {
+  border-color: var(--border-strong);
+  background: var(--hover);
+}
+.mood.on {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 1px var(--accent);
+}
+.mood-preview {
+  display: grid;
+  grid-template-columns: 40% 1fr;
+  gap: 5px;
+  height: 76px;
+  padding: 7px;
+  border-radius: 7px;
+  overflow: hidden;
+}
+.mp-list,
+.mp-read {
+  border: 1px solid;
+  border-radius: 5px;
+  padding: 4px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+}
+.mp-row {
+  display: flex;
+  align-items: center;
+  gap: 3px;
+  padding: 2px;
+  border-radius: 3px;
+}
+.mp-row i {
+  flex: none;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+}
+.mp-row b,
+.mp-read b {
+  display: block;
+  height: 3px;
+  width: 80%;
+  border-radius: 2px;
+  opacity: 0.8;
+}
+.mp-head {
+  font-size: 13px;
+  font-weight: 700;
+  line-height: 1;
+}
+.mp-btn {
+  margin-top: auto;
+  width: 22px;
+  height: 7px;
+  border-radius: 3px;
+}
+.mood-name {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: var(--fs-2);
+  font-weight: 600;
+  padding: 0 2px;
+}
+.mood-name svg {
+  color: var(--accent-text);
+}
+.mood-blurb {
+  font-size: 11.5px;
+  line-height: 1.35;
+  color: var(--text-3);
+  padding: 0 2px;
+}
+/* ---------- settings: the scrim steps aside while the look is being adjusted ---------- */
+.scrim {
+  transition: opacity var(--med) var(--ease);
+}
+.scrim.peek {
+  opacity: 0;
+}
+.scrim.peek.closing {
+  animation: none;
+}
+
+/* ---------- bare home modules: no header, controls float in on hover ---------- */
+.hcard.bare {
+  position: relative;
+  padding-top: 0;
+}
+.hfloat {
+  position: absolute;
+  top: 2px;
+  right: 2px;
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  padding: 2px;
+  background: var(--elevated);
+  border: 1px solid var(--border);
+  border-radius: var(--r-2);
+  box-shadow: var(--shadow-1);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity var(--fast) var(--ease);
+}
+.hcard.bare:hover .hfloat,
+.hfloat:focus-within,
+.hfloat:has([aria-expanded="true"]) {
+  opacity: 1;
+  pointer-events: auto;
+}
+.cw-keywrap {
+  position: relative;
+  display: inline-flex;
+}
+.cw-keywrap .icon-btn.on {
+  background: var(--press);
+}
+.cw-keys {
+  position: absolute;
+  top: calc(100% + 6px);
+  right: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: var(--s-2) var(--s-3);
+  background: var(--elevated);
+  border: 1px solid var(--border);
+  border-radius: var(--r-2);
+  box-shadow: var(--shadow-2);
+  animation: fade var(--fast) var(--ease);
+}
+.cw-keys .cw-key {
+  font-size: var(--fs-1);
+  color: var(--text-2);
+}
+@media (prefers-reduced-motion: reduce) {
+  .scrim,
+  .hfloat {
+    transition: none;
+  }
+}
+
+/* ---------- reading header: title block and actions ---------- */
+.rh-title {
+  flex: 1 1 auto;
+  min-width: 0;
+  display: grid;
+  gap: 3px;
+}
+.rh-title .thread-subject {
+  margin: 0;
+  font-size: 20px;
+  letter-spacing: -0.014em;
+  line-height: 1.25;
+  overflow-wrap: anywhere;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  overflow: hidden;
+}
+.rh-by {
+  font-size: var(--fs-2);
+  color: var(--text-3);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-height: 20px;
+}
+.rh-name,
+.rh-name .who-btn {
+  font-weight: 600;
+  color: var(--text-2);
+}
+.rh-name .who-btn:hover {
+  color: var(--text);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  text-decoration-color: var(--border-strong);
+}
+.rh-snoozed {
+  color: var(--accent-text);
+}
+.rh-snoozed svg {
+  vertical-align: -1px;
+}
+.rh-actions {
+  flex: none;
+  display: flex;
+  align-items: center;
+  gap: 2px;
+}
+.tb-sep {
+  width: 1px;
+  height: 18px;
+  background: var(--border);
+  margin: 0 var(--s-2);
+}
+.read-scroll {
+  padding-top: var(--s-5);
+}
+.read-inner.single > .msg:first-of-type > .msg-collapse .msg-body {
+  padding-top: 0;
+}
+/* Message content uses the full reading width (no indent under the avatar). */
+.msg-body {
+  padding-left: 0;
+}
+/* Sender on two lines: name and date, then address and recipients. */
+.msg-line {
+  display: flex;
+  align-items: baseline;
+  gap: var(--s-2);
+  min-width: 0;
+}
+.msg-line .msg-name {
+  flex: 0 1 auto;
+  min-width: 0;
+}
+.msg-line .msg-date {
+  flex: 0 1 auto;
+}
+.msg-meta .addr::after {
+  content: " · ";
+  white-space: pre;
+}
+
+/* ---------- Ask about one email ---------- */
+/* Dragging an email over the AI assistant lights it up like a section does. */
+.nav-item[data-ask].drop-over {
+  background: var(--accent-soft);
+  box-shadow: inset 0 0 0 1.5px var(--accent);
+  color: var(--accent-text);
+}
+.ask-focus {
+  display: flex;
+  align-items: center;
+  gap: var(--s-2);
+  padding: 6px 6px 6px var(--s-3);
+  margin: 0 0 var(--s-4);
+  border-radius: var(--r-2);
+  background: var(--accent-soft);
+  color: var(--accent-text);
+  font-size: var(--fs-2);
+}
+.ask-focus-subject {
+  flex: 1;
+  min-width: 0;
+  font-weight: 600;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.ask-q {
+  margin: var(--s-4) 0 var(--s-2);
+  padding: var(--s-2) var(--s-3);
+  border-radius: var(--r-2);
+  background: var(--surface-3);
+  font-size: var(--fs-3);
+  font-weight: 500;
+  width: fit-content;
+  max-width: 85%;
+  margin-left: auto;
+  user-select: text;
+}
+.ask-rich p {
+  margin: 0 0 var(--s-2);
+}
+.ask-rich ul {
+  margin: 0 0 var(--s-3);
+  padding-left: 1.2em;
+}
+.ask-rich li {
+  margin: 2px 0;
+}
+.ask-rich h5 {
+  margin: var(--s-3) 0 var(--s-1);
+  font-size: var(--fs-1);
+  font-weight: 650;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--accent-text);
+}
+.ask-thinking {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+/* ---------- collapsed sidebar: a slim rail of icons ----------
+   Labels hide and each item centers its icon; unread counts become small badges. While an email
+   is being dragged the rail opens back up (with labels) so sections are easy to drop on. */
+.sidebar.rail {
+  width: 60px;
+}
+body:not(.dragging-mail) .sidebar.rail .sidebar-inner {
+  width: 60px;
+  padding-inline: var(--s-2);
+}
+body:not(.dragging-mail) .sidebar.rail .nav-text,
+body:not(.dragging-mail) .sidebar.rail .nav-label,
+body:not(.dragging-mail) .sidebar.rail .nav-x,
+.sidebar.rail .sync-foot {
+  display: none;
+}
+body:not(.dragging-mail) .sidebar.rail .nav-item,
+body:not(.dragging-mail) .sidebar.rail .compose-btn {
+  justify-content: center;
+  gap: 0;
+  padding: 0;
+  position: relative;
+}
+body:not(.dragging-mail) .sidebar.rail .compose-btn {
+  width: 44px;
+  margin-inline: auto;
+}
+body:not(.dragging-mail) .sidebar.rail .nav-item .count {
+  position: absolute;
+  top: 2px;
+  right: 3px;
+  min-width: 16px;
+  height: 16px;
+  padding: 0 4px;
+  border-radius: 8px;
+  display: grid;
+  place-items: center;
+  font-size: 10px;
+  font-weight: 700;
+  margin: 0;
+  background: var(--accent);
+  color: var(--accent-ink);
+}
+body:not(.dragging-mail) .sidebar.rail .nav-sep {
+  margin-inline: var(--s-2);
+}
+.sidebar .nav-text {
+  white-space: nowrap;
+}
+.settings-shortcuts .shortcut-group {
+  margin-top: var(--s-4);
+}
+.settings-shortcuts table {
+  width: 100%;
+  border-collapse: collapse;
+}
+.settings-shortcuts td {
+  padding: 6px 0;
+  border-bottom: 1px solid var(--border);
+  font-size: var(--fs-2);
+}
+.settings-shortcuts td:last-child {
+  text-align: right;
+  white-space: nowrap;
+}
+.shortcuts .shortcut-group {
+  margin-top: 14px;
+}
+
+/* ---------- inbox list adapts to its width ----------
+   Narrow (under 380px): avatar, subject and date. Standard: two-line rows. Wide (720px and up):
+   each email is one row, read like a table. The width comes from the drag handle. */
+.list-pane.size-small .row {
+  height: 52px;
+  grid-template-columns: 28px 1fr;
+}
+.list-pane.size-small .row-sub {
+  font-size: var(--fs-3);
+}
+.list-pane.size-large .row {
+  height: 40px;
+  grid-template-columns: 22px minmax(120px, 200px) minmax(0, 1fr) auto auto;
+  column-gap: var(--s-3);
+}
+.list-pane.size-large .row-from,
+.list-pane.size-large .row-sub {
+  flex: none;
+  font-size: var(--fs-2);
+}
+.list-pane.size-large .row-sub .subj {
+  font-weight: 500;
+}
+.list-pane.size-large .row.unread .row-sub .subj {
+  font-weight: 650;
+}
+
+/* Tiny (under 160px): a column of photos. The unread dot stays; date groups become thin rules;
+   hover actions and the header's extras step aside. */
+.list-pane.size-tiny .row {
+  height: 52px;
+  grid-template-columns: 1fr;
+  justify-items: center;
+  padding: 0 4px;
+}
+.list-pane.size-tiny .row .dot {
+  left: 4px;
+}
+.list-pane.size-tiny .row-actions {
+  display: none;
+}
+.list-pane.size-tiny .row::after {
+  left: 10px;
+  right: 10px;
+}
+.list-pane.size-tiny .list-group {
+  font-size: 0;
+}
+.list-pane.size-tiny .list-group::before {
+  content: "";
+  position: absolute;
+  left: 14px;
+  right: 14px;
+  top: 50%;
+  height: 1px;
+  background: var(--border-strong);
+}
+.list-pane.size-tiny .list-head {
+  padding: 0 var(--s-2);
+  justify-content: center;
+}
+.list-pane.size-tiny .list-head .sub,
+.list-pane.size-tiny .list-head .icon-btn {
+  display: none;
+}
+.list-pane.size-tiny .list-head h2 {
+  font-size: var(--fs-2);
+}
+
+/* ---------- emails with their web images held back ---------- */
+.images-held {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 4px var(--s-3);
+  padding: var(--s-2) var(--s-3);
+  margin-bottom: var(--s-3);
+  border-radius: var(--r-2);
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  font-size: var(--fs-2);
+  color: var(--text-2);
+}
+.images-held svg {
+  flex: none;
+  color: var(--text-3);
+}
+
+/* ---------- calendar: finished events stay readable ----------
+   Past events keep a softer tint, but their text and Join links no longer fade into it. */
+.cw-event.past {
+  --cal-strong: color-mix(in srgb, var(--cal, var(--accent)) 70%, var(--text));
+}
+.cw-event.past .cw-title {
+  color: var(--text-2);
+}
+.cw-event.past .cw-time,
+.cw-event.past .cw-loc {
+  color: color-mix(in srgb, var(--text-2) 75%, var(--text-3));
+}
+.cw-join {
+  color: color-mix(in srgb, var(--cal, var(--accent)) 75%, var(--text));
+  background: color-mix(in srgb, var(--cal, var(--accent)) 16%, var(--surface));
+}
+.cm-ev.past {
+  color: var(--text-2);
+}
+:root[data-theme="dark"] .cw-join {
+  color: color-mix(in srgb, var(--cal, var(--accent)) 55%, white);
+  background: color-mix(in srgb, var(--cal, var(--accent)) 24%, var(--surface));
+}
+:root[data-theme="dark"] .cw-event.past {
+  --cal-strong: color-mix(in srgb, var(--cal, var(--accent)) 60%, white);
+}
+.mood-groups {
+  display: grid;
+  gap: var(--s-2);
+  width: 100%;
+}
+.mood-group-label {
+  font-size: var(--fs-1);
+  font-weight: 650;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--text-3);
+  margin-top: var(--s-2);
+}

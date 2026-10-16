@@ -1,0 +1,550 @@
+<title>Post Looks</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Newsreader:opsz,wght@6..72,400;6..72,500;6..72,600&family=Source+Sans+3:wght@400;500;600;700&family=Schibsted+Grotesk:wght@400;500;600;700;800&family=Figtree:wght@400;500;600;700&family=Hanken+Grotesk:wght@400;500;600;700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&family=Manrope:wght@300;400;500;600;700&family=Geist:wght@400;500;600;700&family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600;9..40,700&family=Archivo:wght@400;600;800;900&family=Outfit:wght@300;400;500;600&family=Literata:opsz,wght@7..72,400;7..72,500;7..72,600&family=Plus+Jakarta+Sans:wght@400;500;600;700&family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600&family=Karla:wght@400;500;600;700&family=Atkinson+Hyperlegible:wght@400;700&family=Public+Sans:wght@400;500;600;700&family=Sora:wght@300;400;500;600&family=Libre+Franklin:wght@400;500;600;700&family=Spectral:wght@400;500;600&family=Work+Sans:wght@400;500;600&family=Instrument+Serif&family=Instrument+Sans:wght@400;500;600&display=swap">
+<style>
+/* Layout: a quiet specimen gallery — the 20 mockups carry all the color; the chrome stays neutral.
+   Each mockup is drawn at true size (1200×760) and scaled into its card. */
+:root {
+  --g-bg: #f2f2f0;
+  --g-card: #ffffff;
+  --g-fg: #19191b;
+  --g-mute: #66666d;
+  --g-line: rgba(20, 20, 25, 0.1);
+  --g-accent: #3949c9;
+  --g-heart: #d6336c;
+  --g-scrim: rgba(12, 12, 16, 0.72);
+  --g-display: "Instrument Serif", "Iowan Old Style", Georgia, serif;
+  --g-ui: "Instrument Sans", "Segoe UI", system-ui, sans-serif;
+  --g-mono: "IBM Plex Mono", ui-monospace, Consolas, monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --g-bg: #111113; --g-card: #1a1a1d; --g-fg: #ececef; --g-mute: #9b9ba3;
+    --g-line: rgba(255, 255, 255, 0.09); --g-accent: #9aa6ff; --g-heart: #ff6b9a;
+    --g-scrim: rgba(0, 0, 0, 0.8); color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --g-bg: #111113; --g-card: #1a1a1d; --g-fg: #ececef; --g-mute: #9b9ba3;
+  --g-line: rgba(255, 255, 255, 0.09); --g-accent: #9aa6ff; --g-heart: #ff6b9a;
+  --g-scrim: rgba(0, 0, 0, 0.8); color-scheme: dark;
+}
+* { box-sizing: border-box; }
+body { background: var(--g-bg); color: var(--g-fg); font-family: var(--g-ui); font-size: 15px; line-height: 1.5; }
+.wrap { max-width: 1680px; margin: 0 auto; padding-inline: clamp(16px, 4vw, 48px); padding-block: 40px 72px; }
+header.intro { display: grid; gap: 14px; margin-bottom: 28px; max-width: 70ch; }
+.eyebrow { font-family: var(--g-mono); font-size: 12px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--g-mute); }
+h1 { font-family: var(--g-display); font-weight: 400; font-size: clamp(44px, 7vw, 84px); line-height: 0.95; margin: 0; letter-spacing: -0.01em; text-wrap: balance; }
+.lede { color: var(--g-mute); margin: 0; font-size: 16px; }
+.bar { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin-bottom: 24px; position: sticky; top: env(safe-area-inset-top, 0px); z-index: 5; padding-block: 10px; background: var(--g-bg); }
+.chip { font: inherit; font-size: 14px; border: 1px solid var(--g-line); background: var(--g-card); color: var(--g-fg); padding: 6px 14px; border-radius: 999px; cursor: pointer; }
+.chip[aria-pressed="true"] { background: var(--g-fg); color: var(--g-bg); border-color: var(--g-fg); }
+.chip .n { font-family: var(--g-mono); font-size: 12px; opacity: 0.7; margin-left: 4px; }
+.bar .hint { margin-left: auto; color: var(--g-mute); font-size: 13px; }
+.grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 560px), 1fr)); gap: 36px 28px; }
+.card { display: grid; gap: 12px; min-width: 0; }
+.shot { position: relative; aspect-ratio: 1200 / 760; max-width: 100%; border-radius: 12px; overflow: hidden; box-shadow: 0 1px 2px rgba(0,0,0,.06), 0 12px 32px -12px rgba(0,0,0,.22); cursor: zoom-in; border: 0; padding: 0; background: none; display: block; width: 100%; }
+.shot:focus-visible, .chip:focus-visible, .icon:focus-visible { outline: 2px solid var(--g-accent); outline-offset: 3px; }
+.shot .mock { position: absolute; left: 0; top: 0; transform-origin: 0 0; transform: scale(var(--s, 0.4)); pointer-events: none; }
+.meta { display: grid; grid-template-columns: auto 1fr auto; gap: 4px 14px; align-items: baseline; }
+.num { font-family: var(--g-mono); font-size: 13px; color: var(--g-mute); font-variant-numeric: tabular-nums; }
+.name { font-family: var(--g-display); font-size: 28px; line-height: 1.1; }
+.note { grid-column: 2 / 3; color: var(--g-mute); font-size: 14px; margin: 0; }
+.faces { grid-column: 2 / 4; display: flex; flex-wrap: wrap; gap: 6px; }
+.face { font-family: var(--g-mono); font-size: 11.5px; color: var(--g-mute); border: 1px solid var(--g-line); border-radius: 6px; padding: 1px 7px; }
+.icon { font: inherit; background: none; border: 1px solid var(--g-line); color: var(--g-mute); border-radius: 999px; width: 38px; height: 38px; display: inline-grid; place-items: center; cursor: pointer; transition: transform .15s, color .15s, border-color .15s; }
+.icon:hover { color: var(--g-fg); }
+.icon.fav[aria-pressed="true"] { color: var(--g-heart); border-color: color-mix(in srgb, var(--g-heart) 45%, transparent); }
+.icon.fav[aria-pressed="true"] svg { fill: currentColor; }
+.icon.fav:active { transform: scale(.9); }
+.empty { color: var(--g-mute); padding: 40px 0; }
+
+/* Full view */
+.viewer[hidden] { display: none; }
+.viewer { position: fixed; inset: 0; z-index: 50; background: var(--g-scrim); display: grid; grid-template-rows: auto 1fr; padding-top: env(safe-area-inset-top, 0px); padding-bottom: env(safe-area-inset-bottom, 0px); }
+.vbar { display: flex; align-items: center; gap: 10px; padding: 12px 16px; color: #f2f2f4; }
+.vbar .vname { font-family: var(--g-display); font-size: 26px; }
+.vbar .vnum { font-family: var(--g-mono); font-size: 13px; opacity: .7; }
+.vbar .sp { flex: 1; }
+.vbar .icon { color: #d8d8de; border-color: rgba(255,255,255,.22); }
+.vbar .icon:hover { color: #fff; }
+.vbar .icon.fav[aria-pressed="true"] { color: #ff6b9a; }
+.stage { position: relative; min-height: 0; display: grid; place-items: center; padding: 0 16px 16px; }
+.stage .frame { position: relative; border-radius: 12px; overflow: hidden; box-shadow: 0 30px 80px rgba(0,0,0,.5); }
+.stage .mock { position: absolute; left: 0; top: 0; transform-origin: 0 0; }
+
+@media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
+
+/* =================== Post mockup (scoped) =================== */
+.mock {
+  width: 1200px; height: 760px; overflow: hidden; position: relative;
+  background: var(--bg); color: var(--tx);
+  font-family: var(--fUI); font-size: var(--ui, 13.5px); line-height: 1.45; text-align: left;
+  display: grid; grid-template-rows: 46px 1fr;
+  -webkit-font-smoothing: antialiased;
+}
+.mock * { box-sizing: border-box; }
+.mock svg { width: 16px; height: 16px; fill: none; stroke: currentColor; stroke-width: 1.7; stroke-linecap: round; stroke-linejoin: round; flex: none; }
+.mock .wall { position: absolute; inset: 0; background: var(--wall, none); }
+.mock .top { position: relative; display: flex; align-items: center; gap: 10px; padding-left: 12px; color: var(--tx2); }
+.mock .search { width: 480px; margin-left: 220px; height: 30px; border-radius: var(--rs); background: var(--search); display: flex; align-items: center; gap: 8px; padding: 0 12px; color: var(--tx3); font-size: 13px; }
+.mock .search kbd { margin-left: auto; font-family: inherit; font-size: 11px; border: 1px solid var(--line); border-radius: 4px; padding: 0 5px; }
+.mock .top .sp { flex: 1; }
+.mock .win { display: flex; align-self: stretch; }
+.mock .win span { width: 46px; display: grid; place-items: center; color: var(--tx2); }
+.mock .win svg { width: 13px; height: 13px; stroke-width: 1.3; }
+.mock .body { position: relative; display: flex; min-height: 0; padding: 0 10px 10px 0; gap: 0; }
+.mock .nav { width: 196px; flex: none; padding: 2px 10px 10px 12px; display: flex; flex-direction: column; gap: 2px; background: var(--navBg, transparent); }
+.mock .compose { height: 36px; border-radius: var(--rs); display: flex; align-items: center; gap: 10px; padding: 0 14px; font-weight: 600; background: var(--btnBg, var(--sheet)); color: var(--btnInk, var(--tx)); border: 1px solid var(--line); margin-bottom: 10px; }
+.mock .ni { display: flex; align-items: center; gap: 10px; height: 31px; padding: 0 10px; border-radius: var(--rs); color: var(--tx2); }
+.mock .ni.on { background: var(--sel); color: var(--navOnInk, var(--ac)); font-weight: 600; }
+.mock .ni b { margin-left: auto; font-weight: 500; font-size: 12px; font-variant-numeric: tabular-nums; }
+.mock .ni.sep { height: 1px; background: var(--line); margin: 8px 6px; padding: 0; }
+.mock .sheet { flex: 1; min-width: 0; display: flex; background: var(--sheet); border-radius: var(--r); box-shadow: var(--shadow, 0 1px 2px rgba(0,0,0,.05)); border: 1px solid var(--line); overflow: hidden; margin-left: 10px; }
+.mock .list { width: 400px; flex: none; border-right: 1px solid var(--line); display: flex; flex-direction: column; min-height: 0; }
+.mock .lh { height: 46px; display: flex; align-items: center; gap: 10px; padding: 0 16px; border-bottom: 1px solid var(--line); flex: none; }
+.mock .lh strong { font-family: var(--fHead); font-weight: var(--lhW, 650); font-size: var(--lhSize, 14px); letter-spacing: var(--lhTrack, 0); text-transform: var(--lhCase, none); }
+.mock .lh span { color: var(--tx3); font-size: 12px; }
+.mock .rows { flex: 1; overflow: hidden; padding-top: var(--rowsPad, 4px); }
+.mock .row { position: relative; height: var(--rowH, 66px); display: grid; grid-template-columns: var(--avCol, 34px) 1fr; column-gap: 12px; align-items: center; padding: 0 14px 0 20px; }
+.mock .row::after { content: ""; position: absolute; left: 20px; right: 12px; bottom: 0; height: 1px; background: var(--rowLine, var(--line)); }
+.mock .dot { position: absolute; left: 8px; top: 50%; width: 7px; height: 7px; margin-top: -3.5px; border-radius: 50%; background: var(--dot); opacity: 0; }
+.mock .row.u .dot { opacity: 1; }
+.mock .av { width: 34px; height: 34px; border-radius: var(--avR, 50%); background: var(--avBg); color: var(--avInk); display: grid; place-items: center; font-size: 12px; font-weight: 600; letter-spacing: .02em; }
+.mock .rm { min-width: 0; display: grid; gap: 1px; }
+.mock .l1, .mock .l2 { display: flex; align-items: baseline; gap: 8px; min-width: 0; }
+.mock .fr { flex: 1; min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: var(--tx); opacity: .86; }
+.mock .fr i { font-style: normal; color: var(--tx3); font-size: 11.5px; margin-left: 4px; }
+.mock .tm { font-family: var(--fMeta, inherit); font-size: 11.5px; color: var(--tx3); font-variant-numeric: tabular-nums; white-space: nowrap; }
+.mock .l1 svg { width: 12px; height: 12px; color: var(--tx3); }
+.mock .l2 { font-size: 0.93em; color: var(--tx3); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; display: block; }
+.mock .sj { color: var(--tx); opacity: .86; }
+.mock .row.u .fr, .mock .row.u .sj { font-weight: var(--uW, 650); opacity: 1; }
+/* reading pane */
+.mock .read { flex: 1; min-width: 0; display: flex; flex-direction: column; }
+.mock .rh { height: 46px; flex: none; display: flex; align-items: center; gap: 4px; padding: 0 12px; border-bottom: 1px solid var(--line); color: var(--tx2); }
+.mock .rh .sp { flex: 1; }
+.mock .tb { display: inline-flex; align-items: center; gap: 6px; height: 30px; padding: 0 8px; border-radius: var(--rs); font-size: 12.5px; }
+.mock .rs { flex: 1; overflow: hidden; padding: 26px 36px; }
+.mock .ri { max-width: 640px; margin: 0 auto; }
+.mock h2 { font-family: var(--fHead); font-weight: var(--hW, 650); font-size: var(--hSize, 21px); letter-spacing: var(--hTrack, -0.012em); line-height: 1.2; margin: 0 0 18px; text-wrap: balance; }
+.mock .cm { display: flex; align-items: center; gap: 12px; padding: 10px 0; border-top: 1px solid var(--line); color: var(--tx3); font-size: 12.5px; white-space: nowrap; overflow: hidden; }
+.mock .cm .av { width: 26px; height: 26px; font-size: 10.5px; }
+.mock .cm b { color: var(--tx); font-weight: 600; }
+.mock .cm .snp { flex: 1; overflow: hidden; text-overflow: ellipsis; }
+.mock .mh { display: flex; align-items: center; gap: 12px; padding: 14px 0 12px; border-top: 1px solid var(--line); }
+.mock .mh .av { width: 38px; height: 38px; font-size: 13px; }
+.mock .mh .who { flex: 1; min-width: 0; }
+.mock .mh .who b { font-weight: 600; }
+.mock .mh .who em { font-style: normal; color: var(--tx3); font-size: 12px; margin-left: 6px; }
+.mock .mh .who div { color: var(--tx3); font-size: 12px; }
+.mock .mh .dt { font-family: var(--fMeta, inherit); color: var(--tx3); font-size: 11.5px; }
+.mock .txt { padding-left: 50px; font-family: var(--fRead); font-size: var(--readSize, 14px); line-height: var(--readLH, 1.62); color: var(--tx); }
+.mock .txt p { margin: 0 0 10px; }
+.mock .atts { display: flex; gap: 10px; padding-left: 50px; margin-top: 14px; }
+.mock .att { width: 150px; border-radius: var(--rs); border: 1px solid var(--line); overflow: hidden; background: var(--sheet2); font-size: 11.5px; }
+.mock .att .th { height: 74px; display: grid; place-items: center; color: var(--tx3); }
+.mock .att .th.img { background:
+    linear-gradient(160deg, color-mix(in srgb, var(--ac) 55%, var(--sheet)) 0%, color-mix(in srgb, var(--ac) 18%, var(--sheet)) 60%, var(--sheet2) 100%); }
+.mock .att .th svg { width: 22px; height: 22px; stroke-width: 1.3; }
+.mock .att .in { padding: 6px 8px; }
+.mock .att b { display: block; font-weight: 550; color: var(--tx); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.mock .att span { color: var(--tx3); }
+.mock .rb { display: flex; gap: 8px; padding-left: 50px; margin-top: 18px; }
+.mock .btn { display: inline-flex; align-items: center; gap: 6px; height: 30px; padding: 0 12px; border-radius: var(--rs); border: 1px solid var(--btnLine, var(--line)); font-size: 12.5px; font-weight: 500; color: var(--tx); background: var(--sheet); }
+.mock .btn.pri { background: var(--ac); color: var(--acInk); border-color: transparent; }
+
+/* ---- selection styles ---- */
+.mock.S-pill .row.on { background: var(--sel); border-radius: var(--rs); margin: 0 6px; padding-left: 14px; }
+.mock.S-pill .row.on .dot { left: 2px; }
+.mock.S-bar .row.on { background: var(--sel); box-shadow: inset 3px 0 0 var(--ac); }
+.mock.S-invert .row.on { background: var(--selBg, var(--tx)); }
+.mock.S-invert .row.on .fr, .mock.S-invert .row.on .sj, .mock.S-invert .row.on .l2, .mock.S-invert .row.on .tm, .mock.S-invert .row.on i { color: var(--selInk, var(--sheet)) !important; opacity: 1; }
+.mock.S-invert .row.on .dot { background: var(--selInk, var(--sheet)); }
+.mock.S-outline .row.on { box-shadow: inset 0 0 0 1.5px var(--ac); border-radius: var(--rs); margin: 0 6px; background: var(--sel); }
+.mock.S-marker .row.on { background: var(--sel); }
+.mock.S-glow .row.on { background: var(--sel); border-radius: var(--rs); margin: 0 6px; box-shadow: 0 0 0 1px color-mix(in srgb, var(--ac) 35%, transparent), 0 8px 26px -10px var(--ac); }
+.mock.S-gradient .row.on { background: var(--sel); border-radius: var(--rs); margin: 0 6px; }
+.mock .row.on::after { opacity: 0; }
+
+/* ---- avatars ---- */
+.mock.A-none .row { grid-template-columns: 1fr; padding-left: 22px; }
+.mock.A-none .row .av { display: none; }
+.mock.A-none .cm .av, .mock.A-none .mh .av { display: none; }
+.mock.A-none .txt, .mock.A-none .atts, .mock.A-none .rb { padding-left: 0; }
+
+/* ---- layouts ---- */
+.mock.L-flush .body { padding: 0; }
+.mock.L-flush .sheet { margin-left: 0; border-radius: 0; border-width: 1px 0 0 0; box-shadow: none; }
+.mock.L-flush.sb .sheet { border-left-width: 1px; }
+.mock.L-split .sheet { background: transparent; border: 0; box-shadow: none; gap: 10px; overflow: visible; }
+.mock.L-split .list, .mock.L-split .read { background: var(--sheet); border-radius: var(--r); border: 1px solid var(--line); box-shadow: var(--shadow, 0 1px 2px rgba(0,0,0,.05)); overflow: hidden; }
+.mock.L-glass .sheet { background: transparent; border: 0; box-shadow: none; gap: 10px; overflow: visible; }
+.mock.L-glass .list, .mock.L-glass .read { background: var(--sheet); backdrop-filter: blur(24px) saturate(1.4); -webkit-backdrop-filter: blur(24px) saturate(1.4); border-radius: var(--r); border: 1px solid rgba(255,255,255,.65); box-shadow: 0 10px 40px -18px rgba(40, 50, 90, .45); overflow: hidden; }
+.mock.L-glass .search { background: rgba(255,255,255,.55); }
+.mock.L-frame .body { padding: 0 12px 12px 0; }
+.mock.L-frame .sheet { border: 2px solid var(--tx); border-radius: 0; box-shadow: 6px 6px 0 var(--tx); }
+.mock.L-frame .list { border-right: 2px solid var(--tx); }
+.mock.L-frame .lh, .mock.L-frame .rh { border-bottom: 2px solid var(--tx); }
+.mock.L-frame .btn { border: 2px solid var(--tx); font-weight: 700; }
+.mock.L-frame .compose { border: 2px solid var(--tx); box-shadow: 3px 3px 0 var(--tx); }
+.mock.L-frame .att { border: 2px solid var(--tx); }
+
+/* ---- density ---- */
+.mock.D-airy .row { height: 86px; }
+.mock.D-airy .rm { gap: 4px; }
+.mock.D-compact .row { height: 30px; grid-template-columns: 150px 1fr auto; padding: 0 14px 0 22px; column-gap: 14px; }
+.mock.D-compact .row .rm { display: contents; }
+.mock.D-compact .row .l1 { display: contents; }
+.mock.D-compact .row .fr { grid-column: 1; }
+.mock.D-compact .row .l1 svg { display: none; }
+.mock.D-compact .row .tm { grid-column: 3; }
+.mock.D-compact .row .l2 { grid-column: 2; grid-row: 1; font-size: 1em; }
+.mock.D-compact .row.on { box-shadow: none; }
+.mock.D-compact .list { width: 560px; }
+.mock.grid .row::after { left: 0; right: 0; }
+
+/* per-look flourishes */
+.mock.X-swiss .lh strong, .mock.X-swiss .ni { text-transform: uppercase; letter-spacing: .06em; font-size: 11.5px; font-weight: 700; }
+.mock.X-swiss .lh { border-bottom: 2px solid var(--tx); }
+.mock.X-swiss h2 { border-bottom: 2px solid var(--tx); padding-bottom: 14px; }
+.mock.X-swiss .ni.on { background: transparent; color: var(--ac); }
+.mock.X-signal .row.on .sj { background: var(--ac2); padding: 0 3px; }
+.mock.X-signal .ni.on { background: var(--ac2); color: var(--tx); }
+.mock.X-signal .av { border: 2px solid var(--tx); }
+.mock.X-aurora .top::after { content: ""; position: absolute; left: 0; right: 0; bottom: 0; height: 1px; background: linear-gradient(90deg, transparent, #8b7bff 30%, #38d6e8 70%, transparent); opacity: .5; }
+.mock.X-aurora .btn.pri, .mock.X-aurora .compose { background: linear-gradient(120deg, #8b7bff, #38d6e8); color: #08080c; border: 0; }
+.mock.X-aurora .dot { background: linear-gradient(120deg, #8b7bff, #38d6e8); }
+.mock.X-atelier h2 { font-size: 40px; line-height: 1.04; letter-spacing: -0.01em; }
+.mock.X-folio .txt { padding-left: 0; text-indent: 0; }
+.mock.X-folio h2 { font-style: italic; }
+.mock.X-vellum h2 { font-size: 30px; font-weight: 500; }
+.mock.X-ledger .lh strong { font-size: 13px; }
+.mock.X-ledger .rs { padding: 20px 28px; }
+.mock.X-studio .nav { border-right: 1px solid var(--line); }
+.mock.X-studio .sheet { border-top: 0; }
+.mock.X-nocturne .sheet, .mock.X-tide .sheet { border-color: rgba(255,255,255,.06); }
+</style>
+
+<div class="wrap">
+  <header class="intro">
+    <span class="eyebrow">Post · visual directions</span>
+    <h1>Twenty ways to read your mail</h1>
+    <p class="lede">The same inbox, drawn twenty ways. Each one changes the palette, typefaces, density, and how selection and structure are shown. Click any one to see it full size, use the arrow keys to step through, and tap the heart on the ones you like. Your hearts are saved in this browser.</p>
+  </header>
+  <div class="bar" role="toolbar" aria-label="Filter looks">
+    <button class="chip" id="f-all" data-f="all" aria-pressed="true">All<span class="n" id="n-all"></span></button>
+    <button class="chip" id="f-light" data-f="light" aria-pressed="false">Light<span class="n" id="n-light"></span></button>
+    <button class="chip" id="f-dark" data-f="dark" aria-pressed="false">Dark<span class="n" id="n-dark"></span></button>
+    <button class="chip" id="f-fav" data-f="fav" aria-pressed="false">Hearted<span class="n" id="n-fav"></span></button>
+    <span class="hint">Tell Claude the number of the one you pick.</span>
+  </div>
+  <main class="grid" id="grid" aria-live="polite"></main>
+</div>
+
+<div class="viewer" id="viewer" hidden role="dialog" aria-modal="true" aria-labelledby="v-name">
+  <div class="vbar">
+    <span class="vnum" id="v-num"></span>
+    <span class="vname" id="v-name"></span>
+    <span class="sp"></span>
+    <button class="icon fav" id="v-fav" aria-pressed="false" aria-label="Heart this look"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 20s-7-4.4-7-10a4 4 0 0 1 7-2.6A4 4 0 0 1 19 10c0 5.6-7 10-7 10Z"/></svg></button>
+    <button class="icon" id="v-prev" aria-label="Previous look"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="m15 6-6 6 6 6"/></svg></button>
+    <button class="icon" id="v-next" aria-label="Next look"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="m9 6 6 6-6 6"/></svg></button>
+    <button class="icon" id="v-close" aria-label="Close"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M6 6l12 12M18 6 6 18"/></svg></button>
+  </div>
+  <div class="stage" id="stage"><div class="frame" id="frame"></div></div>
+</div>
+
+<script>
+const I = {
+  search: '<circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/>',
+  pen: '<path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z"/>',
+  panel: '<rect x="3" y="4" width="18" height="16" rx="2"/><path d="M9 4v16"/>',
+  clip: '<path d="m21.4 11.1-8.5 8.5a5 5 0 0 1-7.1-7.1l8.5-8.5a3.3 3.3 0 0 1 4.7 4.7l-8.5 8.5a1.7 1.7 0 0 1-2.4-2.4l7.8-7.8"/>',
+  reply: '<path d="M9 17 4 12l5-5"/><path d="M20 18v-2a4 4 0 0 0-4-4H4"/>',
+  fwd: '<path d="m15 17 5-5-5-5"/><path d="M4 18v-2a4 4 0 0 1 4-4h12"/>',
+  trash: '<path d="M3 6h18M8 6V4h8v2M6 6l1 14h10l1-14"/>',
+  clock: '<circle cx="12" cy="13" r="8"/><path d="M12 9v4l2 2M5 3 2 6M22 6l-3-3"/>',
+  mail: '<rect x="3" y="5" width="18" height="14" rx="2"/><path d="m3 7 9 6 9-6"/>',
+  shield: '<path d="M12 3 4 6v6c0 5 3.5 8 8 9 4.5-1 8-4 8-9V6Z"/><path d="M12 8v4M12 16h.01"/>',
+  inbox: '<path d="M22 12h-6l-2 3h-4l-2-3H2"/><path d="M5.5 5h13L22 12v6a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2v-6Z"/>',
+  send: '<path d="m22 2-7 20-4-9-9-4Z"/><path d="M22 2 11 13"/>',
+  file: '<path d="M14 3H6v18h12V7Z"/><path d="M14 3v4h4"/>',
+  x: '<path d="M6 6l12 12M18 6 6 18"/>',
+  min: '<path d="M5 12h14"/>',
+  max: '<rect x="5" y="5" width="14" height="14" rx="1"/>',
+  more: '<circle cx="5" cy="12" r="1"/><circle cx="12" cy="12" r="1"/><circle cx="19" cy="12" r="1"/>',
+};
+const svg = (n) => `<svg viewBox="0 0 24 24" aria-hidden="true">${I[n]}</svg>`;
+
+const THREADS = [
+  { f: "Maya Chen", n: 3, s: "Sketches for the spring campaign", p: "Attached a few directions. I think the second one has legs.", t: "8:42 AM", u: 1, a: 1 },
+  { f: "GitHub", s: "[post] Fix sync backoff on 429 (#142)", p: "Jordan approved these changes. All checks have passed.", t: "7:15 AM", u: 1 },
+  { f: "Daniel Okafor", s: "Dinner Saturday?", p: "We're thinking 7:30 at the Ethiopian place on 5th.", t: "Mon", u: 1 },
+  { f: "Figma", s: "Your weekly digest", p: "3 files were updated by your team this week.", t: "Mon" },
+  { f: "Priya Raman", n: 4, s: "Re: API contract review", p: "Agreed on the pagination changes. One question on the error envelope.", t: "Mon" },
+  { f: "Delta", s: "Your trip to Lisbon is confirmed", p: "Confirmation HX7Q2L. Departing Fri, Nov 14 at 6:05 PM.", t: "Sun", a: 1 },
+  { f: "Sam Whitaker", s: "Quick favor", p: "Could you look over this cover letter when you get a chance?", t: "Sun" },
+  { f: "Lena Fischer", s: "Invoice for October", p: "Please find attached the invoice for the October brand work.", t: "Sat", a: 1 },
+  { f: "Stripe", s: "Your receipt from Linear", p: "Receipt #2291-0441. Amount paid $96.00.", t: "Sat" },
+  { f: "Jonah Park", s: "Photos from the cabin", p: "Finally got these off my camera. The fog one is my favorite.", t: "Fri", a: 1 },
+  { f: "Ava Lindqvist", s: "Coffee next week?", p: "I'm back in town Tuesday. Would love to catch up.", t: "Thu" },
+  { f: "Notion", s: "Weekly summary for Post", p: "12 pages edited, 3 comments waiting on you.", t: "Thu" },
+];
+const initials = (n) => n.split(/\s+/).map((w) => w[0]).slice(0, 2).join("").toUpperCase();
+
+/* Each look: palette (c), faces (fonts), structure flags. */
+const LOOKS = [
+  { id: "classic", name: "Post", tone: "light", note: "Today's Post: soft floating sheet, periwinkle accent, Inter throughout.",
+    faces: ["Inter"], fUI: "Inter", fRead: "Inter", fHead: "Inter", L: "sheet", S: "pill", r: 14, rs: 8,
+    c: { bg: "#efefec", sheet: "#ffffff", sheet2: "#f6f6f4", tx: "#1b1c1f", tx2: "#55585f", tx3: "#6f727a", line: "rgba(20,20,30,.08)", ac: "#5b74e8", acInk: "#fff", sel: "rgba(91,116,232,.12)", dot: "#5b74e8", avBg: "#e7e7e4", avInk: "#5b5e65", search: "rgba(20,20,30,.05)" } },
+  { id: "vellum", name: "Vellum", tone: "light", note: "Ivory paper and an oxblood accent. Newsreader serif for subjects and reading.",
+    faces: ["Newsreader", "Source Sans 3"], fUI: "'Source Sans 3'", fRead: "Newsreader", fHead: "Newsreader", L: "flush", S: "bar", sb: 1, r: 0, rs: 6, readSize: "16px",
+    c: { bg: "#ece5d9", sheet: "#fbf8f2", sheet2: "#f3ede3", tx: "#2a2420", tx2: "#5e544b", tx3: "#7f7468", line: "rgba(60,40,20,.12)", ac: "#7a2e2e", acInk: "#fff", sel: "rgba(122,46,46,.07)", dot: "#7a2e2e", avBg: "#e6dccd", avInk: "#6b5a4a", search: "rgba(60,40,20,.06)" } },
+  { id: "swiss", name: "Swiss", tone: "light", note: "White, black and one red. Grotesk caps, heavy rules, an inverted selection. No avatars.",
+    faces: ["Schibsted Grotesk"], fUI: "'Schibsted Grotesk'", fRead: "'Schibsted Grotesk'", fHead: "'Schibsted Grotesk'", L: "flush", S: "invert", A: "none", sb: 1, r: 0, rs: 0, hW: 800, hSize: "30px", hTrack: "-0.025em", x: "swiss",
+    c: { bg: "#ffffff", sheet: "#ffffff", sheet2: "#f3f3f3", tx: "#111111", tx2: "#3d3d3d", tx3: "#666666", line: "rgba(0,0,0,.13)", ac: "#e1251b", acInk: "#fff", sel: "#111", dot: "#e1251b", avBg: "#eee", avInk: "#111", search: "#f1f1f1", navOnInk: "#e1251b" } },
+  { id: "nocturne", name: "Nocturne", tone: "dark", note: "Deep navy with a soft indigo glow around the open conversation.",
+    faces: ["Figtree"], fUI: "Figtree", fRead: "Figtree", fHead: "Figtree", L: "sheet", S: "glow", r: 16, rs: 10, x: "nocturne",
+    c: { bg: "#0a0e18", sheet: "#111725", sheet2: "#182033", tx: "#e6e9f2", tx2: "#a3abc2", tx3: "#7f88a4", line: "rgba(255,255,255,.07)", ac: "#8c9bff", acInk: "#0a0e18", sel: "rgba(140,155,255,.13)", dot: "#8c9bff", avBg: "#1d2640", avInk: "#b4bde0", search: "rgba(255,255,255,.06)", shadow: "0 20px 50px -20px rgba(0,0,0,.6)" } },
+  { id: "moss", name: "Moss", tone: "light", note: "Lichen greens, generous corners, and the list and reader as two separate cards.",
+    faces: ["Hanken Grotesk"], fUI: "'Hanken Grotesk'", fRead: "'Hanken Grotesk'", fHead: "'Hanken Grotesk'", L: "split", S: "pill", r: 20, rs: 12,
+    c: { bg: "#e6ebe2", sheet: "#f9fbf6", sheet2: "#eef2e9", tx: "#1f2a1f", tx2: "#4b584a", tx3: "#687566", line: "rgba(30,50,30,.09)", ac: "#3f6b45", acInk: "#fff", sel: "rgba(63,107,69,.12)", dot: "#3f6b45", avBg: "#dde5d6", avInk: "#4b5c48", search: "rgba(30,60,30,.06)" } },
+  { id: "graphite", name: "Graphite", tone: "dark", note: "Charcoal and amber. Plex Sans with Plex Mono for every date and count.",
+    faces: ["IBM Plex Sans", "IBM Plex Mono"], fUI: "'IBM Plex Sans'", fRead: "'IBM Plex Sans'", fHead: "'IBM Plex Sans'", fMeta: "'IBM Plex Mono'", L: "flush", S: "outline", r: 0, rs: 4, avR: "6px", hW: 600,
+    c: { bg: "#151515", sheet: "#1c1c1c", sheet2: "#242424", tx: "#e8e6e3", tx2: "#a8a5a0", tx3: "#8a8781", line: "rgba(255,255,255,.08)", ac: "#e0a43a", acInk: "#151515", sel: "rgba(224,164,58,.07)", dot: "#e0a43a", avBg: "#2b2b2b", avInk: "#c9c4bc", search: "rgba(255,255,255,.06)" } },
+  { id: "fjord", name: "Fjord", tone: "light", note: "Cold blue-grey air, tall rows without dividers, and a glacier-teal accent.",
+    faces: ["Manrope"], fUI: "Manrope", fRead: "Manrope", fHead: "Manrope", L: "sheet", S: "pill", D: "airy", r: 18, rs: 12, rowLine: "transparent", hW: 700,
+    c: { bg: "#e4e9ee", sheet: "#f8fafb", sheet2: "#edf1f5", tx: "#1d2733", tx2: "#4e5b6b", tx3: "#677485", line: "rgba(30,50,80,.08)", ac: "#2f7d86", acInk: "#fff", sel: "rgba(47,125,134,.1)", dot: "#2f7d86", avBg: "#dbe3ea", avInk: "#4f5e70", search: "rgba(30,50,80,.05)" } },
+  { id: "mono", name: "Monochrome", tone: "light", note: "No accent at all. Black, white and greys, with the open conversation printed in reverse.",
+    faces: ["Geist"], fUI: "Geist", fRead: "Geist", fHead: "Geist", L: "sheet", S: "invert", r: 12, rs: 8, hW: 600, hTrack: "-0.02em",
+    c: { bg: "#f0f0f0", sheet: "#ffffff", sheet2: "#f5f5f5", tx: "#0e0e0e", tx2: "#474747", tx3: "#6b6b6b", line: "rgba(0,0,0,.09)", ac: "#0e0e0e", acInk: "#fff", sel: "#0e0e0e", dot: "#0e0e0e", avBg: "#eaeaea", avInk: "#3a3a3a", search: "rgba(0,0,0,.05)", navOnInk: "#0e0e0e" } },
+  { id: "frosted", name: "Frosted", tone: "light", note: "Translucent panes over a soft wallpaper, like Windows 11 Mica turned all the way up.",
+    faces: ["DM Sans"], fUI: "'DM Sans'", fRead: "'DM Sans'", fHead: "'DM Sans'", L: "glass", S: "pill", r: 18, rs: 10,
+    wall: "radial-gradient(60% 80% at 15% 20%, #c9d8ff 0%, transparent 60%), radial-gradient(50% 70% at 85% 30%, #ffd9c7 0%, transparent 60%), radial-gradient(60% 70% at 60% 100%, #e4d4ff 0%, transparent 60%), #eef1f7",
+    c: { bg: "#eef1f7", sheet: "rgba(255,255,255,.62)", sheet2: "rgba(255,255,255,.55)", tx: "#1c2230", tx2: "#465066", tx3: "#636c84", line: "rgba(30,40,70,.08)", ac: "#3d6bf2", acInk: "#fff", sel: "rgba(255,255,255,.85)", dot: "#3d6bf2", avBg: "rgba(255,255,255,.75)", avInk: "#45506a", search: "rgba(255,255,255,.55)" } },
+  { id: "signal", name: "Signal", tone: "light", note: "Brutalist: two-pixel black borders, hard shadows, and a highlighter-yellow selection.",
+    faces: ["Archivo"], fUI: "Archivo", fRead: "Archivo", fHead: "Archivo", L: "frame", S: "marker", sb: 1, r: 0, rs: 0, avR: "0", hW: 900, hSize: "28px", hTrack: "-0.02em", x: "signal",
+    c: { bg: "#ffffff", sheet: "#ffffff", sheet2: "#f2f2f2", tx: "#000000", tx2: "#1f1f1f", tx3: "#555555", line: "rgba(0,0,0,.18)", ac: "#000000", acInk: "#ffe600", ac2: "#ffe600", sel: "#fff7a8", dot: "#000", avBg: "#ffe600", avInk: "#000", search: "#f2f2f2", btnBg: "#ffe600", btnInk: "#000", navOnInk: "#000" } },
+  { id: "dusk", name: "Dusk", tone: "dark", note: "Plum shadows and lavender light. Outfit's round geometry, split into two cards.",
+    faces: ["Outfit"], fUI: "Outfit", fRead: "Outfit", fHead: "Outfit", L: "split", S: "pill", r: 16, rs: 10, hW: 500, hSize: "23px",
+    c: { bg: "#15111a", sheet: "#1f1926", sheet2: "#2a2233", tx: "#ece6f2", tx2: "#b3a8c0", tx3: "#918699", line: "rgba(255,255,255,.07)", ac: "#c4a1ff", acInk: "#15111a", sel: "rgba(196,161,255,.13)", dot: "#c4a1ff", avBg: "#2d2438", avInk: "#cdbfe0", search: "rgba(255,255,255,.06)", shadow: "0 18px 40px -22px rgba(0,0,0,.7)" } },
+  { id: "folio", name: "Folio", tone: "light", note: "An e-reader: sepia pages, Literata everywhere, no avatars, large comfortable text.",
+    faces: ["Literata"], fUI: "Literata", fRead: "Literata", fHead: "Literata", L: "flush", S: "bar", A: "none", r: 0, rs: 4, hW: 500, hSize: "26px", readSize: "16.5px", readLH: "1.7", ui: "13px", x: "folio",
+    c: { bg: "#e6d9c0", sheet: "#f4ead5", sheet2: "#ebdfc6", tx: "#3b2f22", tx2: "#5f4f3c", tx3: "#7a6852", line: "rgba(80,60,30,.15)", ac: "#8a5a2b", acInk: "#fff", sel: "rgba(138,90,43,.11)", dot: "#8a5a2b", avBg: "#e3d4b8", avInk: "#6e5a40", search: "rgba(80,60,30,.07)" } },
+  { id: "tide", name: "Tidewater", tone: "dark", note: "Deep sea teal with a bright sea-glass accent bar on the open thread.",
+    faces: ["Plus Jakarta Sans"], fUI: "'Plus Jakarta Sans'", fRead: "'Plus Jakarta Sans'", fHead: "'Plus Jakarta Sans'", L: "sheet", S: "bar", r: 14, rs: 8, hW: 700, x: "tide",
+    c: { bg: "#0a1819", sheet: "#0f2226", sheet2: "#152e35", tx: "#e2efee", tx2: "#9fbab8", tx3: "#7f9d9b", line: "rgba(255,255,255,.07)", ac: "#4fd1b2", acInk: "#062a24", sel: "rgba(79,209,178,.1)", dot: "#4fd1b2", avBg: "#163a40", avInk: "#a8d3cc", search: "rgba(255,255,255,.06)", shadow: "0 20px 50px -24px rgba(0,0,0,.7)" } },
+  { id: "blush", name: "Blush", tone: "light", note: "Rose-tinted and soft. Fraunces subjects over Karla, with big rounded cards.",
+    faces: ["Fraunces", "Karla"], fUI: "Karla", fRead: "Karla", fHead: "Fraunces", L: "split", S: "pill", r: 22, rs: 12, hW: 500, hSize: "26px",
+    c: { bg: "#f4e8e6", sheet: "#fffaf9", sheet2: "#fbefed", tx: "#2f1e22", tx2: "#6a5156", tx3: "#876c71", line: "rgba(90,40,50,.09)", ac: "#c2456b", acInk: "#fff", sel: "rgba(194,69,107,.1)", dot: "#c2456b", avBg: "#f2dedf", avInk: "#7b4f5a", search: "rgba(90,40,50,.05)" } },
+  { id: "solar", name: "Solar", tone: "light", note: "The Solarized light palette with Atkinson Hyperlegible, built for readability.",
+    faces: ["Atkinson Hyperlegible", "IBM Plex Mono"], fUI: "'Atkinson Hyperlegible'", fRead: "'Atkinson Hyperlegible'", fHead: "'Atkinson Hyperlegible'", fMeta: "'IBM Plex Mono'", L: "sheet", S: "bar", r: 10, rs: 6, hW: 700,
+    c: { bg: "#eee8d5", sheet: "#fdf6e3", sheet2: "#f5efdc", tx: "#073642", tx2: "#586e75", tx3: "#657b83", line: "rgba(7,54,66,.12)", ac: "#268bd2", acInk: "#fff", sel: "rgba(38,139,210,.11)", dot: "#cb4b16", avBg: "#eee8d5", avInk: "#586e75", search: "rgba(7,54,66,.06)" } },
+  { id: "studio", name: "Studio", tone: "light", note: "Document-tool calm: warm greys, no shadows, a sidebar that blends into the page.",
+    faces: ["Public Sans"], fUI: "'Public Sans'", fRead: "'Public Sans'", fHead: "'Public Sans'", L: "flush", S: "pill", sb: 1, r: 0, rs: 6, avR: "7px", rowLine: "transparent", hW: 700, hSize: "24px", x: "studio",
+    c: { bg: "#f7f7f5", sheet: "#ffffff", sheet2: "#f7f7f5", tx: "#37352f", tx2: "#605e58", tx3: "#7d7b75", line: "rgba(55,53,47,.09)", ac: "#2383e2", acInk: "#fff", sel: "rgba(55,53,47,.07)", dot: "#2383e2", avBg: "#efefec", avInk: "#605e58", search: "rgba(55,53,47,.06)", navOnInk: "#37352f" } },
+  { id: "aurora", name: "Aurora", tone: "dark", note: "Near-black with a violet-to-cyan gradient reserved for the few things that matter.",
+    faces: ["Sora"], fUI: "Sora", fRead: "Sora", fHead: "Sora", L: "sheet", S: "gradient", r: 16, rs: 10, hW: 500, ui: "13px", x: "aurora",
+    c: { bg: "#07070b", sheet: "#0e0e14", sheet2: "#16161f", tx: "#ececf2", tx2: "#a2a2b4", tx3: "#83839a", line: "rgba(255,255,255,.07)", ac: "#8b7bff", acInk: "#08080c", sel: "linear-gradient(90deg, rgba(139,123,255,.22), rgba(56,214,232,.10))", dot: "#8b7bff", avBg: "#1b1b26", avInk: "#c8c8da", search: "rgba(255,255,255,.06)", navOnInk: "#b9b0ff", shadow: "0 30px 60px -30px rgba(0,0,0,.8)" } },
+  { id: "ledger", name: "Ledger", tone: "light", note: "Dense and businesslike: one line per conversation, gridlines, more on screen.",
+    faces: ["Libre Franklin"], fUI: "'Libre Franklin'", fRead: "'Libre Franklin'", fHead: "'Libre Franklin'", L: "flush", S: "bar", D: "compact", A: "none", sb: 1, grid: 1, r: 0, rs: 4, ui: "12.5px", hW: 600, hSize: "19px", x: "ledger",
+    c: { bg: "#edf0f4", sheet: "#ffffff", sheet2: "#f6f8fa", tx: "#1b2733", tx2: "#48586a", tx3: "#5f6f82", line: "rgba(20,40,70,.1)", ac: "#1f6feb", acInk: "#fff", sel: "rgba(31,111,235,.1)", dot: "#1f6feb", avBg: "#e8edf3", avInk: "#48586a", search: "#fff" } },
+  { id: "ember", name: "Ember", tone: "dark", note: "Firelight on dark walnut. Spectral serif for reading, Work Sans for the interface.",
+    faces: ["Spectral", "Work Sans"], fUI: "'Work Sans'", fRead: "Spectral", fHead: "Spectral", L: "split", S: "bar", r: 12, rs: 8, hW: 500, hSize: "27px", readSize: "15.5px",
+    c: { bg: "#13100e", sheet: "#1b1613", sheet2: "#241d19", tx: "#f0e6dd", tx2: "#bba99a", tx3: "#9a8876", line: "rgba(255,230,210,.07)", ac: "#f08a4b", acInk: "#1b1613", sel: "rgba(240,138,75,.1)", dot: "#f08a4b", avBg: "#2b221d", avInk: "#d8c3b1", search: "rgba(255,230,210,.06)", shadow: "0 20px 44px -24px rgba(0,0,0,.8)" } },
+  { id: "atelier", name: "Atelier", tone: "light", note: "Gallery-label restraint: stone greys, black ink, and an oversized serif for the subject.",
+    faces: ["Instrument Serif", "Instrument Sans"], fUI: "'Instrument Sans'", fRead: "'Instrument Sans'", fHead: "'Instrument Serif'", L: "sheet", S: "outline", r: 6, rs: 4, hW: 400, x: "atelier",
+    c: { bg: "#e9e8e4", sheet: "#faf9f7", sheet2: "#f1f0ed", tx: "#151514", tx2: "#52514c", tx3: "#706e68", line: "rgba(20,20,15,.1)", ac: "#151514", acInk: "#faf9f7", sel: "rgba(20,20,15,.03)", dot: "#151514", avBg: "#e3e1dc", avInk: "#52514c", search: "rgba(20,20,15,.05)", navOnInk: "#151514", btnBg: "#151514", btnInk: "#faf9f7" } },
+];
+
+function vars(l) {
+  const c = l.c;
+  const v = {
+    "--bg": c.bg, "--sheet": c.sheet, "--sheet2": c.sheet2, "--tx": c.tx, "--tx2": c.tx2, "--tx3": c.tx3, "--line": c.line,
+    "--ac": c.ac, "--acInk": c.acInk, "--sel": c.sel, "--dot": c.dot, "--avBg": c.avBg, "--avInk": c.avInk, "--search": c.search,
+    "--fUI": `${l.fUI}, 'Segoe UI', system-ui, sans-serif`, "--fRead": `${l.fRead}, Georgia, 'Segoe UI', serif`,
+    "--fHead": `${l.fHead}, Georgia, 'Segoe UI', serif`, "--r": `${l.r}px`, "--rs": `${l.rs}px`,
+  };
+  if (l.fMeta) v["--fMeta"] = `${l.fMeta}, ui-monospace, monospace`;
+  if (c.ac2) v["--ac2"] = c.ac2;
+  if (c.shadow) v["--shadow"] = c.shadow;
+  if (c.btnBg) { v["--btnBg"] = c.btnBg; v["--btnInk"] = c.btnInk; }
+  if (c.navOnInk) v["--navOnInk"] = c.navOnInk;
+  if (l.avR) v["--avR"] = l.avR;
+  if (l.rowLine) v["--rowLine"] = l.rowLine;
+  if (l.wall) v["--wall"] = l.wall;
+  if (l.hW) v["--hW"] = l.hW;
+  if (l.hSize) v["--hSize"] = l.hSize;
+  if (l.hTrack) v["--hTrack"] = l.hTrack;
+  if (l.readSize) v["--readSize"] = l.readSize;
+  if (l.readLH) v["--readLH"] = l.readLH;
+  if (l.ui) v["--ui"] = l.ui;
+  if (l.S === "invert") { v["--selBg"] = c.sel; v["--selInk"] = c.sheet; }
+  if (l.S === "gradient") v["--sel"] = c.sel;
+  return Object.entries(v).map(([k, val]) => `${k}:${val}`).join(";");
+}
+
+function row(t, i) {
+  const cls = ["row", t.u ? "u" : "", i === 0 ? "on" : ""].join(" ");
+  return `<div class="${cls}"><span class="dot"></span><span class="av">${initials(t.f)}</span>
+    <div class="rm"><div class="l1"><span class="fr">${t.f}${t.n ? `<i>${t.n}</i>` : ""}</span>${t.a ? svg("clip") : ""}<span class="tm">${t.t}</span></div>
+    <div class="l2"><span class="sj">${t.s}</span> · ${t.p}</div></div></div>`;
+}
+
+function mock(l) {
+  const cls = ["mock", `L-${l.L}`, `S-${l.S}`, `A-${l.A || "circle"}`, `D-${l.D || "normal"}`, l.sb ? "sb" : "", l.grid ? "grid" : "", l.x ? `X-${l.x}` : ""].join(" ");
+  const nav = l.sb ? `<nav class="nav"><div class="compose">${svg("pen")} Compose</div>
+      <div class="ni on">${svg("inbox")} Inbox <b>3</b></div><div class="ni">${svg("clock")} Snoozed <b>1</b></div>
+      <div class="ni">${svg("send")} Sent</div><div class="ni">${svg("file")} Drafts <b>2</b></div><div class="ni sep"></div>
+      <div class="ni">${svg("shield")} Spam</div><div class="ni">${svg("trash")} Trash</div></nav>` : "";
+  const rows = THREADS.map(row).join("");
+  return `<div class="${cls}" style="${vars(l)}" aria-hidden="true">
+    <div class="wall"></div>
+    <div class="top">${svg("panel")}<div class="search" style="${l.sb ? "margin-left:30px" : ""}">${svg("search")} Search mail <kbd>/</kbd></div>
+      <span class="sp"></span>${l.sb ? "" : svg("pen")}<div class="win"><span>${svg("min")}</span><span>${svg("max")}</span><span>${svg("x")}</span></div></div>
+    <div class="body">${nav}
+      <div class="sheet">
+        <section class="list"><div class="lh"><strong>Inbox</strong><span>3 unread</span></div><div class="rows">${rows}</div></section>
+        <section class="read">
+          <div class="rh">${svg("x")}<span class="sp"></span><span class="tb">${svg("clock")} Snooze</span><span class="tb">${svg("mail")} Unread</span><span class="tb">${svg("shield")} Spam</span><span class="tb">${svg("trash")} Delete</span></div>
+          <div class="rs"><div class="ri">
+            <h2>Sketches for the spring campaign</h2>
+            <div class="cm"><span class="av">MC</span><b>Maya Chen</b><span class="snp">Here's the brief and the mood board. Let's aim for three directions by Thursday.</span><span>Oct 9</span></div>
+            <div class="cm"><span class="av">NB</span><b>me</b><span class="snp">Sounds great. I'll pull the type samples from the archive tomorrow.</span><span>Oct 10</span></div>
+            <div class="mh"><span class="av">MC</span><div class="who"><b>Maya Chen</b><em>maya@studio-north.co</em><div>to me, Priya</div></div><span class="dt">Tue, Oct 13, 8:42 AM</span>${svg("reply")}${svg("more")}</div>
+            <div class="txt"><p>Attached a few directions. I think the second one has legs: the palette feels calmer than last round, and the type holds up at small sizes.</p>
+              <p>Two things I'd still like your eyes on: the headline might want to go a touch larger on mobile, and I'm not sure the photo crop works on the landing page.</p>
+              <p>Could we look at it together Thursday morning?</p><p>Thanks!<br>Maya</p></div>
+            <div class="atts"><div class="att"><div class="th img"></div><div class="in"><b>spring-direction-02.png</b><span>471 KB</span></div></div>
+              <div class="att"><div class="th">${svg("file")}</div><div class="in"><b>Brief v3.pdf</b><span>1.1 MB</span></div></div></div>
+            <div class="rb"><span class="btn pri">${svg("reply")} Reply</span><span class="btn">${svg("fwd")} Forward</span></div>
+          </div></div>
+        </section>
+      </div>
+    </div></div>`;
+}
+
+/* ---------- gallery ---------- */
+const store = {
+  get() { try { return new Set(JSON.parse(localStorage.getItem("postLooks.fav") || "[]")); } catch { return new Set(); } },
+  set(s) { try { localStorage.setItem("postLooks.fav", JSON.stringify([...s])); } catch {} },
+};
+let favs = store.get();
+let filter = "all";
+const grid = document.getElementById("grid");
+const pad2 = (n) => String(n).padStart(2, "0");
+const heart = '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M12 20s-7-4.4-7-10a4 4 0 0 1 7-2.6A4 4 0 0 1 19 10c0 5.6-7 10-7 10Z"/></svg>';
+
+function visible() {
+  return LOOKS.map((l, i) => ({ l, i })).filter(({ l }) =>
+    filter === "all" ? true : filter === "fav" ? favs.has(l.id) : l.tone === filter);
+}
+
+function counts() {
+  document.getElementById("n-all").textContent = LOOKS.length;
+  document.getElementById("n-light").textContent = LOOKS.filter((l) => l.tone === "light").length;
+  document.getElementById("n-dark").textContent = LOOKS.filter((l) => l.tone === "dark").length;
+  document.getElementById("n-fav").textContent = favs.size;
+}
+
+const ro = new ResizeObserver((entries) => {
+  for (const e of entries) e.target.style.setProperty("--s", (e.contentRect.width / 1200).toFixed(4));
+});
+
+function render() {
+  ro.disconnect();
+  const list = visible();
+  grid.innerHTML = list.length ? list.map(({ l, i }) => `
+    <article class="card" id="look-${l.id}">
+      <button class="shot" data-i="${i}" aria-label="Open look ${i + 1}, ${l.name}, full size">${mock(l)}</button>
+      <div class="meta">
+        <span class="num">${pad2(i + 1)}</span>
+        <span class="name">${l.name}</span>
+        <button class="icon fav" data-fav="${l.id}" aria-pressed="${favs.has(l.id)}" aria-label="Heart ${l.name}">${heart}</button>
+        <p class="note">${l.note}</p>
+        <div class="faces">${l.faces.map((f) => `<span class="face">${f}</span>`).join("")}<span class="face">${l.tone}</span></div>
+      </div>
+    </article>`).join("") : `<p class="empty">No hearted looks yet. Tap the heart under any look to keep it here.</p>`;
+  grid.querySelectorAll(".shot").forEach((s) => ro.observe(s));
+  counts();
+}
+
+function toggleFav(id) {
+  favs.has(id) ? favs.delete(id) : favs.add(id);
+  store.set(favs);
+  document.querySelectorAll(`[data-fav="${id}"]`).forEach((b) => b.setAttribute("aria-pressed", favs.has(id)));
+  if (current !== null && LOOKS[current].id === id) document.getElementById("v-fav").setAttribute("aria-pressed", favs.has(id));
+  counts();
+  if (filter === "fav") render();
+}
+
+grid.addEventListener("click", (e) => {
+  const fav = e.target.closest("[data-fav]");
+  if (fav) return toggleFav(fav.dataset.fav);
+  const shot = e.target.closest(".shot");
+  if (shot) open(Number(shot.dataset.i));
+});
+
+document.querySelectorAll(".chip").forEach((c) => c.addEventListener("click", () => {
+  filter = c.dataset.f;
+  document.querySelectorAll(".chip").forEach((x) => x.setAttribute("aria-pressed", x === c));
+  render();
+}));
+
+/* ---------- viewer ---------- */
+const viewer = document.getElementById("viewer");
+const frame = document.getElementById("frame");
+const stage = document.getElementById("stage");
+let current = null;
+let lastFocus = null;
+
+function fit() {
+  if (current === null) return;
+  const r = stage.getBoundingClientRect();
+  const s = Math.min((r.width - 32) / 1200, (r.height - 16) / 760, 1.25);
+  frame.style.width = `${1200 * s}px`;
+  frame.style.height = `${760 * s}px`;
+  const m = frame.firstElementChild;
+  if (m) m.style.transform = `scale(${s})`;
+}
+
+function open(i) {
+  if (current === null) lastFocus = document.activeElement;
+  current = (i + LOOKS.length) % LOOKS.length;
+  const l = LOOKS[current];
+  frame.innerHTML = mock(l);
+  document.getElementById("v-num").textContent = pad2(current + 1);
+  document.getElementById("v-name").textContent = l.name;
+  document.getElementById("v-fav").setAttribute("aria-pressed", favs.has(l.id));
+  viewer.hidden = false;
+  document.body.style.overflow = "hidden";
+  fit();
+  document.getElementById("v-close").focus();
+}
+
+function close() {
+  viewer.hidden = true;
+  current = null;
+  frame.innerHTML = "";
+  document.body.style.overflow = "";
+  lastFocus?.focus?.();
+}
+
+document.getElementById("v-close").addEventListener("click", close);
+document.getElementById("v-prev").addEventListener("click", () => open(current - 1));
+document.getElementById("v-next").addEventListener("click", () => open(current + 1));
+document.getElementById("v-fav").addEventListener("click", () => toggleFav(LOOKS[current].id));
+stage.addEventListener("click", (e) => { if (e.target === stage) close(); });
+window.addEventListener("resize", fit);
+window.addEventListener("keydown", (e) => {
+  if (current === null) return;
+  if (e.key === "Escape") close();
+  else if (e.key === "ArrowRight") open(current + 1);
+  else if (e.key === "ArrowLeft") open(current - 1);
+  else if (e.key.toLowerCase() === "h") toggleFav(LOOKS[current].id);
+});
+
+render();
+</script>

@@ -1,0 +1,434 @@
+/* The reading pane and attachments. */
+
+/* ---------- reading pane ----------
+   The header above the email: close, the sender's avatar, then the subject (up to two lines) over
+   a byline with the sender, address, recipients and date; the main actions at the right, the rest
+   under …. */
+.read-pane {
+  /* The header is white like the rest of the email card, set apart by a hairline below it. */
+  --band: var(--surface);
+}
+.read-head {
+  flex: none;
+  min-height: 52px;
+  display: flex;
+  align-items: center;
+  padding: 14px var(--s-4) 14px var(--s-3);
+  background: var(--band);
+  border-bottom: 1px solid var(--border);
+}
+.read-head-inner {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: var(--s-3);
+  min-width: 0;
+}
+.read-head-inner > .avatar {
+  flex: none;
+}
+.read-head .spacer {
+  flex: 1;
+}
+
+.tb-reply {
+  color: var(--text);
+  font-weight: 550;
+}
+
+.read-scroll {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  padding: var(--s-6) var(--s-8) var(--s-8);
+}
+.read-inner {
+  max-width: var(--read-width);
+  margin: 0 auto;
+  transition: opacity var(--fast) var(--ease);
+}
+/* Moving from one email to another (ThreadView): the next email is laid out out of sight, where
+   the email normally starts, then replaces the current one. */
+.read-scroll {
+  position: relative;
+  --pad-top: var(--s-5);
+}
+.read-inner.layer-in {
+  position: absolute;
+  top: var(--pad-top);
+  left: var(--s-8);
+  right: var(--s-8);
+  pointer-events: none;
+  visibility: hidden;
+}
+.read-inner.stale {
+  opacity: 0.75;
+}
+.thread-subject {
+  font-size: var(--fs-5);
+  font-weight: 650;
+  letter-spacing: -0.012em;
+  line-height: 1.3;
+  margin: 0 0 var(--s-5);
+  user-select: text;
+}
+.snooze-note {
+  margin: calc(-1 * var(--s-3)) 0 var(--s-4);
+  font-size: var(--fs-2);
+  color: var(--accent-text);
+  display: flex;
+  align-items: center;
+  gap: var(--s-2);
+}
+.msg {
+  border-top: 1px solid var(--border);
+}
+.msg:first-of-type {
+  border-top: 0;
+}
+.msg-head {
+  display: flex;
+  align-items: center;
+  gap: var(--s-3);
+  padding: var(--s-3) var(--s-2);
+  margin: 0 calc(-1 * var(--s-2));
+  border-radius: var(--r-2);
+}
+.msg.collapsed .msg-head {
+  padding: 10px var(--s-2);
+  transition: background var(--fast) var(--ease);
+}
+.msg.collapsed .msg-head:hover {
+  background: var(--hover);
+}
+.msg-who {
+  flex: 1 1 auto;
+  min-width: 96px;
+}
+.msg-name {
+  font-weight: 600;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.msg-name .who-btn {
+  font-weight: 600;
+  border-radius: 4px;
+}
+.msg-name .who-btn:hover {
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  text-decoration-color: var(--border-strong);
+}
+.msg-name .addr {
+  font-weight: 400;
+  color: var(--text-3);
+  font-size: var(--fs-2);
+  margin-left: 6px;
+}
+.msg-meta {
+  font-size: var(--fs-2);
+  color: var(--text-3);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.msg-date {
+  font-size: var(--fs-1);
+  color: var(--text-3);
+  white-space: nowrap;
+  font-variant-numeric: tabular-nums;
+  flex: 0 1 auto;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+@container (max-width: 560px) {
+  .msg-date .faint {
+    display: none;
+  }
+}
+.msg-collapse > div {
+  overflow: hidden;
+  min-height: 0;
+}
+/* Opening or folding a message (only when the user does it, not when a thread first loads). */
+.msg-collapse.anim,
+.msg-collapse.closing {
+  overflow: hidden;
+}
+.msg-collapse.anim {
+  animation: grow-in var(--slow) var(--ease-move);
+}
+.msg-collapse.closing {
+  animation: shrink-away var(--med-out) var(--ease-in) forwards;
+}
+.msg-body {
+  padding: 0 0 var(--s-6) 52px;
+  user-select: text;
+  cursor: auto;
+}
+.msg-text {
+  white-space: pre-wrap;
+  word-wrap: break-word;
+  overflow-wrap: anywhere;
+  font-size: 15px;
+  line-height: 1.65;
+}
+.msg-tools {
+  display: flex;
+  gap: 2px;
+}
+.draft-tag {
+  color: var(--danger);
+  font-weight: 600;
+  font-size: var(--fs-1);
+  margin-right: 6px;
+}
+.email-frame {
+  width: 100%;
+  border: 0;
+  display: block;
+  background: transparent;
+  min-height: 40px;
+}
+.frame-tools {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 6px;
+}
+.link-btn {
+  font-size: var(--fs-1);
+  color: var(--text-3);
+  padding: 2px 6px;
+  border-radius: 5px;
+}
+.link-btn:hover {
+  color: var(--text);
+  background: var(--hover);
+}
+.reply-bar {
+  display: flex;
+  gap: var(--s-2);
+  margin: var(--s-4) 0 0 52px;
+  align-items: stretch;
+}
+.reply-box {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  gap: var(--s-2);
+  height: 40px;
+  padding: 0 var(--s-4);
+  border: 1px solid var(--border-strong);
+  border-radius: var(--r-2);
+  background: var(--surface);
+  color: var(--text-3);
+  font-size: var(--fs-3);
+  text-align: left;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  transition: border-color var(--fast) var(--ease), box-shadow var(--fast) var(--ease), color var(--fast) var(--ease);
+}
+.reply-box:hover {
+  border-color: color-mix(in srgb, var(--accent) 45%, var(--border-strong));
+  box-shadow: var(--shadow-1);
+  color: var(--text-2);
+}
+.reply-bar .btn.outline {
+  height: 40px;
+  border-radius: var(--r-2);
+}
+.bulk {
+  height: 100%;
+  display: grid;
+  place-items: center;
+  text-align: center;
+  animation: fade var(--med) var(--ease);
+}
+.bulk .big {
+  font-size: var(--fs-4);
+  font-weight: 600;
+  margin-bottom: var(--s-4);
+}
+.bulk .actions {
+  display: flex;
+  gap: var(--s-2);
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+/* invite */
+.invite {
+  border: 1px solid var(--border);
+  border-radius: var(--r-2);
+  padding: var(--s-4);
+  margin-bottom: var(--s-4);
+  display: grid;
+  grid-template-columns: 44px 1fr;
+  gap: var(--s-3);
+  background: var(--surface-2);
+}
+.invite .cal {
+  width: 44px;
+  border-radius: var(--r-1);
+  overflow: hidden;
+  text-align: center;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  align-self: start;
+}
+.invite .cal .m {
+  background: var(--accent);
+  color: var(--accent-ink);
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  padding: 2px 0;
+}
+.invite .cal .d {
+  font-size: var(--fs-4);
+  font-weight: 650;
+  padding: 3px 0 4px;
+}
+.invite h4 {
+  margin: 0 0 2px;
+  font-size: var(--fs-3);
+}
+.invite .when {
+  font-size: var(--fs-2);
+  color: var(--text-2);
+}
+.invite .rsvp {
+  display: flex;
+  gap: 6px;
+  margin-top: var(--s-3);
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+/* hover card */
+.hovercard {
+  width: 300px;
+  padding: var(--s-4);
+}
+.hovercard .top {
+  display: flex;
+  gap: var(--s-3);
+  align-items: center;
+  margin-bottom: var(--s-3);
+}
+.hovercard .nm {
+  font-weight: 600;
+}
+.hovercard .em {
+  font-size: var(--fs-2);
+  color: var(--text-3);
+  word-break: break-all;
+  user-select: text;
+}
+.hovercard .acts {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+/* ---------- attachments ---------- */
+.atts {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--s-2);
+  margin-top: var(--s-4);
+}
+.att {
+  width: 168px;
+  border: 1px solid var(--border);
+  border-radius: var(--r-2);
+  overflow: hidden;
+  background: var(--surface-2);
+  transition: box-shadow var(--fast) var(--ease), border-color var(--fast) var(--ease);
+  position: relative;
+}
+.att:hover {
+  box-shadow: var(--shadow-2);
+  border-color: var(--border-strong);
+}
+.att-thumb {
+  height: 96px;
+  display: grid;
+  place-items: center;
+  background: var(--surface-3);
+  color: var(--text-3);
+  overflow: hidden;
+}
+.att-thumb img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.att-info {
+  padding: 7px var(--s-2);
+  font-size: var(--fs-1);
+}
+.att-name {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  font-weight: 550;
+}
+.att-actions {
+  position: absolute;
+  top: 6px;
+  right: 6px;
+  display: flex;
+  gap: 2px;
+  background: var(--elevated);
+  border-radius: var(--r-1);
+  box-shadow: var(--shadow-1);
+  padding: 2px;
+  opacity: 0;
+  transition: opacity var(--fast) var(--ease);
+}
+.att:hover .att-actions {
+  opacity: 1;
+}
+
+/* Sender addresses with a copy icon (Message.tsx CopyAddress). */
+/* Plain inline text, so a selection across it copies as one line. */
+.copy-addr {
+  display: inline;
+}
+.copy-addr .copy-icon {
+  margin-left: 2px;
+}
+/* The reading header's text (subject, sender, address, recipients, date) can be selected. */
+.rh-title,
+.rh-title *,
+.msg:not(.collapsed) > .msg-head .msg-who,
+.msg:not(.collapsed) > .msg-head .msg-who * {
+  user-select: text;
+  cursor: text;
+}
+.rh-title button,
+.msg-head .msg-who button {
+  cursor: pointer;
+}
+.copy-icon {
+  display: inline-grid;
+  place-items: center;
+  width: 18px;
+  height: 18px;
+  border-radius: 4px;
+  color: var(--text-3);
+  vertical-align: middle;
+  transition: background var(--fast) var(--ease), color var(--fast) var(--ease);
+}
+.copy-icon:hover {
+  background: var(--hover);
+  color: var(--text);
+}
+.copy-addr.copied .copy-icon {
+  color: var(--accent-text);
+}

@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024">
+  <!-- Post: a teal postage stamp with an Onest Black P (converted to a path). -->
+  <defs>
+    <mask id="perforations" maskUnits="userSpaceOnUse" x="0" y="0" width="1024" height="1024">
+      <rect width="1024" height="1024" fill="#fff"/>
+      <g fill="#000"><circle cx="30.2" cy="30.2" r="60"/><circle cx="30.2" cy="993.8000000000001" r="60"/><circle cx="30.2" cy="30.2" r="60"/><circle cx="993.8000000000001" cy="30.2" r="60"/><circle cx="271.1" cy="30.2" r="60"/><circle cx="271.1" cy="993.8000000000001" r="60"/><circle cx="30.2" cy="271.1" r="60"/><circle cx="993.8000000000001" cy="271.1" r="60"/><circle cx="512" cy="30.2" r="60"/><circle cx="512" cy="993.8000000000001" r="60"/><circle cx="30.2" cy="512" r="60"/><circle cx="993.8000000000001" cy="512" r="60"/><circle cx="752.9" cy="30.2" r="60"/><circle cx="752.9" cy="993.8000000000001" r="60"/><circle cx="30.2" cy="752.9" r="60"/><circle cx="993.8000000000001" cy="752.9" r="60"/><circle cx="993.8" cy="30.2" r="60"/><circle cx="993.8" cy="993.8000000000001" r="60"/><circle cx="30.2" cy="993.8" r="60"/><circle cx="993.8000000000001" cy="993.8" r="60"/></g>
+    </mask>
+  </defs>
+  <rect x="30.2" y="30.2" width="963.6" height="963.6" fill="#2a737b" mask="url(#perforations)"/>
+  <path fill="#eef8f8" d="M439.0 751.3L316.6 751.3L316.6 272.7L517.4 272.7Q573.5 272.7 616.1 288.6Q658.7 304.5 683.0 341.3Q707.4 378.2 707.4 442.4L707.4 442.4Q707.4 501.2 681.7 540.1Q656.0 578.9 612.0 597.9Q568.1 616.8 512.7 616.8L512.7 616.8L439.0 616.8L439.0 751.3ZM439.0 386.3L439.0 507.9L512.7 507.9Q547.8 507.9 567.4 491.0Q587.0 474.1 587.0 443.0L587.0 443.0Q587.0 415.3 569.8 400.8Q552.6 386.3 512 386.3L512 386.3L439.0 386.3Z"/>
+</svg>

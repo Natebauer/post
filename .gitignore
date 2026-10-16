@@ -1,0 +1,10 @@
+node_modules
+dist
+src-tauri/target
+src-tauri/gen
+*.log
+
+# Local diagnostics: helper scripts for one machine, copies of the real log/settings, mailbox
+# snapshots and personal notes. Never published.
+diag/
+

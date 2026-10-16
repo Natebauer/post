@@ -1,0 +1,542 @@
+/* Home, the inbox/reading resizer and the crash screen. */
+
+/* ---------- home (no conversation open) ---------- */
+.home {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  padding: var(--s-2) var(--s-5) var(--s-8) var(--s-6);
+}
+
+/* Home sections sit directly on the window background; only the inbox list is a card. */
+/* Home appears as it is, without its own entrance (closing an email fades the email out over it). */
+.hcard {
+  padding: var(--s-2) 0 var(--s-3);
+  min-width: 0;
+}
+.hcard.wide {
+  grid-column: 1 / -1;
+}
+.hcard header {
+  display: flex;
+  align-items: center;
+  gap: var(--s-2);
+  padding: 0 var(--s-2) var(--s-2);
+  margin-bottom: var(--s-1);
+  border-bottom: 1px solid var(--border-strong);
+  color: var(--text-2);
+  min-height: 26px;
+}
+.hcard h3 {
+  margin: 0;
+  font-size: var(--fs-2);
+  font-weight: 650;
+  color: var(--text);
+}
+.hcard header .sp {
+  flex: 1;
+}
+.hcount {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--text-2);
+  background: var(--surface-3);
+  border-radius: 10px;
+  padding: 0 7px;
+  line-height: 18px;
+  font-variant-numeric: tabular-nums;
+}
+.hchip {
+  font-size: 10.5px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  color: var(--accent-text);
+  background: var(--accent-soft);
+  border-radius: 4px;
+  padding: 1px 6px;
+}
+.hbody {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+}
+.hempty {
+  margin: 0;
+  padding: var(--s-1) var(--s-2) var(--s-2);
+  color: var(--text-3);
+  font-size: var(--fs-2);
+  line-height: 1.5;
+}
+.hsetup {
+  padding: 0 var(--s-2) var(--s-2);
+  display: grid;
+  gap: var(--s-3);
+  justify-items: start;
+}
+.hsetup p {
+  margin: 0;
+  color: var(--text-2);
+  font-size: var(--fs-2);
+  line-height: 1.5;
+}
+.hitem {
+  display: flex;
+  align-items: center;
+  gap: var(--s-3);
+  width: 100%;
+  text-align: left;
+  padding: 7px var(--s-2);
+  border-radius: var(--r-1);
+  transition: background var(--fast) var(--ease);
+  min-width: 0;
+}
+.hitem:hover {
+  background: var(--hover);
+}
+.htext {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+}
+.hl1 {
+  display: flex;
+  gap: var(--s-2);
+  align-items: baseline;
+  min-width: 0;
+  font-size: var(--fs-2);
+}
+.hl1 b {
+  font-weight: 600;
+  flex: 1;
+  min-width: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.hdate {
+  font-size: 11.5px;
+  color: var(--text-3);
+  white-space: nowrap;
+  font-variant-numeric: tabular-nums;
+}
+.hl2 {
+  font-size: var(--fs-2);
+  color: var(--text-3);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.hstatus {
+  flex: none;
+  font-size: 11px;
+  font-weight: 600;
+  border-radius: 10px;
+  padding: 1px 8px;
+  background: var(--surface-3);
+  color: var(--text-2);
+  white-space: nowrap;
+}
+.hstatus.hot {
+  background: var(--accent-soft);
+  color: var(--accent-text);
+}
+.hstatus.ok {
+  background: color-mix(in srgb, #2f9e5b 14%, transparent);
+  color: color-mix(in srgb, #2f9e5b 80%, var(--text));
+}
+
+.hcard .progress {
+  margin: var(--s-2) var(--s-2) 0;
+}
+
+.hcal-badge {
+  width: 28px;
+  flex: none;
+  border-radius: var(--r-1);
+  border: 1px solid var(--border);
+  text-align: center;
+  font-size: 12px;
+  font-weight: 650;
+  line-height: 1.2;
+  overflow: hidden;
+  background: var(--surface);
+}
+.hcal-badge b {
+  display: block;
+  font-size: 9px;
+  background: var(--accent);
+  color: var(--accent-ink);
+  text-transform: uppercase;
+  padding: 1px 0;
+}
+.hatts {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(118px, 1fr));
+  gap: var(--s-2);
+  padding: 0 var(--s-2) var(--s-1);
+}
+.hatt {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  text-align: left;
+  min-width: 0;
+  font-size: 11.5px;
+  border-radius: var(--r-1);
+  padding: 4px;
+  transition: background var(--fast) var(--ease);
+}
+.hatt:hover {
+  background: var(--hover);
+}
+.hatt-thumb {
+  height: 64px;
+  border-radius: var(--r-1);
+  background: var(--surface-3);
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+  color: var(--text-3);
+  margin-bottom: 2px;
+}
+.hatt-thumb img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.hatt-name {
+  font-weight: 550;
+  color: var(--text);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.hatt .faint {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Email bodies appear at full height in one step (no 150px default flash). */
+.frame-wrap:not(.ready) {
+  min-height: 120px;
+}
+.frame-wrap:not(.ready) .email-frame {
+  visibility: hidden;
+  height: 0;
+}
+.frame-wrap.ready:not(.quiet) .email-frame {
+  animation: fade var(--fast) var(--ease);
+}
+
+.thumb {
+  width: 100%;
+  height: 100%;
+  display: grid;
+  place-items: center;
+}
+.thumb img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: top center;
+  animation: fade var(--med) var(--ease);
+}
+
+/* ---------- home: header, customize ---------- */
+
+.home-hint {
+  margin: 0 var(--s-1) var(--s-4);
+  font-size: var(--fs-2);
+  color: var(--text-2);
+}
+.home.editing .hcard {
+  outline: 1px dashed var(--border-strong);
+  outline-offset: 4px;
+  border-radius: var(--r-1);
+  transition: opacity var(--fast) var(--ease), transform var(--fast) var(--ease-move);
+}
+.home.editing .hcard .hbody {
+  pointer-events: none;
+  opacity: 0.7;
+}
+.hcard.dragging {
+  opacity: 0.45;
+  transform: scale(0.99);
+}
+.hgrip {
+  display: inline-grid;
+  place-items: center;
+  width: 22px;
+  height: 26px;
+  margin-left: -4px;
+  border-radius: var(--r-1);
+  color: var(--text-3);
+  cursor: grab;
+  touch-action: none;
+}
+.hgrip:hover {
+  background: var(--hover);
+  color: var(--text);
+}
+.home.editing {
+  user-select: none;
+}
+.home-hidden {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--s-2);
+  margin-top: var(--s-5);
+  padding: 0 var(--s-1);
+  font-size: var(--fs-2);
+}
+
+/* ---------- home: rows of modules ---------- */
+.home-bar {
+  display: flex;
+  align-items: center;
+  gap: var(--s-2);
+  min-height: 40px;
+  padding: var(--s-1) 0;
+}
+.home-bar .sp {
+  flex: 1;
+}
+.home-customize {
+  opacity: 0.55;
+  transition: opacity var(--fast) var(--ease);
+}
+.home:hover .home-customize,
+.home-customize:focus-visible {
+  opacity: 1;
+}
+.home-rows {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-5);
+}
+.hrow {
+  display: grid;
+  grid-template-columns: repeat(var(--n, 1), minmax(0, 1fr));
+  gap: var(--s-6);
+  align-items: start;
+}
+@container (max-width: 720px) {
+  .hrow {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+.hcard {
+  position: relative;
+}
+/* Drop indicators while dragging */
+.hcard[class*="drop-"]::after {
+  content: "";
+  position: absolute;
+  background: var(--accent);
+  border-radius: 2px;
+  pointer-events: none;
+  animation: fade var(--fast) var(--ease);
+}
+.hcard.drop-left::after {
+  left: -14px;
+  top: 0;
+  bottom: 0;
+  width: 3px;
+}
+.hcard.drop-right::after {
+  right: -14px;
+  top: 0;
+  bottom: 0;
+  width: 3px;
+}
+.hcard.drop-above::after {
+  top: -12px;
+  left: 0;
+  right: 0;
+  height: 3px;
+}
+.hcard.drop-below::after {
+  bottom: -12px;
+  left: 0;
+  right: 0;
+  height: 3px;
+}
+.home.dragging-any,
+.home.dragging-any * {
+  cursor: grabbing !important;
+}
+
+/* ---------- inbox / reading pane resizer ---------- */
+.splitter {
+  flex: none;
+  width: var(--s-2);
+  align-self: stretch;
+  cursor: col-resize;
+  position: relative;
+  touch-action: none;
+}
+.splitter::after {
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 3px;
+  height: 36px;
+  margin: -18px 0 0 -1.5px;
+  border-radius: 2px;
+  background: var(--border-strong);
+  opacity: 0;
+  transition: opacity var(--fast) var(--ease), height var(--fast) var(--ease-move), margin var(--fast) var(--ease-move);
+}
+.splitter:hover::after,
+.splitter:focus-visible::after,
+body.resizing .splitter::after {
+  opacity: 1;
+  height: 64px;
+  margin-top: -32px;
+  background: var(--accent);
+}
+.splitter:focus-visible {
+  outline: none;
+}
+body.resizing,
+body.resizing * {
+  cursor: col-resize !important;
+  user-select: none !important;
+}
+body.resizing iframe {
+  pointer-events: none;
+}
+
+/* ---------- home sections: no containers; each is set apart by its underlined header ---------- */
+.hrow {
+  gap: var(--s-5);
+}
+.home-rows {
+  gap: var(--s-5);
+}
+.hcard.drop-left::after {
+  left: -12px;
+}
+.hcard.drop-right::after {
+  right: -12px;
+}
+.hcard.drop-above::after {
+  top: -12px;
+}
+.hcard.drop-below::after {
+  bottom: -12px;
+}
+
+/* ---------- drag an email onto home to pin it ---------- */
+body.dragging,
+body.dragging * {
+  cursor: grabbing !important;
+  user-select: none;
+}
+.mail-ghost {
+  position: fixed;
+  left: 0;
+  top: 0;
+  z-index: 1000;
+  pointer-events: none;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  max-width: 280px;
+  padding: var(--s-2) var(--s-3);
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--r-2);
+  box-shadow: var(--shadow-2, 0 8px 24px rgb(0 0 0 / 0.18));
+  font-size: var(--fs-2);
+  opacity: 0.95;
+}
+.mail-ghost b,
+.mail-ghost span {
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+.mail-ghost span {
+  color: var(--text-2);
+}
+body.dragging .read-pane.bare {
+  border: 1px dashed var(--border-strong);
+}
+.read-pane.bare.drop-over {
+  border: 1px dashed var(--accent);
+  background: color-mix(in srgb, var(--accent) 6%, transparent);
+}
+.read-pane.bare.drop-over::after,
+.sidebar.drop-over::after {
+  content: "Drop to pin";
+  position: absolute;
+  left: 50%;
+  bottom: var(--s-6);
+  transform: translateX(-50%);
+  padding: var(--s-2) var(--s-4);
+  border-radius: 999px;
+  background: var(--accent);
+  color: var(--on-accent, white);
+  font-size: var(--fs-2);
+  font-weight: 600;
+  pointer-events: none;
+  animation: fade var(--fast) var(--ease);
+}
+
+/* ---------- crash screen (never leave a frameless window blank) ---------- */
+.crash {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  background: var(--surface);
+}
+.crash-bar {
+  height: 40px;
+  display: flex;
+  align-items: center;
+  padding-left: var(--s-4);
+  font-weight: 600;
+  border-bottom: 1px solid var(--border);
+}
+.crash-bar span {
+  flex: 1;
+}
+.crash-x {
+  width: 46px;
+  align-self: stretch;
+  color: var(--text-2);
+}
+.crash-x:hover {
+  background: #c42b1c;
+  color: white;
+}
+.crash-body {
+  padding: var(--s-6);
+  max-width: 560px;
+}
+.crash-body h1 {
+  font-size: var(--fs-5);
+  margin: 0 0 var(--s-2);
+}
+.crash-body p {
+  color: var(--text-2);
+  margin: 0 0 var(--s-3);
+}
+.crash-body pre {
+  white-space: pre-wrap;
+  font-size: 12px;
+  color: var(--danger);
+  background: var(--surface-2);
+  border-radius: var(--r-1);
+  padding: var(--s-3);
+  margin: 0 0 var(--s-4);
+}
+.crash-actions {
+  display: flex;
+  gap: var(--s-2);
+}

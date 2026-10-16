@@ -1,0 +1,56 @@
+import React from "react";
+import ReactDOM from "react-dom/client";
+import "@fontsource-variable/inter";
+// Styles, in cascade order (later files build on earlier ones).
+import "./styles/01-base.css";
+import "./styles/02-sidebar-list.css";
+import "./styles/03-reading.css";
+import "./styles/04-overlays-compose.css";
+import "./styles/05-settings.css";
+import "./styles/06-home.css";
+import "./styles/07-sections-motion.css";
+import "./styles/08-calendar-ask.css";
+import "./styles/09-moods-header-layouts.css";
+import { App } from "./App";
+import { ComposeWindow } from "./ComposeWindow";
+import { ErrorBoundary, logToBackend } from "./components/ErrorBoundary";
+
+// Suppress the browser context menu outside editable areas for a native feel.
+document.addEventListener("contextmenu", (e) => {
+  const t = e.target as HTMLElement;
+  if (!t.closest("input, textarea, [contenteditable], .msg-body, .ProseMirror")) e.preventDefault();
+});
+
+// Anything that goes wrong in the UI ends up in Post's log, so problems can be diagnosed.
+window.addEventListener("error", (e) => logToBackend(`Uncaught: ${e.message} at ${e.filename}:${e.lineno}`));
+window.addEventListener("unhandledrejection", (e) => {
+  const r = e.reason;
+  logToBackend(`Unhandled promise rejection: ${r instanceof Error ? `${r.message}\n${r.stack}` : String(r)}`);
+});
+
+/** Compose windows are created with a "compose-…" label (see open_compose_window). */
+async function isComposeWindow(): Promise<boolean> {
+  if (window.location.hash.startsWith("#compose")) return true;
+  try {
+    const { getCurrentWindow } = await import("@tauri-apps/api/window");
+    return getCurrentWindow().label.startsWith("compose-");
+  } catch {
+    return false;
+  }
+}
+
+async function start() {
+  // Plain-browser preview during development: swap in a fake backend.
+  if (import.meta.env.DEV && !("__TAURI_INTERNALS__" in window)) {
+    (await import("./dev-mock")).installMock();
+  }
+  const compose = await isComposeWindow();
+  if (compose) logToBackend("Compose window starting");
+  ReactDOM.createRoot(document.getElementById("root")!).render(
+    <React.StrictMode>
+      <ErrorBoundary>{compose ? <ComposeWindow /> : <App />}</ErrorBoundary>
+    </React.StrictMode>,
+  );
+}
+
+void start();

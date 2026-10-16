@@ -1,0 +1,278 @@
+/* Settings. */
+
+/* ---------- settings ---------- */
+.settings {
+  /* Roomy enough that the mood cards and longer tabs fit without much scrolling. */
+  width: min(960px, calc(100vw - 48px));
+  height: min(820px, calc(100vh - 64px));
+  flex-direction: row;
+  overflow: hidden;
+}
+.settings nav {
+  width: 184px;
+  flex: none;
+  padding: var(--s-4) var(--s-3);
+  border-right: 1px solid var(--border);
+  background: var(--surface-2);
+  border-radius: var(--r-3) 0 0 var(--r-3);
+}
+.settings nav h3 {
+  margin: var(--s-1) var(--s-3) var(--s-4);
+  font-size: var(--fs-4);
+}
+.settings section {
+  flex: 1;
+  padding: var(--s-6) var(--s-6);
+  overflow-y: auto;
+}
+.settings h4 {
+  margin: 0 0 var(--s-1);
+  font-size: var(--fs-4);
+}
+.set-row {
+  display: flex;
+  align-items: center;
+  gap: var(--s-4);
+  padding: var(--s-4) 0;
+  border-bottom: 1px solid var(--border);
+}
+.set-row:last-child {
+  border-bottom: 0;
+}
+.set-row .lbl {
+  flex: 1;
+  min-width: 0;
+}
+.set-row .lbl small {
+  display: block;
+  color: var(--text-3);
+  font-size: var(--fs-1);
+  margin-top: 2px;
+  line-height: 1.45;
+}
+.set-row.col {
+  flex-direction: column;
+  align-items: stretch;
+  gap: var(--s-2);
+}
+.seg {
+  display: inline-flex;
+  background: var(--surface-3);
+  border-radius: var(--r-1);
+  padding: 2px;
+  gap: 2px;
+  flex-wrap: wrap;
+}
+.seg button {
+  height: 26px;
+  padding: 0 var(--s-3);
+  border-radius: 5px;
+  font-size: var(--fs-2);
+  color: var(--text-2);
+  transition: background var(--fast) var(--ease), color var(--fast) var(--ease);
+}
+.seg button.on {
+  background: var(--surface);
+  color: var(--text);
+  box-shadow: var(--shadow-1);
+  font-weight: 550;
+}
+.switch {
+  width: 36px;
+  height: 20px;
+  border-radius: 10px;
+  background: var(--border-strong);
+  position: relative;
+  transition: background var(--fast) var(--ease);
+  flex: none;
+}
+.switch::after {
+  content: "";
+  position: absolute;
+  left: 2px;
+  top: 2px;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: white;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.25);
+  transition: transform var(--med) var(--ease-move);
+}
+.switch.on {
+  background: var(--accent);
+}
+.switch.on::after {
+  transform: translateX(16px);
+}
+.swatches {
+  display: flex;
+  gap: var(--s-2);
+  align-items: center;
+  flex-wrap: wrap;
+}
+.swatch {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  border: 2px solid transparent;
+  box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.1);
+  transition: transform var(--fast) var(--ease);
+}
+.swatch:hover {
+  transform: scale(1.1);
+}
+.swatch.on {
+  outline: 2px solid var(--text);
+  outline-offset: 2px;
+}
+.swatch-custom {
+  width: 24px;
+  height: 24px;
+  border: 0;
+  padding: 0;
+  background: none;
+  border-radius: 50%;
+  overflow: hidden;
+}
+/* The custom picker: a rainbow ring around the chosen color, so it never looks like a duplicate. */
+.swatch-custom {
+  background: conic-gradient(#e5484d, #f5a524, #46a758, #12a594, #3e63dd, #8e4ec6, #e5484d) !important;
+}
+.swatch-custom::-webkit-color-swatch-wrapper {
+  padding: 3px;
+}
+.swatch-custom::-webkit-color-swatch {
+  border: 2px solid var(--elevated);
+  border-radius: 50%;
+}
+.progress {
+  height: 6px;
+  border-radius: 3px;
+  background: var(--surface-3);
+  overflow: hidden;
+  margin-top: var(--s-2);
+}
+.progress > div {
+  height: 100%;
+  background: var(--accent);
+  border-radius: 3px;
+  transition: width var(--slow) var(--ease-move);
+}
+.template {
+  border: 1px solid var(--border);
+  border-radius: var(--r-2);
+  padding: var(--s-3);
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-2);
+  margin-bottom: var(--s-2);
+}
+.shortcuts {
+  width: min(640px, calc(100vw - 48px));
+  padding: var(--s-6);
+  overflow-y: auto;
+}
+.shortcuts table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: var(--fs-2);
+}
+.shortcuts td {
+  padding: 6px 0;
+  border-bottom: 1px solid var(--border);
+}
+.shortcuts td:last-child {
+  text-align: right;
+}
+
+/* quick look & source */
+.quicklook {
+  width: min(1000px, calc(100vw - 64px));
+  height: calc(100vh - 80px);
+  overflow: hidden;
+}
+.quicklook .ql-head {
+  height: 48px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 0 var(--s-2) 0 var(--s-5);
+  border-bottom: 1px solid var(--border);
+  flex: none;
+}
+.quicklook .ql-body {
+  flex: 1;
+  min-height: 0;
+  display: grid;
+  place-items: center;
+  background: var(--surface-2);
+  overflow: auto;
+  border-radius: 0 0 var(--r-3) var(--r-3);
+}
+.quicklook img {
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
+}
+.quicklook iframe {
+  width: 100%;
+  height: 100%;
+  border: 0;
+  background: white;
+}
+.source {
+  align-self: stretch;
+  justify-self: stretch;
+  margin: 0;
+  padding: var(--s-5);
+  font: 12px/1.5 ui-monospace, "Cascadia Mono", Consolas, monospace;
+  white-space: pre-wrap;
+  word-break: break-all;
+  user-select: text;
+  color: var(--text-2);
+}
+
+.spin {
+  animation: spin var(--loop-spin) linear infinite;
+}
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+.skeleton {
+  background: var(--surface-2);
+  animation: breathe var(--loop-breathe) var(--ease-move) infinite alternate;
+  border-radius: var(--r-1);
+}
+@keyframes breathe {
+  to {
+    background: var(--surface-3);
+  }
+}
+
+@media (max-width: 980px) {
+  .list-pane {
+    width: var(--list-w, 320px);
+  }
+  .read-scroll {
+    padding: var(--s-5) var(--s-5) var(--s-8);
+  }
+  .msg-body,
+  .reply-bar {
+    padding-left: 0;
+    margin-left: 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    /* Endless loops (a spinner, a loading placeholder) play once and hold still. */
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}

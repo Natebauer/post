@@ -1,0 +1,359 @@
+/* The sidebar, the inbox list and avatars. */
+
+/* ---------- sidebar ---------- */
+.compose-btn {
+  height: 38px;
+  border-radius: var(--r-2);
+  display: flex;
+  align-items: center;
+  gap: var(--s-3);
+  padding: 0 var(--s-4);
+  font-weight: 600;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  box-shadow: var(--shadow-1);
+  margin-bottom: var(--s-3);
+  transition: box-shadow var(--fast) var(--ease);
+}
+.compose-btn:hover {
+  box-shadow: var(--shadow-2);
+}
+.nav-item {
+  display: flex;
+  align-items: center;
+  gap: var(--s-3);
+  height: 32px;
+  padding: 0 var(--s-3);
+  border-radius: var(--r-1);
+  color: var(--text-2);
+  width: 100%;
+  text-align: left;
+  transition: background var(--fast) var(--ease), color var(--fast) var(--ease);
+}
+.nav-item:hover {
+  background: var(--hover);
+  color: var(--text);
+}
+.nav-item.active {
+  background: var(--accent-soft);
+  color: var(--accent-text);
+  font-weight: 600;
+}
+.nav-item .count {
+  margin-left: auto;
+  font-size: var(--fs-1);
+  font-variant-numeric: tabular-nums;
+}
+.nav-sep {
+  height: 1px;
+  background: var(--border);
+  margin: var(--s-2) 6px;
+}
+.sidebar-foot {
+  margin-top: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.sync-foot {
+  display: flex;
+  align-items: center;
+  gap: var(--s-2);
+  font-size: var(--fs-1);
+  color: var(--text-3);
+  padding: var(--s-2) var(--s-3);
+  line-height: 1.35;
+}
+
+/* ---------- list ---------- */
+.list-head {
+  height: 44px;
+  flex: none;
+  display: flex;
+  align-items: center;
+  padding: 0 var(--s-2) 0 var(--s-4);
+  gap: var(--s-2);
+  border-bottom: 1px solid var(--border);
+}
+.list-head h2 {
+  font-size: var(--fs-3);
+  font-weight: 650;
+  margin: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.list-head .sub {
+  font-size: var(--fs-1);
+  color: var(--text-3);
+  white-space: nowrap;
+  flex: 1;
+}
+.list-scroll {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  contain: strict;
+  position: relative;
+}
+/* The keyboard cursor ring on rows shows focus inside the list. */
+.list-scroll:focus-visible {
+  outline: none;
+}
+.sel-ind {
+  position: absolute;
+  left: 6px;
+  right: 6px;
+  height: 68px;
+  border-radius: var(--r-2);
+  background: var(--selected-bg);
+  transition: transform var(--med) var(--ease-move), opacity var(--fast) var(--ease);
+  pointer-events: none;
+}
+.row {
+  position: absolute;
+  left: 0;
+  right: 0;
+  height: 68px;
+  padding: 0 var(--s-3) 0 var(--s-5);
+  display: grid;
+  grid-template-columns: 36px 1fr;
+  column-gap: var(--s-3);
+  align-items: center;
+  transition:
+    transform var(--slow) var(--ease-move),
+    opacity var(--med) var(--ease);
+  border-radius: var(--r-2);
+  margin: 0 6px;
+}
+.row::after {
+  content: "";
+  position: absolute;
+  left: 14px;
+  right: 8px;
+  bottom: 0;
+  height: 1px;
+  background: var(--border);
+}
+/* No line touching a highlighted row. */
+.row:hover::after,
+.row:has(+ .row:hover)::after,
+.row:has(+ .row.selected)::after,
+.row:has(+ .row.cursor)::after,
+.row:has(+ .row.checked)::after {
+  opacity: 0;
+}
+.row:hover {
+  background: var(--hover);
+}
+.row.selected,
+.row.selected:hover {
+  background: transparent;
+}
+.row.selected::after,
+.row.checked::after {
+  opacity: 0;
+}
+.row.checked {
+  background: var(--accent-softer);
+}
+/* Keyboard position, and the conversation you just closed. */
+/* The conversation you were just reading keeps a soft tint, without a border. */
+.row.cursor {
+  background: var(--accent-softer);
+}
+.row.cursor::after {
+  opacity: 0;
+}
+.row.leaving {
+  opacity: 0;
+  transition-duration: var(--med-out);
+  transition-timing-function: var(--ease-in);
+  pointer-events: none;
+}
+/* A newly arrived email: the one soft tint, settling away. */
+.row.fresh {
+  animation: fresh var(--highlight) var(--ease);
+}
+@keyframes fresh {
+  from {
+    background: var(--accent-soft);
+  }
+}
+.row-main {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.row-line {
+  display: flex;
+  align-items: baseline;
+  gap: var(--s-2);
+  min-width: 0;
+}
+.row-from {
+  flex: 1;
+  min-width: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  color: color-mix(in srgb, var(--text) 85%, transparent);
+}
+.row-from .n {
+  color: var(--text-3);
+  font-size: var(--fs-1);
+  margin-left: 4px;
+  font-weight: 400;
+}
+.row-date {
+  font-size: var(--fs-1);
+  color: var(--text-3);
+  flex: none;
+  font-variant-numeric: tabular-nums;
+}
+.row-sub {
+  flex: 1;
+  min-width: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  font-size: var(--fs-2);
+  color: var(--text-3);
+}
+.row-sub .subj {
+  color: var(--text);
+  font-weight: 500;
+}
+.row.unread .row-from,
+.row.unread .row-sub .subj {
+  font-weight: 650;
+  color: var(--text);
+}
+.row .dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--accent);
+  position: absolute;
+  left: 6px;
+  top: 50%;
+  margin-top: -4px;
+  transition: opacity var(--med) var(--ease);
+}
+.row:not(.unread) .dot {
+  opacity: 0;
+}
+.row-icons {
+  display: flex;
+  gap: 4px;
+  color: var(--text-3);
+  flex: none;
+  align-items: center;
+}
+.row-actions {
+  position: absolute;
+  right: var(--s-2);
+  top: 50%;
+  transform: translateY(-50%);
+  display: flex;
+  gap: 2px;
+  background: var(--elevated);
+  border-radius: var(--r-1);
+  box-shadow: var(--shadow-1);
+  border: 1px solid var(--border);
+  padding: 2px;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity var(--fast) var(--ease);
+}
+.row:hover .row-actions {
+  opacity: 1;
+  pointer-events: auto;
+}
+.chip-snooze {
+  font-size: 11px;
+  color: var(--accent-text);
+  background: var(--accent-softer);
+  padding: 0 6px;
+  border-radius: 4px;
+  white-space: nowrap;
+}
+.empty {
+  height: 100%;
+  display: grid;
+  place-items: center;
+  text-align: center;
+  color: var(--text-3);
+  padding: var(--s-6);
+  font-size: var(--fs-2);
+}
+.empty .big {
+  font-size: var(--fs-4);
+  color: var(--text-2);
+  font-weight: 550;
+  margin-bottom: var(--s-1);
+}
+.search-banner {
+  font-size: var(--fs-1);
+  color: var(--text-3);
+  padding: var(--s-2) var(--s-4);
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex: none;
+}
+
+/* ---------- avatar ---------- */
+.avatar {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  position: relative;
+  flex: none;
+  overflow: hidden;
+  display: grid;
+  place-items: center;
+  font-size: var(--fs-2);
+  font-weight: 600;
+  background: var(--avatar-bg);
+  color: var(--avatar-ink);
+  transition: background var(--fast) var(--ease);
+}
+.avatar img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  background: var(--surface);
+  opacity: 0;
+  transition: opacity var(--slow) var(--ease);
+}
+/* A photo that's already loaded shows at once (switching emails, scrolling the list). */
+.avatar img.ok.instant {
+  transition: none;
+}
+.avatar img.ok {
+  opacity: 1;
+}
+.avatar.sm {
+  width: 28px;
+  height: 28px;
+  font-size: 11px;
+}
+.avatar.lg {
+  width: 40px;
+  height: 40px;
+  font-size: var(--fs-3);
+}
+.avatar.check {
+  background: var(--accent);
+  color: var(--accent-ink);
+  animation: fade var(--med) var(--ease);
+}
+/* Crossing into another list layout: rows take their new places at once (ThreadList.tsx). */
+.list-pane.relayout .row {
+  transition: none;
+}

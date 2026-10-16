@@ -1,0 +1,528 @@
+/* Tokens, base elements, window layout, title bar and buttons. */
+
+/* =========================================================
+   Post design system
+   Type scale: 12 · 13 · 14 · 16 · 20     Radii: 6 · 10 · 14
+   Spacing: 4-point (4, 8, 12, 16, 20, 24, 32)
+   ========================================================= */
+:root {
+  /* Lets heights animate to and from their natural size (opening a message, a new section). */
+  interpolate-size: allow-keywords;
+  --accent: #2a737b;
+  --accent-ink: #ffffff;
+  --accent-soft: color-mix(in srgb, var(--accent) 12%, transparent);
+  /* The selected email in the inbox list. */
+  --selected-bg: color-mix(in srgb, var(--accent) 12%, var(--surface));
+  --accent-softer: color-mix(in srgb, var(--accent) 6%, transparent);
+  --accent-text: color-mix(in srgb, var(--accent) 82%, black);
+
+  --chrome: rgba(243, 243, 240, 0.55);
+  --window-base: #e4e4e1;
+  --surface: #ffffff;
+  --surface-2: #f6f6f4;
+  --surface-3: #ececea;
+  --elevated: #ffffff;
+  --text: #1b1c1f;
+  --text-2: #55585f;
+  --text-3: #6f727a; /* 4.6:1 on white */
+  --border: rgba(20, 20, 30, 0.08);
+  --border-strong: rgba(20, 20, 30, 0.14);
+  --hover: rgba(20, 20, 30, 0.04);
+  --press: rgba(20, 20, 30, 0.07);
+  --danger: #c93d31;
+  --shadow-1: 0 1px 2px rgba(0, 0, 0, 0.04), 0 1px 1px rgba(0, 0, 0, 0.03);
+  --shadow-2: 0 8px 28px rgba(15, 20, 40, 0.14), 0 2px 6px rgba(15, 20, 40, 0.06);
+  --shadow-3: 0 24px 64px rgba(15, 20, 40, 0.22), 0 4px 12px rgba(15, 20, 40, 0.08);
+  --scrim: rgba(20, 22, 28, 0.28);
+  --avatar-bg: #e7e7e4;
+  /* Calendar event tints are mixed into this solid color rather than into transparency, so they
+     look the same while animating as at rest. */
+  --tint-base: #f4f4f2;
+  --avatar-ink: #5b5e65;
+
+  --fs-1: 12px;
+  --fs-2: 13px;
+  --fs-3: 14px;
+  --fs-4: 16px;
+  --fs-5: 20px;
+  --r-1: 6px;
+  --r-2: 10px;
+  --r-3: 14px;
+  --s-1: 4px;
+  --s-2: 8px;
+  --s-3: 12px;
+  --s-4: 16px;
+  --s-5: 20px;
+  --s-6: 24px;
+  --s-8: 32px;
+
+  /* Motion. Things fade; movement is kept for where something actually goes (a sent email, an
+     email dropped somewhere, modules rearranging). Code reads these too (motionTokens.ts). */
+  --ease: cubic-bezier(0.2, 0.7, 0.2, 1); /* entering */
+  --ease-in: cubic-bezier(0.4, 0, 1, 1); /* leaving */
+  --ease-move: cubic-bezier(0.4, 0, 0.2, 1); /* moving or resizing in place */
+  --pane-in: 70ms; /* an email opening */
+  --pane-out: 80ms; /* an email closing */
+  --fast: 120ms;
+  --med: 170ms;
+  --slow: 220ms;
+  /* Leaving is a little quicker than arriving. */
+  --fast-out: 90ms;
+  --med-out: 130ms;
+  --slow-out: 170ms;
+  /* Something the app did on its own (a new section, a pinned email) that's worth a glance. */
+  --emphasis: 420ms;
+  /* The one soft highlight on something new or changed. */
+  --highlight: 900ms;
+  /* Endless loops: a spinner, a loading placeholder breathing. */
+  --loop-spin: 1s;
+  --loop-breathe: 1.6s;
+  /* The two distances anything travels. */
+  --travel-sm: 4px;
+  --travel-lg: 8px;
+
+  --font: "Inter Variable", "Inter", "Segoe UI Variable Text", "Segoe UI", system-ui, sans-serif;
+  /* Headings follow the mood (see moods.ts); by default they use the UI face. */
+  --font-display: var(--font);
+  --read-width: 760px;
+  color-scheme: light;
+}
+
+:root[data-theme="dark"] {
+  --accent-text: color-mix(in srgb, var(--accent) 68%, white);
+  --chrome: rgba(28, 28, 31, 0.5);
+  --window-base: #202023;
+  --surface: #1d1e21;
+  --surface-2: #232428;
+  --surface-3: #2c2d32;
+  --elevated: #2a2b30;
+  --text: #ececee;
+  --text-2: #adb0b6;
+  --text-3: #8b8e95; /* 4.6:1 on surface */
+  --border: rgba(255, 255, 255, 0.07);
+  --border-strong: rgba(255, 255, 255, 0.13);
+  --hover: rgba(255, 255, 255, 0.045);
+  --press: rgba(255, 255, 255, 0.08);
+  --danger: #ef6b5f;
+  --shadow-1: 0 1px 2px rgba(0, 0, 0, 0.3);
+  --shadow-2: 0 8px 28px rgba(0, 0, 0, 0.45), 0 2px 6px rgba(0, 0, 0, 0.3);
+  --shadow-3: 0 24px 64px rgba(0, 0, 0, 0.55), 0 4px 12px rgba(0, 0, 0, 0.35);
+  --scrim: rgba(0, 0, 0, 0.45);
+  --avatar-bg: #34353a;
+  --tint-base: #222326;
+  --avatar-ink: #b9bcc2;
+  color-scheme: dark;
+}
+
+/* ---------- base ---------- */
+* {
+  box-sizing: border-box;
+}
+html,
+body,
+#root {
+  height: 100%;
+  margin: 0;
+}
+/* The window background is solid. It used to let Windows' Mica show through, but Windows
+   draws Mica differently for the active and inactive window (wallpaper-tinted vs flat), so the
+   background shifted between gray and yellowish as focus moved to other apps. The mood's
+   tint (--chrome) now sits on a fixed base instead. */
+html {
+  background: linear-gradient(var(--chrome), var(--chrome)), var(--window-base);
+}
+body {
+  font-family: var(--font);
+  font-size: var(--fs-3);
+  line-height: 1.45;
+  color: var(--text);
+  background: transparent;
+  -webkit-font-smoothing: antialiased;
+  font-feature-settings: "cv11", "ss03";
+  overflow: hidden;
+  user-select: none;
+  cursor: default;
+}
+button {
+  font: inherit;
+  color: inherit;
+  background: none;
+  border: 0;
+  padding: 0;
+  cursor: default;
+}
+input,
+textarea,
+select {
+  font: inherit;
+  color: inherit;
+}
+a {
+  color: var(--accent-text);
+}
+mark {
+  background: color-mix(in srgb, #f5c542 45%, transparent);
+  color: inherit;
+  border-radius: 2px;
+  padding: 0 1px;
+}
+::selection {
+  background: color-mix(in srgb, var(--accent) 30%, transparent);
+}
+:focus {
+  outline: none;
+}
+/* One focus style everywhere: a solid accent ring that follows each element's own shape. */
+:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+::-webkit-scrollbar-thumb {
+  background: transparent;
+  border-radius: 10px;
+  border: 3px solid transparent;
+  background-clip: content-box;
+}
+*:hover::-webkit-scrollbar-thumb {
+  background-color: var(--border-strong);
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+.tnum {
+  font-variant-numeric: tabular-nums;
+}
+.muted {
+  color: var(--text-2);
+}
+.faint {
+  color: var(--text-3);
+}
+
+/* ---------- layout ---------- */
+.app {
+  display: grid;
+  grid-template-rows: 44px 1fr;
+  height: 100%;
+}
+.body {
+  display: flex;
+  min-height: 0;
+  padding: 0 var(--s-2) var(--s-2) 0;
+}
+.sidebar {
+  width: 0;
+  overflow: hidden;
+  transition: width var(--slow) var(--ease-move);
+  flex: none;
+}
+.sidebar.open {
+  width: 216px;
+}
+.sidebar-inner {
+  width: 216px;
+  padding: var(--s-1) var(--s-3) var(--s-3);
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+.sheet {
+  flex: 1;
+  overflow-x: clip;
+  min-width: 0;
+  display: flex;
+  gap: 0;
+  margin-left: var(--s-2);
+  position: relative;
+}
+/* The email list and the open email are two separate cards. */
+.list-pane,
+.read-pane {
+  background: var(--surface);
+  border-radius: var(--r-3);
+  box-shadow: var(--shadow-1);
+  border: 1px solid var(--border);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+}
+.list-pane {
+  width: var(--list-w, clamp(340px, 36%, 460px));
+  flex: none;
+}
+.read-pane {
+  flex: 1;
+  min-width: 0;
+  position: relative;
+  container-type: inline-size;
+}
+/* Opening and closing an email: the card fades in over Home and out over it (paneFade.ts). */
+.read-pane.pane-waiting {
+  opacity: 0;
+}
+.read-pane.pane-opening {
+  animation: fade var(--pane-in) var(--ease) both;
+}
+/* The still copy shows things as they were: nothing inside it replays its entrance animation. */
+.pane-still * {
+  animation: none !important;
+  transition: none !important;
+}
+.read-pane.pane-leaving {
+  animation: fade-out var(--pane-out) var(--ease-in) both;
+  pointer-events: none;
+}
+.pane-still.pane-closing {
+  animation: fade-out var(--pane-out) var(--ease-in) both;
+}
+.read-pane.bare {
+  background: transparent;
+  border-color: transparent;
+  box-shadow: none;
+}
+
+/* ---------- title bar ---------- */
+.titlebar {
+  display: flex;
+  align-items: center;
+  gap: var(--s-2);
+  padding-left: var(--s-2);
+  height: 44px;
+}
+.titlebar .drag {
+  flex: 1;
+  align-self: stretch;
+}
+.search-wrap {
+  flex: 0 1 520px;
+  position: relative;
+  min-width: 180px;
+  transition: flex-basis var(--slow) var(--ease-move);
+}
+/* Opens up while you type. */
+.search-wrap:focus-within {
+  flex-basis: 720px;
+}
+.search {
+  display: flex;
+  align-items: center;
+  gap: var(--s-2);
+  height: 30px;
+  padding: 0 var(--s-2) 0 var(--s-3);
+  border-radius: var(--r-1);
+  background: color-mix(in srgb, var(--surface) 70%, transparent);
+  border: 1px solid var(--border);
+  transition: background var(--fast) var(--ease), border-color var(--fast) var(--ease), box-shadow var(--fast) var(--ease);
+  color: var(--text-3);
+}
+.search:focus-within {
+  background: var(--surface);
+  border-color: var(--border-strong);
+  box-shadow: var(--shadow-1);
+}
+.search input {
+  flex: 1;
+  border: 0;
+  outline: 0;
+  background: transparent;
+  color: var(--text);
+  min-width: 0;
+  font-size: var(--fs-2);
+}
+.search input::placeholder {
+  color: var(--text-3);
+}
+.search-pop {
+  position: absolute;
+  top: 36px;
+  left: 0;
+  right: 0;
+  z-index: 60;
+  background: var(--elevated);
+  border: 1px solid var(--border);
+  border-radius: var(--r-2);
+  box-shadow: var(--shadow-2);
+  padding: var(--s-1);
+  animation: fade var(--fast) var(--ease);
+}
+.kbd {
+  font-size: 11px;
+  color: var(--text-3);
+  border: 1px solid var(--border-strong);
+  border-radius: 4px;
+  padding: 0 4px;
+  line-height: 16px;
+  font-family: var(--font);
+  font-variant-numeric: tabular-nums;
+}
+.winctl {
+  display: flex;
+  align-self: stretch;
+}
+.winctl button {
+  width: 46px;
+  display: grid;
+  place-items: center;
+  color: var(--text-2);
+  transition: background var(--fast) var(--ease);
+}
+.winctl button:hover {
+  background: var(--hover);
+  color: var(--text);
+}
+.winctl button.close:hover {
+  background: #c42b1c;
+  color: white;
+}
+.sync-pill {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: var(--fs-1);
+  color: var(--text-3);
+  padding: 0 var(--s-2);
+  height: 28px;
+  border-radius: var(--r-1);
+  white-space: nowrap;
+}
+button.sync-pill:hover {
+  background: var(--hover);
+}
+.ring {
+  flex: none;
+  transform: rotate(-90deg);
+}
+.ring circle {
+  fill: none;
+  stroke-width: 2.5;
+}
+.ring .track {
+  stroke: var(--border-strong);
+}
+.ring .bar {
+  stroke: var(--accent);
+  stroke-linecap: round;
+  transition: stroke-dashoffset var(--slow) var(--ease-move);
+}
+
+/* ---------- buttons ---------- */
+.icon-btn {
+  min-width: 30px;
+  height: 30px;
+  border-radius: var(--r-1);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  color: var(--text-2);
+  transition: background var(--fast) var(--ease), color var(--fast) var(--ease);
+  flex: none;
+}
+.icon-btn:hover {
+  background: var(--hover);
+  color: var(--text);
+}
+.icon-btn:active {
+  background: var(--press);
+}
+.icon-btn.sm {
+  min-width: 26px;
+  height: 26px;
+}
+.icon-btn:disabled {
+  opacity: 0.4;
+}
+.icon-btn.on {
+  background: var(--accent-soft);
+  color: var(--accent-text);
+}
+.tb-label {
+  display: none;
+  font-size: var(--fs-2);
+  padding-right: 4px;
+}
+@container (min-width: 820px) {
+  .tb-label {
+    display: inline;
+  }
+  .read-head .icon-btn.labeled {
+    padding: 0 var(--s-2);
+  }
+}
+.btn {
+  height: 30px;
+  padding: 0 var(--s-3);
+  border-radius: var(--r-1);
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-weight: 500;
+  font-size: var(--fs-2);
+  transition: background var(--fast) var(--ease), box-shadow var(--fast) var(--ease), opacity var(--fast) var(--ease);
+  white-space: nowrap;
+}
+.btn.primary {
+  /* A touch deeper than the accent so white text stays readable on light accents. */
+  background: color-mix(in srgb, var(--accent) 90%, black);
+  color: var(--accent-ink);
+  box-shadow: 0 1px 2px color-mix(in srgb, var(--accent) 40%, transparent);
+}
+.btn.primary:hover {
+  background: color-mix(in srgb, var(--accent) 80%, black);
+}
+.btn.primary:disabled {
+  opacity: 0.5;
+}
+.btn.ghost {
+  color: var(--text-2);
+}
+.btn.ghost:hover {
+  background: var(--hover);
+  color: var(--text);
+}
+.btn.outline {
+  border: 1px solid var(--border-strong);
+  background: var(--surface);
+}
+.btn.outline:hover {
+  background: var(--surface-2);
+}
+.btn.outline.on {
+  border-color: var(--accent);
+  background: var(--accent-soft);
+  color: var(--accent-text);
+}
+.btn.danger {
+  color: var(--danger);
+}
+.btn.danger:hover {
+  background: color-mix(in srgb, var(--danger) 10%, transparent);
+}
+.split-btn {
+  display: inline-flex;
+}
+.split-btn .btn.primary:first-child {
+  border-radius: var(--r-1) 0 0 var(--r-1);
+}
+.split-btn .btn.primary:last-child {
+  border-radius: 0 var(--r-1) var(--r-1) 0;
+  padding: 0 7px;
+  border-left: 1px solid color-mix(in srgb, var(--accent-ink) 25%, transparent);
+}
+
+/* Changing the theme or mood switches every color at once, rather than hover colors trailing a
+   beat behind (theme.ts adds this class for a frame). The scrim keeps its own fade. */
+:root.theme-switching *:not(.scrim),
+:root.theme-switching *::before,
+:root.theme-switching *::after {
+  transition: none !important;
+}
+/* Hover lights up at once and only fades on the way out. */
+:is(.icon-btn, .btn, .nav-item, .winctl button, .search, .msg.collapsed .msg-head, .reply-box, .att, .copy-icon, .seg button, .hitem, .hatt, .home-ai, .cw-event, .cm-ev, .mood):hover {
+  transition-duration: 0s;
+}

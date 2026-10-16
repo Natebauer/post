@@ -1,0 +1,689 @@
+/* The Home calendar, the AI assistant and the send check. */
+
+/* ---------- calendar: yesterday through the next five days ---------- */
+.cw {
+  /* Event tints come from each calendar's own color; --cal falls back to the accent. */
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  gap: var(--s-2);
+  padding: var(--s-1) 0 var(--s-1);
+}
+.cw-day {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: var(--s-2) 6px var(--s-3);
+  border-radius: var(--r-2);
+}
+.cw-day.weekend {
+  background: color-mix(in srgb, var(--text) 2.5%, transparent);
+}
+.cw-day.before .cw-name,
+.cw-day.before .cw-num {
+  color: var(--text-3);
+}
+.cw-head {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 0 2px 2px;
+  min-height: 26px;
+}
+.cw-name {
+  font-size: 11px;
+  font-weight: 650;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--text-3);
+}
+.cw-num {
+  font-size: var(--fs-4);
+  font-weight: 650;
+  color: var(--text);
+  min-width: 26px;
+  height: 26px;
+  display: inline-grid;
+  place-items: center;
+  border-radius: 13px;
+}
+.cw-day.today .cw-name {
+  color: var(--accent-text);
+}
+.cw-day.today .cw-num {
+  background: var(--accent);
+  color: var(--accent-ink);
+  padding: 0 6px;
+}
+
+.cw-allday {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+.cw-pill,
+.cw-event {
+  --cal-strong: color-mix(in oklab, var(--cal, var(--accent)) 78%, black);
+  --cal-tint: color-mix(in srgb, var(--cal, var(--accent)) 14%, var(--tint-base));
+  text-align: left;
+  border-radius: var(--r-1);
+  background: var(--cal-tint);
+  transition: background var(--fast) var(--ease), opacity var(--fast) var(--ease);
+  min-width: 0;
+}
+:root[data-theme="dark"] .cw-pill,
+:root[data-theme="dark"] .cw-event {
+  --cal-strong: var(--cal, var(--accent));
+  --cal-tint: color-mix(in srgb, var(--cal, var(--accent)) 20%, var(--tint-base));
+}
+.cw-pill {
+  padding: 3px 8px;
+  font-size: var(--fs-1);
+  font-weight: 600;
+  color: var(--text);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.cw-list {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.cw-event {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  padding: 6px 22px 7px 10px;
+}
+.cw-event:hover,
+.cw-pill:hover {
+  background: color-mix(in srgb, var(--cal, var(--accent)) 24%, var(--tint-base));
+}
+.cw-time {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 11px;
+  color: var(--text-2);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.cw-clash {
+  flex: none;
+  color: var(--danger);
+}
+.cw-title {
+  font-size: var(--fs-2);
+  font-weight: 600;
+  line-height: 1.3;
+  color: var(--text);
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  overflow-wrap: anywhere;
+}
+.cw-loc {
+  display: flex;
+  align-items: center;
+  gap: 3px;
+  font-size: 11px;
+  color: var(--text-3);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.cw-loc svg {
+  flex: none;
+}
+.cw-go {
+  position: absolute;
+  top: 6px;
+  right: 6px;
+  color: var(--cal-strong);
+  opacity: 0;
+  transition: opacity var(--fast) var(--ease);
+}
+.cw-event:hover .cw-go {
+  opacity: 1;
+}
+/* Already over: dimmed. Happening now: an accent ring. */
+/* Finished events: softer solid colors (not transparency, which blends differently mid-animation). */
+.cw-event.past {
+  --cal-tint: color-mix(in srgb, var(--cal, var(--accent)) 7%, var(--tint-base));
+  --cal-strong: color-mix(in srgb, var(--cal, var(--accent)) 45%, var(--tint-base));
+}
+.cw-event.past .cw-title,
+.cw-event.past .cw-time,
+.cw-event.past .cw-loc {
+  color: var(--text-3);
+}
+.cw-event.live {
+  box-shadow: 0 0 0 1.5px color-mix(in srgb, var(--accent) 55%, transparent);
+}
+.cw-now {
+  position: relative;
+  height: 2px;
+  margin: 2px 0;
+  border-radius: 1px;
+  background: var(--accent);
+}
+.cw-now::before {
+  content: "";
+  position: absolute;
+  left: -3px;
+  top: -3px;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--accent);
+}
+.cw-more {
+  align-self: flex-start;
+  font-size: var(--fs-1);
+  font-weight: 600;
+  color: var(--accent-text);
+  padding: 2px 6px;
+  border-radius: var(--r-1);
+}
+.cw-more:hover {
+  background: var(--hover);
+}
+
+.cw-key {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--text-3);
+  white-space: nowrap;
+}
+.cw-key::before {
+  content: "";
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--cal, var(--accent));
+}
+
+/* Narrow: one row per day instead of seven squeezed columns. */
+@container (max-width: 760px) {
+  .cw {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 4px;
+  }
+  .cw-day {
+    display: grid;
+    grid-template-columns: 112px minmax(0, 1fr);
+    column-gap: var(--s-3);
+    align-items: start;
+  }
+  .cw-head {
+    grid-row: span 2;
+    flex-wrap: wrap;
+  }
+
+  .cw-allday,
+  .cw-list {
+    grid-column: 2;
+  }
+}
+/* Pinned emails on Home sit on the same soft tint as weekend days in the calendar. */
+.hitem.pinned {
+  background: color-mix(in srgb, var(--text) 2.5%, transparent);
+}
+.hitem.pinned + .hitem.pinned {
+  margin-top: 4px;
+}
+.hitem.pinned:hover {
+  background: color-mix(in srgb, var(--text) 5%, transparent);
+}
+/* ---------- calendar: join links, header buttons, month view ---------- */
+.cw-event {
+  cursor: default;
+}
+.cw-join {
+  align-self: flex-start;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  margin-top: 3px;
+  padding: 1px 7px 1px 5px;
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--cal-strong);
+  background: color-mix(in srgb, var(--cal, var(--accent)) 18%, var(--surface));
+}
+.cw-event:hover .cw-join {
+  background: var(--cal-strong);
+  color: white;
+}
+button.cw-go {
+  display: grid;
+  place-items: center;
+  width: 20px;
+  height: 20px;
+  top: 4px;
+  right: 4px;
+  border-radius: var(--r-1);
+}
+button.cw-go:hover {
+  background: color-mix(in srgb, var(--cal, var(--accent)) 22%, var(--tint-base));
+}
+.cw-event:focus-within .cw-go {
+  opacity: 1;
+}
+.cw-toggle {
+  height: 26px;
+  padding: 0 var(--s-2);
+  font-size: var(--fs-1);
+}
+.cw-toggle.on {
+  background: var(--accent-soft);
+  color: var(--accent-text);
+}
+.cm-nav {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: var(--s-1) 0 var(--s-2);
+}
+.cm-nav h4 {
+  margin: 0 var(--s-1);
+  font-size: var(--fs-4);
+  font-weight: 650;
+  min-width: 150px;
+  text-align: center;
+}
+.cm-today {
+  height: 26px;
+  font-size: var(--fs-1);
+  margin-left: var(--s-1);
+}
+.cm-grid {
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  gap: 4px;
+}
+.cm-dow {
+  font-size: 11px;
+  font-weight: 650;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--text-3);
+  padding: 0 6px 2px;
+}
+.cm-cell {
+  min-height: 96px;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 4px 4px 6px;
+  border-radius: var(--r-1);
+  border-top: 1px solid var(--border);
+}
+.cm-cell.weekend {
+  background: color-mix(in srgb, var(--text) 2.5%, transparent);
+}
+.cm-cell.other {
+  opacity: 0.45;
+}
+.cm-num {
+  align-self: flex-start;
+  min-width: 22px;
+  height: 22px;
+  display: inline-grid;
+  place-items: center;
+  border-radius: 11px;
+  font-size: var(--fs-2);
+  font-weight: 650;
+  color: var(--text-2);
+  margin-bottom: 2px;
+}
+.cm-cell.today .cm-num {
+  background: var(--accent);
+  color: var(--accent-ink);
+  padding: 0 5px;
+}
+.cm-ev {
+  --cal-strong: color-mix(in oklab, var(--cal, var(--accent)) 78%, black);
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  min-width: 0;
+  padding: 1px 4px;
+  border-radius: 4px;
+  font-size: 11.5px;
+  text-align: left;
+  transition: background var(--fast) var(--ease);
+}
+.cm-ev::before {
+  content: "";
+  flex: none;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--cal-strong);
+}
+.cm-ev.allday {
+  background: color-mix(in srgb, var(--cal, var(--accent)) 16%, var(--tint-base));
+  font-weight: 600;
+}
+.cm-ev.allday::before {
+  display: none;
+}
+.cm-ev:hover {
+  background: color-mix(in srgb, var(--cal, var(--accent)) 20%, var(--tint-base));
+}
+.cm-ev.past {
+  --cal-strong: color-mix(in srgb, var(--cal, var(--accent)) 45%, var(--tint-base));
+  color: var(--text-3);
+}
+.cm-ev.past.allday {
+  background: color-mix(in srgb, var(--cal, var(--accent)) 8%, var(--tint-base));
+}
+.cm-t {
+  flex: none;
+  color: var(--text-3);
+}
+.cm-title {
+  flex: 1;
+  min-width: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.cm-video {
+  flex: none;
+  color: var(--cal-strong);
+}
+.cm-more {
+  align-self: flex-start;
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--accent-text);
+  padding: 0 4px;
+  border-radius: 4px;
+}
+.cm-more:hover {
+  background: var(--hover);
+}
+:root[data-theme="dark"] .cm-ev,
+:root[data-theme="dark"] .cw-join {
+  --cal-strong: var(--cal, var(--accent));
+}
+
+/* ---------- ask your inbox ---------- */
+.ask {
+  top: 14%;
+  transform: translate(-50%, 0);
+  width: min(640px, calc(100vw - 32px));
+  overflow: hidden;
+  animation: fade var(--med) var(--ease);
+}
+.ask.closing {
+  animation: fade-out var(--fast-out) var(--ease-in) forwards;
+}
+.ask-bar {
+  display: flex;
+  align-items: center;
+  gap: var(--s-2);
+  padding: 0 var(--s-3) 0 var(--s-4);
+  border-bottom: 1px solid var(--border);
+}
+.ask-bar input {
+  flex: 1;
+  height: 54px;
+  border: 0;
+  outline: 0;
+  background: transparent;
+  font-size: var(--fs-4);
+  min-width: 0;
+}
+.ask-spark {
+  color: var(--accent-text);
+  flex: none;
+}
+.ask-body {
+  padding: var(--s-4) var(--s-5) var(--s-5);
+  max-height: min(520px, calc(100vh - 220px));
+  overflow-y: auto;
+}
+.ask-empty {
+  padding: var(--s-4) 0;
+  font-size: var(--fs-3);
+}
+.ask-empty p {
+  margin: 0 0 var(--s-3);
+}
+.ask-answer {
+  margin: 0 0 var(--s-4);
+  font-size: 15px;
+  line-height: 1.6;
+  user-select: text;
+}
+.ask-cite {
+  display: inline-grid;
+  place-items: center;
+  min-width: 18px;
+  height: 18px;
+  margin: 0 2px;
+  padding: 0 4px;
+  border-radius: 9px;
+  font-size: 11px;
+  font-weight: 700;
+  vertical-align: 2px;
+  background: var(--accent-soft);
+  color: var(--accent-text);
+}
+.ask-cite:hover {
+  background: var(--accent);
+  color: var(--accent-ink);
+}
+.ask-sources {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  border-top: 1px solid var(--border);
+  padding-top: var(--s-2);
+}
+.ask-source {
+  display: flex;
+  align-items: center;
+  gap: var(--s-3);
+  padding: 6px var(--s-2);
+  border-radius: var(--r-1);
+  text-align: left;
+}
+.ask-source:hover {
+  background: var(--hover);
+}
+.ask-n {
+  flex: none;
+  width: 20px;
+  height: 20px;
+  border-radius: 10px;
+  display: grid;
+  place-items: center;
+  font-size: 11px;
+  font-weight: 700;
+  background: var(--surface-3);
+  color: var(--text-2);
+}
+.ask-src-text {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+.ask-src-text b,
+.ask-src-text small {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.ask-src-text b {
+  font-size: var(--fs-2);
+  font-weight: 600;
+}
+.ask-src-text small {
+  font-size: var(--fs-1);
+  color: var(--text-3);
+}
+.ask-examples {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 4px;
+}
+.ask-example {
+  padding: 6px var(--s-3);
+  border-radius: 999px;
+  border: 1px solid var(--border-strong);
+  font-size: var(--fs-2);
+  color: var(--text-2);
+}
+.ask-example:hover {
+  border-color: var(--accent);
+  color: var(--accent-text);
+}
+.ask-note {
+  margin: var(--s-3) 0 0;
+  font-size: var(--fs-1);
+  line-height: 1.5;
+}
+
+/* ---------- send check ---------- */
+.send-check {
+  margin: 0 var(--s-4) var(--s-2);
+  padding: var(--s-3) var(--s-4);
+  border-radius: var(--r-2);
+  background: color-mix(in srgb, #f5a524 12%, var(--surface));
+  border: 1px solid color-mix(in srgb, #f5a524 40%, transparent);
+  animation: fade var(--med) var(--ease);
+}
+.send-check-title {
+  font-weight: 650;
+  font-size: var(--fs-2);
+  margin-bottom: 4px;
+}
+.send-check ul {
+  margin: 0 0 var(--s-3);
+  padding-left: 18px;
+  font-size: var(--fs-2);
+  line-height: 1.5;
+}
+.send-check-actions {
+  display: flex;
+  align-items: center;
+  gap: var(--s-2);
+}
+.send-check-actions .sp {
+  flex: 1;
+}
+/* ---------- calendar: week ⇄ month transition ---------- */
+.cal-swap {
+  overflow: hidden;
+}
+
+/* The week ⇄ month morph itself is driven from Home.tsx (toggleCalendarView / useArrival). */
+
+:root[data-theme="dark"] .cw-event.past {
+  --cal-tint: color-mix(in srgb, var(--cal, var(--accent)) 9%, var(--tint-base));
+  --cal-strong: color-mix(in srgb, var(--cal, var(--accent)) 50%, var(--tint-base));
+}
+/* A newly pinned email opens up its row in the Pinned list and fades in. */
+@media (prefers-reduced-motion: no-preference) {
+  .hitem.pin-new {
+    animation: grow-in var(--emphasis) var(--ease-move) both;
+    overflow: hidden;
+  }
+}
+
+/* ---------- the AI assistant acting on conversations (AskAction.tsx) ---------- */
+.ask-act {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-3);
+  animation: fade var(--fast) var(--ease);
+}
+.ask-act .ask-sources {
+  max-height: 320px;
+  overflow: auto;
+}
+.ask-pick {
+  display: flex;
+  align-items: center;
+  gap: var(--s-3);
+  padding: 6px var(--s-2);
+  border-radius: var(--r-1);
+}
+.ask-pick:hover {
+  background: var(--hover);
+}
+.ask-pick input {
+  flex: none;
+  accent-color: var(--accent);
+}
+.ask-pick .ask-src-text {
+  flex: 1;
+  text-align: left;
+}
+label.ask-pick {
+  cursor: pointer;
+}
+.ask-act-bar {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: var(--s-3);
+  font-size: var(--fs-2);
+}
+.ask-act-bar .error {
+  margin-right: auto;
+}
+.ask-done {
+  color: var(--accent-text);
+  font-weight: 500;
+}
+
+/* What the assistant works on: the open email or the whole inbox (Ask.tsx). */
+.ask-scope {
+  display: flex;
+  align-items: center;
+  gap: var(--s-3);
+  padding: var(--s-2) var(--s-4);
+  border-bottom: 1px solid var(--border);
+  min-width: 0;
+}
+.ask-scope .seg button {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+.ask-scope .seg button:disabled {
+  opacity: 0.45;
+}
+.ask-scope-subject {
+  min-width: 0;
+  font-size: var(--fs-2);
+  color: var(--text-2);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.ask-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--s-2);
+}
+.ask-chips .ask-example {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}

@@ -1,0 +1,402 @@
+/* Dragging mail, sidebar sections, list details and motion. */
+
+/* ---------- drag an email onto the sidebar to add a sender section ---------- */
+.sidebar {
+  position: relative;
+}
+/* While dragging an email, a collapsed sidebar slides out so there's somewhere to drop it. */
+body.dragging-mail .sidebar {
+  width: 216px;
+}
+body.dragging-mail .sidebar-inner {
+  border-radius: var(--r-3);
+  outline: 1px dashed var(--border-strong);
+  outline-offset: -4px;
+}
+.sidebar.drop-over .sidebar-inner {
+  outline-color: var(--accent);
+  background: color-mix(in srgb, var(--accent) 6%, transparent);
+}
+.sidebar.drop-over::after {
+  content: attr(data-drop-label);
+  white-space: nowrap;
+}
+.nav-group {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.nav-item.sender {
+  cursor: default;
+  gap: var(--s-2);
+  padding-left: 10px;
+}
+.nav-label {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+.nav-item.sender .count {
+  margin-left: 0;
+}
+.avatar.xs {
+  width: 20px;
+  height: 20px;
+  font-size: 9px;
+}
+.nav-x {
+  display: none;
+  place-items: center;
+  width: 20px;
+  height: 20px;
+  margin-right: -4px;
+  border-radius: var(--r-1);
+  color: var(--text-2);
+}
+.nav-x:hover {
+  background: var(--hover);
+  color: var(--text);
+}
+.nav-item.sender:hover .nav-x,
+.nav-x:focus-visible {
+  display: grid;
+}
+.nav-item.sender:hover .count {
+  display: none;
+}
+
+/* ---------- link address preview (like a browser's status bubble) ---------- */
+.link-status {
+  position: fixed;
+  z-index: 60;
+  max-width: min(640px, 60vw);
+  padding: 4px var(--s-2);
+  border-radius: var(--r-1);
+  background: var(--surface);
+  color: var(--text-2);
+  border: 1px solid var(--border-strong);
+  box-shadow: var(--shadow-1);
+  font-size: var(--fs-1);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  pointer-events: none;
+  animation: fade var(--fast) var(--ease);
+}
+/* ---------- date groups in the inbox list ---------- */
+.list-group {
+  position: absolute;
+  left: 0;
+  right: 0;
+  height: 30px;
+  padding: 10px var(--s-3) 0 var(--s-5);
+  margin: 0 6px;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--text-3);
+  pointer-events: none;
+}
+
+/* ---------- home: date heading, customize at the bottom ---------- */
+
+.home-bar {
+  padding: var(--s-3) var(--s-1) var(--s-3);
+}
+/* Home fills the pane so this footer rests at the bottom when the sections don't fill it. */
+.home {
+  display: flex;
+  flex-direction: column;
+}
+.home-foot {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--s-3);
+  margin-top: auto;
+  padding: var(--s-6) var(--s-1) 0;
+}
+.home-ai-bar {
+  position: relative;
+  width: 96px;
+  height: 4px;
+  border-radius: 2px;
+  background: var(--border-strong);
+  overflow: hidden;
+  margin: 0 2px;
+  flex: none;
+}
+.home-ai-bar > span {
+  position: absolute;
+  inset: 0 auto 0 0;
+  border-radius: 2px;
+  background: var(--accent);
+  transition: width var(--slow) var(--ease-move);
+}
+.home-ai-bar.capped > span {
+  background: var(--danger);
+}
+.home-ai {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: var(--fs-1);
+  color: var(--text-3);
+  padding: 4px var(--s-2);
+  border-radius: var(--r-1);
+  transition: color var(--fast) var(--ease), background var(--fast) var(--ease);
+}
+.home-ai:hover {
+  color: var(--text-2);
+  background: var(--hover);
+}
+.home-rows {
+  margin-top: var(--s-4);
+}
+/* ---------- an open message's header sits on a soft band, apart from the email itself ---------- */
+.msg:not(.collapsed) > .msg-head {
+  background: var(--surface-2);
+  padding: var(--s-3);
+  margin: var(--s-2) calc(-1 * var(--s-3)) var(--s-4);
+}
+:root[data-theme="dark"] .msg:not(.collapsed) > .msg-head {
+  background: var(--surface-3);
+}
+/* ---------- back to top (inbox) ---------- */
+.to-top {
+  animation: fade var(--med) var(--ease);
+}
+/* ---------- sidebar sections: groups and AI categories ---------- */
+.nav-item.sender.drop-over {
+  background: var(--accent-soft);
+  box-shadow: inset 0 0 0 1.5px var(--accent);
+  color: var(--accent-text);
+}
+.sec-icon {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  flex: none;
+  background: var(--avatar-bg);
+  color: var(--avatar-ink);
+}
+.sec-icon.ai {
+  background: var(--accent-soft);
+  color: var(--accent-text);
+}
+.sec-stack {
+  display: flex;
+  flex: none;
+  width: 26px;
+}
+.sec-stack .avatar.xs {
+  width: 16px;
+  height: 16px;
+  font-size: 7px;
+  box-shadow: 0 0 0 1.5px var(--chrome);
+}
+.sec-stack .avatar.xs + .avatar.xs {
+  margin-left: -6px;
+  margin-top: 4px;
+}
+.group-pop {
+  width: 300px;
+}
+.menu-item.two-line {
+  height: auto;
+  min-height: 44px;
+  padding-top: 6px;
+  padding-bottom: 6px;
+  align-items: center;
+}
+.menu-item .ml {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+.menu-item .ml small {
+  color: var(--text-3);
+  font-size: var(--fs-1);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.menu-item:disabled {
+  opacity: 0.55;
+}
+.menu-item:disabled:hover {
+  background: none;
+}
+.section-editor {
+  width: min(460px, calc(100vw - 32px));
+  padding: var(--s-5) var(--s-5) var(--s-4);
+}
+.section-editor h3 {
+  margin: 0 0 var(--s-4);
+  font-size: var(--fs-4);
+}
+.section-editor .field > span {
+  font-size: var(--fs-2);
+  font-weight: 550;
+  color: var(--text-2);
+}
+.section-editor .field small {
+  font-size: var(--fs-1);
+  line-height: 1.45;
+}
+.rule-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+.rule-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: var(--fs-2);
+  padding: 3px 4px 3px 10px;
+  border-radius: 999px;
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  max-width: 100%;
+}
+.rule-chip button {
+  display: grid;
+  place-items: center;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  color: var(--text-3);
+}
+.rule-chip button:hover {
+  background: var(--hover);
+  color: var(--text);
+}
+.editor-actions {
+  display: flex;
+  gap: var(--s-2);
+  align-items: center;
+  margin-top: var(--s-2);
+}
+.editor-actions .sp {
+  flex: 1;
+}
+/* Dragging a sidebar section onto Home. */
+body.dragging-section .read-pane.bare.drop-over::after {
+  content: "Drop to add to Home";
+}
+.hmore {
+  display: block;
+  margin: var(--s-1) var(--s-2) 0;
+  padding: 4px 0;
+  font-size: var(--fs-2);
+  color: var(--accent-text);
+  font-weight: 550;
+}
+.hmore:hover {
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+.hitem.unread b {
+  font-weight: 700;
+}
+.section-editor .ai-describe {
+  border-top: 1px solid var(--border);
+  padding-top: var(--s-4);
+}
+.section-editor .how {
+  display: flex;
+  gap: var(--s-3);
+  align-items: flex-start;
+  margin: calc(-1 * var(--s-2)) 0 var(--s-4);
+  padding: var(--s-3);
+  border-radius: var(--r-2);
+  background: var(--surface-2);
+  color: var(--text-2);
+  font-size: var(--fs-2);
+  line-height: 1.5;
+}
+.section-editor .how svg {
+  flex: none;
+  margin-top: 2px;
+  color: var(--accent-text);
+}
+.section-editor .how p {
+  margin: 0;
+}
+.section-editor .how b {
+  color: var(--text);
+  font-weight: 600;
+}
+/* ---------- motion: groups appearing, changing and leaving; modules on Home ---------- */
+/* An email dropped on a target fades out where it was let go (mailDrag.ts). */
+.mail-ghost.landing {
+  animation: fade-out var(--med-out) var(--ease-in) forwards;
+}
+@media (prefers-reduced-motion: no-preference) {
+  /* A new section opens up its row and fades in, with one soft tint. */
+  .nav-item.sender.sec-new {
+    animation:
+      grow-in var(--emphasis) var(--ease-move) both,
+      soft-tint var(--highlight) var(--ease);
+    overflow: hidden;
+  }
+  .nav-item.sender.sec-new-quiet {
+    animation: grow-in var(--emphasis) var(--ease-move) both;
+    overflow: hidden;
+  }
+  /* Grouped, re-described or given a new example: the same soft tint, nothing else. */
+  .nav-item.sender.sec-changed {
+    animation: soft-tint var(--highlight) var(--ease);
+  }
+  .nav-item.sender.sec-leaving {
+    animation: shrink-away var(--slow-out) var(--ease-in) forwards;
+    overflow: hidden;
+    pointer-events: none;
+  }
+  /* Home modules fade in and out; a new or changed one tints its header line once. */
+  .hcard.hcard-new,
+  .hcard.hcard-new-quiet {
+    animation: fade var(--slow) var(--ease) both;
+  }
+  .hcard.hcard-leaving {
+    animation: fade-out var(--slow-out) var(--ease-in) forwards;
+    pointer-events: none;
+  }
+  .hcard.hcard-new header,
+  .hcard.hcard-changed header {
+    animation: line-tint var(--highlight) var(--ease);
+  }
+}
+/* Opening up to, or closing from, natural height (with interpolate-size on :root). */
+@keyframes grow-in {
+  from {
+    opacity: 0;
+    height: 0;
+    padding-block: 0;
+  }
+}
+@keyframes shrink-away {
+  to {
+    opacity: 0;
+    height: 0;
+    padding-block: 0;
+  }
+}
+/* The one highlight for something new or changed: a soft tint that settles away. */
+@keyframes soft-tint {
+  25% {
+    background: var(--accent-soft);
+  }
+}
+@keyframes line-tint {
+  25% {
+    border-bottom-color: color-mix(in srgb, var(--accent) 60%, var(--border));
+  }
+}
+
