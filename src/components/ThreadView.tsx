@@ -41,6 +41,7 @@ import { Avatar } from "./Avatar";
 import { TimePicker } from "./TimePicker";
 import { Composer } from "./Composer";
 import { Popover } from "./Popover";
+import { TextSizeMenuRow } from "./EmailFrame";
 import { Highlight } from "./Highlight";
 import { ScheduledView } from "./Scheduled";
 import { CopyAddress, MessageCard, SenderCard, SourceView } from "./Message";
@@ -559,6 +560,12 @@ function ThreadDetailView() {
           {single && last && (
             <>
               <div className="menu-sep" />
+              {last.html && (
+                <>
+                  <TextSizeMenuRow messageId={last.id} />
+                  <div className="menu-sep" />
+                </>
+              )}
               <button className="menu-item" onClick={() => { setMoreAnchor(null); A.printMessage(last); }}>
                 <Printer size={15} /> Print
               </button>

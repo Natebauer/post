@@ -25,7 +25,7 @@ import { fromComposeData, newDraft, openCompose } from "../compose";
 import { useDialogFocus, usePresence } from "../hooks";
 import { cx, displayName, linkify, longDate, relativeAgo, shortDate } from "../util";
 import { Avatar } from "./Avatar";
-import { EmailFrame } from "./EmailFrame";
+import { EmailFrame, TextSizeMenuRow } from "./EmailFrame";
 import { Attachments } from "./Attachments";
 import { Popover } from "./Popover";
 import { Highlight } from "./Highlight";
@@ -238,7 +238,17 @@ export function SenderCard({ m, children }: { m: Message; children: React.ReactN
   );
 }
 
-function MessageMenu({ m, anchor, onClose, onSource }: { m: Message; anchor: HTMLElement; onClose: () => void; onSource: () => void }) {
+function MessageMenu({
+  m,
+  anchor,
+  onClose,
+  onSource,
+}: {
+  m: Message;
+  anchor: HTMLElement;
+  onClose: () => void;
+  onSource: () => void;
+}) {
   const go = (f: () => void) => () => {
     onClose();
     f();
@@ -253,6 +263,12 @@ function MessageMenu({ m, anchor, onClose, onSource }: { m: Message; anchor: HTM
         <Forward size={15} /> Forward
       </button>
       <div className="menu-sep" />
+      {m.html && (
+        <>
+          <TextSizeMenuRow messageId={m.id} />
+          <div className="menu-sep" />
+        </>
+      )}
       <button className="menu-item" onClick={go(() => A.printMessage(m))}>
         <Printer size={15} /> Print
       </button>

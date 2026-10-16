@@ -1,4 +1,5 @@
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { create } from "zustand";
 import { openUrl } from "@tauri-apps/plugin-opener";
 import type { Attachment } from "../api";
 import { useStore } from "../store";
@@ -109,6 +110,69 @@ function saveScale(id: string, scale: number | null) {
   } catch {
     /* storage unavailable: the choice lasts until the email closes */
   }
+}
+
+/** Text sizes shared by the email and its ⋯ menu: the ones you picked, and Post's automatic fixes. */
+const useScales = create<{ chosen: Record<string, number>; auto: Record<string, number> }>(() => ({ chosen: loadScales(), auto: {} }));
+
+export type TextScale = ReturnType<typeof useTextScale>;
+
+/** An email's text size: the one you picked (remembered per email), else Post's automatic fix. */
+export function useTextScale(messageId: string) {
+  const chosen = useScales((s) => s.chosen[messageId] ?? null);
+  // The automatic fix EmailFrame measured for this email (1 when none is needed).
+  const auto = useScales((s) => s.auto[messageId] ?? 1);
+  const scale = chosen ?? auto;
+  const setAuto = useCallback(
+    (a: number) => useScales.setState((s) => (s.auto[messageId] === a ? s : { auto: { ...s.auto, [messageId]: a } })),
+    [messageId],
+  );
+  const choose = (v: number | null) => {
+    useScales.setState((s) => {
+      const next = { ...s.chosen };
+      if (v === null) delete next[messageId];
+      else next[messageId] = v;
+      return { chosen: next };
+    });
+    saveScale(messageId, v);
+  };
+  const step = (dir: 1 | -1) => {
+    const next = dir > 0 ? SCALE_STEPS.find((x) => x > scale + 0.001) : [...SCALE_STEPS].reverse().find((x) => x < scale - 0.001);
+    if (next !== undefined) choose(next);
+  };
+  return { chosen, auto, setAuto, scale, choose, step };
+}
+
+/** A ⋯ menu row with smaller / size / larger buttons; the size in the middle resets. */
+export function TextSizeMenuRow({ messageId }: { messageId: string }) {
+  const { chosen, auto, scale, choose, step } = useTextScale(messageId);
+  return (
+    <div className="menu-item menu-row">
+      <Type size={15} /> Text size
+      <div className="text-size" role="group" aria-label="Text size for this email">
+        <button className="icon-btn sm" title="Smaller text" aria-label="Smaller text" disabled={scale <= SCALE_STEPS[0]} onClick={() => step(-1)}>
+          <AArrowDown size={15} />
+        </button>
+        <button
+          className="link-btn text-size-value"
+          title={chosen === null ? "Show original size" : auto !== 1 ? "Let Post pick a readable size" : "Reset to original size"}
+          disabled={chosen === null && auto === 1}
+          onClick={() => choose(chosen === null ? 1 : null)}
+        >
+          {Math.round(scale * 100)}%
+        </button>
+        <button
+          className="icon-btn sm"
+          title="Larger text"
+          aria-label="Larger text"
+          disabled={scale >= SCALE_STEPS[SCALE_STEPS.length - 1]}
+          onClick={() => step(1)}
+        >
+          <AArrowUp size={15} />
+        </button>
+      </div>
+    </div>
+  );
 }
 
 /** One element's own text, with the inline sizes it came with so they can be put back. */
@@ -228,7 +292,7 @@ export function EmailFrame({
   /** The sender's address, for "always show images from this sender". */
   sender?: string;
   /** Which email this is, so its text size is remembered. */
-  messageId?: string;
+  messageId: string;
 }) {
   const ref = useRef<HTMLIFrameElement>(null);
   const settings = useStore((s) => s.settings);
@@ -246,22 +310,11 @@ export function EmailFrame({
   const [showImages, setShowImages] = useState(false);
   useEffect(() => setShowImages(false), [html]);
   const trusted = !!sender && (settings?.imageSenders ?? []).includes(sender.toLowerCase());
-  // Text size: the one you picked for this email, else Post's automatic fix (1 when none is needed).
-  const [chosen, setChosen] = useState<number | null>(() => (messageId ? loadScales()[messageId] ?? null : null));
-  const [auto, setAuto] = useState(1);
-  const scale = chosen ?? auto;
+  const { chosen, auto, setAuto, scale, choose } = useTextScale(messageId);
   const chosenRef = useRef(chosen);
   chosenRef.current = chosen;
   const rescale = useRef<((s: number) => void) | null>(null);
   useEffect(() => rescale.current?.(scale), [scale]);
-  const choose = (s: number | null) => {
-    setChosen(s);
-    if (messageId) saveScale(messageId, s);
-  };
-  const step = (dir: 1 | -1) => {
-    const next = dir > 0 ? SCALE_STEPS.find((x) => x > scale + 0.001) : [...SCALE_STEPS].reverse().find((x) => x < scale - 0.001);
-    if (next !== undefined) choose(next);
-  };
   const blockRemote = !(settings?.remoteImages ?? true) && !trusted && !showImages;
 
   const prepared = useMemo(() => prepareEmail(resolveCids(html, attachments), blockRemote), [html, attachments, blockRemote]);
@@ -480,41 +533,13 @@ export function EmailFrame({
           {hover.text}
         </div>
       )}
-      <div className="frame-tools">
-        <div className={scale !== 1 ? "text-size changed" : "text-size"} role="group" aria-label="Text size for this email">
-          <button
-            className="icon-btn sm"
-            title="Smaller text"
-            aria-label="Smaller text"
-            disabled={scale <= SCALE_STEPS[0]}
-            onClick={() => step(-1)}
-          >
-            <AArrowDown size={15} />
-          </button>
-          <button
-            className="link-btn text-size-value"
-            title={chosen === null ? "Show original size" : auto !== 1 ? "Let Post pick a readable size" : "Reset to original size"}
-            disabled={chosen === null && auto === 1}
-            onClick={() => choose(chosen === null ? 1 : null)}
-          >
-            {Math.round(scale * 100)}%
-          </button>
-          <button
-            className="icon-btn sm"
-            title="Larger text"
-            aria-label="Larger text"
-            disabled={scale >= SCALE_STEPS[SCALE_STEPS.length - 1]}
-            onClick={() => step(1)}
-          >
-            <AArrowUp size={15} />
-          </button>
-        </div>
-        {dark && (settings?.emailDarkMode ?? true) && (
+      {dark && (settings?.emailDarkMode ?? true) && (
+        <div className="frame-tools">
           <button className="link-btn" onClick={() => setOriginal((o) => !o)}>
             {original ? "Use dark colors" : "Show original colors"}
           </button>
-        )}
-      </div>
+        </div>
+      )}
     </div>
   );
 }
