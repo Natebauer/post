@@ -688,3 +688,10 @@ body {
   flex: none;
   filter: drop-shadow(0 1px 1px color-mix(in srgb, var(--shadow-ink) 18%, transparent));
 }
+/* ---------- changing the look ---------- */
+/* Picking a mood, accent or theme cross-fades the whole window from the old colors (theme.ts). */
+::view-transition-old(root),
+::view-transition-new(root) {
+  animation-duration: 240ms;
+  animation-timing-function: var(--ease-move);
+}

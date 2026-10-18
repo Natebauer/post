@@ -1,6 +1,7 @@
 import { getCurrentWindow } from "@tauri-apps/api/window";
 import type { Settings } from "./api";
 import { applyMood, moodById } from "./moods";
+import { reduceMotion } from "./motionTokens";
 
 /** Post's teal, the app icon's color. */
 export const DEFAULT_ACCENT = "#2a737b";
@@ -23,6 +24,7 @@ export function applyTheme(s: Settings | null) {
   // When the look changes, every color switches together (no hover colors trailing behind; see
   // 01-base.css). Other settings re-apply the theme too, and leave motion alone.
   const look = `${t}|${s?.mood ?? ""}|${s?.accent ?? ""}`;
+  const changed = look !== lastLook && !!lastLook;
   if (look !== lastLook) {
     if (lastLook) {
       root.classList.add("theme-switching");
@@ -30,6 +32,14 @@ export function applyTheme(s: Settings | null) {
     }
     lastLook = look;
   }
+  // A new look cross-fades from the old one (a view transition), unless motion is reduced.
+  const doc = document as Document & { startViewTransition?: (cb: () => void) => unknown };
+  if (changed && doc.startViewTransition && !reduceMotion()) doc.startViewTransition(() => paint(s, t));
+  else paint(s, t);
+}
+
+function paint(s: Settings | null, t: "light" | "dark") {
+  const root = document.documentElement;
   root.dataset.theme = t;
   applyMood(root, s?.mood, t);
   const accent = s?.accent || DEFAULT_ACCENT;
