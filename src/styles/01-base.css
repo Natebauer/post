@@ -217,14 +217,23 @@ select {
 a {
   color: var(--accent-text);
 }
+/* Search matches: a soft highlighter wash with a firmer stroke along the bottom, like a pen. */
 mark {
-  background: color-mix(in srgb, var(--mark) 45%, transparent);
+  background: color-mix(in srgb, var(--mark) 38%, transparent);
+  box-shadow: inset 0 -2px 0 color-mix(in srgb, var(--mark) 90%, transparent);
   color: inherit;
-  border-radius: 2px;
+  border-radius: 3px;
   padding: 0 1px;
+}
+:root[data-theme="dark"] mark {
+  background: color-mix(in srgb, var(--mark) 26%, transparent);
+  box-shadow: inset 0 -2px 0 color-mix(in srgb, var(--mark) 70%, transparent);
 }
 ::selection {
   background: color-mix(in srgb, var(--accent) 30%, transparent);
+}
+:root[data-theme="dark"] ::selection {
+  background: color-mix(in srgb, var(--accent) 42%, transparent);
 }
 :focus {
   outline: none;

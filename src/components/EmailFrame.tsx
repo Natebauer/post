@@ -257,7 +257,21 @@ const BASE_CSS = (dark: boolean) => `
   a { color: ${dark ? "#9db0ff" : "#3653d4"}; }
   blockquote { margin: 0 0 0 .8ex; border-left: 2px solid ${dark ? "#444" : "#ccc"}; padding-left: 1ex; }
   pre { white-space: pre-wrap; }
+  /* Selection and search matches look the same as in the rest of Post. */
+  ::selection { background: color-mix(in srgb, ${accentNow()} 30%, transparent); }
+  mark {
+    color: inherit;
+    background: color-mix(in srgb, #f5c542 ${dark ? 30 : 38}%, transparent);
+    box-shadow: inset 0 -2px 0 color-mix(in srgb, #f5c542 ${dark ? 75 : 90}%, transparent);
+    border-radius: 3px;
+    padding: 0 1px;
+  }
 `;
+
+/** The app's current accent color, for styles inside the email's own document. */
+function accentNow(): string {
+  return getComputedStyle(document.documentElement).getPropertyValue("--accent").trim() || "#2a737b";
+}
 
 /** Inline cid: images by pointing them at the attachment protocol. */
 function resolveCids(html: string, atts: Attachment[]) {
