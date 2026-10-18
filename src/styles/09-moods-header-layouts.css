@@ -130,7 +130,10 @@
 }
 /* ---------- settings: the scrim steps aside while the look is being adjusted ---------- */
 .scrim {
-  transition: opacity var(--med) var(--ease);
+  transition:
+    opacity var(--med) var(--ease),
+    backdrop-filter var(--med) var(--ease),
+    -webkit-backdrop-filter var(--med) var(--ease);
 }
 .scrim.peek {
   opacity: 0;

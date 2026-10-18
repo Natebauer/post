@@ -1115,9 +1115,11 @@ div.ob-check {
   -webkit-backdrop-filter: blur(6px) saturate(1.15);
   backdrop-filter: blur(6px) saturate(1.15);
 }
+/* Peeking at a mood: the blur eases away with the tint (a zero blur, not "none", so it can fade
+   back in too). */
 .scrim.peek {
-  -webkit-backdrop-filter: none;
-  backdrop-filter: none;
+  -webkit-backdrop-filter: blur(0px) saturate(1);
+  backdrop-filter: blur(0px) saturate(1);
 }
 
 /* ---------- command palette: icon tiles, key caps and a footer ---------- */
