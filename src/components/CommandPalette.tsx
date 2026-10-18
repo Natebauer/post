@@ -239,6 +239,7 @@ export function CommandPalette() {
     <>
       <div className={cx("scrim", closing && "closing")} onClick={close} />
       <div className={cx("modal palette", closing && "closing")} role="dialog" aria-label="Command palette">
+        <Search className="palette-search" size={17} aria-hidden />
         <input
           autoFocus
           value={q}
@@ -271,14 +272,25 @@ export function CommandPalette() {
                   onMouseMove={() => setActive(i)}
                   onClick={() => run(c)}
                 >
-                  {c.icon}
+                  <span className="pi">{c.icon}</span>
                   {c.label}
-                  {c.hint && <span className="hint">{c.hint}</span>}
+                  {c.hint && (
+                    <span className="hint keys">
+                      {c.hint.split(/(?<=\S)[ +](?=\S)/).map((k, j) => (
+                        <kbd key={j}>{k}</kbd>
+                      ))}
+                    </span>
+                  )}
                 </button>
               </Fragment>
             );
           })}
           {items.length === 0 && <div className="menu-label">No matching commands</div>}
+        </div>
+        <div className="palette-foot" aria-hidden>
+          <span><kbd>↑</kbd><kbd>↓</kbd> move</span>
+          <span><kbd>Enter</kbd> run</span>
+          <span><kbd>Esc</kbd> close</span>
         </div>
       </div>
     </>,

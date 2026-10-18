@@ -1119,3 +1119,71 @@ div.ob-check {
   -webkit-backdrop-filter: none;
   backdrop-filter: none;
 }
+
+/* ---------- command palette: icon tiles, key caps and a footer ---------- */
+.palette-search {
+  position: absolute;
+  left: var(--s-5);
+  top: 17px;
+  color: var(--text-3);
+  pointer-events: none;
+}
+.palette input {
+  padding-left: 48px;
+}
+.palette .menu-item {
+  height: 40px;
+  gap: var(--s-3);
+}
+.palette .pi {
+  width: 26px;
+  height: 26px;
+  flex: none;
+  display: grid;
+  place-items: center;
+  border-radius: var(--r-1);
+  background: var(--surface-2);
+  color: var(--text-2);
+}
+.palette .menu-item.active .pi {
+  background: var(--accent);
+  color: var(--accent-ink);
+}
+.palette .keys {
+  margin-left: auto;
+  display: flex;
+  gap: 3px;
+}
+.palette kbd,
+.palette-foot kbd {
+  font: inherit;
+  font-size: 11px;
+  font-weight: 600;
+  min-width: 20px;
+  height: 20px;
+  padding: 0 5px;
+  display: inline-grid;
+  place-items: center;
+  border-radius: 5px;
+  color: var(--text-2);
+  background: var(--surface);
+  border: 1px solid var(--border-strong);
+  border-bottom-width: 2px;
+}
+.palette-foot {
+  display: flex;
+  gap: var(--s-4);
+  padding: 8px var(--s-4);
+  border-top: 1px solid var(--border);
+  background: var(--surface-2);
+  font-size: var(--fs-1);
+  color: var(--text-3);
+}
+.palette-foot span {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+}
+.palette-foot kbd {
+  margin-right: 2px;
+}
