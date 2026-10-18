@@ -305,7 +305,7 @@ function Row({
           </span>
           <span className="row-icons">
             {t.hasAttachments && <Paperclip size={13} aria-hidden />}
-            {t.snoozedUntil && t.snoozedUntil > Date.now() && <span className="chip-snooze">{whenLabel(t.snoozedUntil)}</span>}
+            {t.snoozedUntil && t.snoozedUntil > Date.now() && <span className="chip-snooze"><AlarmClock size={11} aria-hidden />{whenLabel(t.snoozedUntil)}</span>}
           </span>
           <span className="row-date">{shortDate(t.date)}</span>
         </>
@@ -319,7 +319,7 @@ function Row({
           <span className="row-icons">
             {t.hasAttachments && <Paperclip size={13} aria-hidden />}
             {t.snoozedUntil && t.snoozedUntil > Date.now() && (
-              <span className="chip-snooze">{whenLabel(t.snoozedUntil)}</span>
+              <span className="chip-snooze"><AlarmClock size={11} aria-hidden />{whenLabel(t.snoozedUntil)}</span>
             )}
           </span>
           <span className="row-date">{shortDate(t.date)}</span>

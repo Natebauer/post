@@ -347,12 +347,18 @@
   opacity: 1;
   pointer-events: auto;
 }
+/* When a snoozed email comes back: a soft amber pill with a little clock. */
 .chip-snooze {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
   font-size: 11px;
-  color: var(--accent-text);
-  background: var(--accent-softer);
-  padding: 0 6px;
-  border-radius: 4px;
+  font-weight: 600;
+  color: color-mix(in srgb, #c98a12 80%, var(--text));
+  background: color-mix(in srgb, #e9a83a 16%, transparent);
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, #e9a83a 26%, transparent);
+  padding: 1px 7px 1px 5px;
+  border-radius: 999px;
   white-space: nowrap;
 }
 .empty {
