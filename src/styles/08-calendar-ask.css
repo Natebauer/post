@@ -17,7 +17,7 @@
   border-radius: var(--r-2);
 }
 .cw-day.weekend {
-  background: color-mix(in srgb, var(--text) 2.5%, transparent);
+  background: color-mix(in srgb, var(--text) 5%, transparent);
 }
 .cw-day.before .cw-name,
 .cw-day.before .cw-num {
@@ -232,7 +232,7 @@
     grid-column: 2;
   }
 }
-/* Pinned emails on Home sit on the same soft tint as weekend days in the calendar. */
+/* Pinned emails on Home sit on a soft tint, a little lighter than weekend days in the calendar. */
 .hitem.pinned {
   background: color-mix(in srgb, var(--text) 2.5%, transparent);
 }
@@ -329,7 +329,7 @@ button.cw-go:hover {
   border-top: 1px solid var(--border);
 }
 .cm-cell.weekend {
-  background: color-mix(in srgb, var(--text) 2.5%, transparent);
+  background: color-mix(in srgb, var(--text) 5%, transparent);
 }
 .cm-cell.other {
   opacity: 0.45;
