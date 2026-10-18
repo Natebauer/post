@@ -257,6 +257,26 @@
   font-weight: 650;
   color: var(--text);
 }
+/* Unread mail carries a faint glow of the accent from its left edge, fading out by mid-row, and
+   lets it go softly once read. */
+.row::before {
+  content: "";
+  position: absolute;
+  inset: 3px auto 3px 0;
+  width: 55%;
+  border-radius: var(--r-2) 0 0 var(--r-2);
+  background: linear-gradient(90deg, color-mix(in srgb, var(--accent) 9%, transparent), transparent);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity var(--slow) var(--ease);
+}
+.row.unread::before {
+  opacity: 1;
+}
+.row.selected::before,
+.row.checked::before {
+  opacity: 0;
+}
 .row .dot {
   width: 8px;
   height: 8px;
