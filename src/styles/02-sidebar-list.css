@@ -431,3 +431,20 @@
 .row.checked .row-actions {
   background: linear-gradient(var(--accent-softer), var(--accent-softer)), var(--surface);
 }
+
+/* First sync: how far the download has got. */
+.fetch-bar {
+  width: 200px;
+  height: 4px;
+  margin: var(--s-4) auto 0;
+  border-radius: 2px;
+  background: color-mix(in srgb, var(--accent) 14%, transparent);
+  overflow: hidden;
+}
+.fetch-bar span {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+  background: var(--accent);
+  transition: width var(--slow) var(--ease-move);
+}

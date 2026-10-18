@@ -333,8 +333,14 @@ function EmptyState() {
     return (
       <div className="empty">
         <div>
+          <EmptyArt kind="fetching" />
           <div className="big">Fetching your mail…</div>
           This first sync runs in the background.
+          {status.total > 0 && (
+            <div className="fetch-bar" role="progressbar" aria-valuenow={Math.round((status.backfilled / status.total) * 100)} aria-valuemin={0} aria-valuemax={100}>
+              <span style={{ width: `${Math.min(100, (status.backfilled / status.total) * 100)}%` }} />
+            </div>
+          )}
         </div>
       </div>
     );

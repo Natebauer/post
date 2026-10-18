@@ -5,7 +5,7 @@ import { api, errText } from "../api";
 import { useStore } from "../store";
 import { ACCENTS } from "../theme";
 import { cx } from "../util";
-import { WindowControls } from "./TitleBar";
+import { StampMark, WindowControls } from "./TitleBar";
 
 /*
  * First-run onboarding, in five steps (the dots at the top of each card):
@@ -19,13 +19,12 @@ import { WindowControls } from "./TitleBar";
 
 const STEPS = ["Welcome", "Connect", "Sign in", "Make it yours", "Tour"];
 
+/** The app icon's stamp, large, at the top of a setup card. */
 function Logo() {
   return (
-    <svg className="logo" viewBox="0 0 1024 1024" aria-hidden>
-      <rect x="64" y="64" width="896" height="896" rx="210" fill="var(--accent)" />
-      <rect x="236" y="318" width="552" height="388" rx="64" fill="none" stroke="#fff" strokeWidth="56" strokeLinejoin="round" />
-      <path d="M262 356 L512 540 L762 356" fill="none" stroke="#fff" strokeWidth="56" strokeLinecap="round" strokeLinejoin="round" />
-    </svg>
+    <span className="logo">
+      <StampMark size={52} />
+    </span>
   );
 }
 
@@ -33,6 +32,10 @@ function Frame({ children }: { children: React.ReactNode }) {
   return (
     <div className="app">
       <div className="titlebar" data-tauri-drag-region>
+        <div className="tb-brand" data-tauri-drag-region aria-hidden>
+          <StampMark />
+          <span data-tauri-drag-region>Post</span>
+        </div>
         <div className="drag" data-tauri-drag-region />
         <WindowControls />
       </div>

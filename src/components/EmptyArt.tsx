@@ -2,11 +2,19 @@
  * Small line drawings for empty lists. They draw in the text color with one accent detail, so
  * they follow the mood and theme.
  */
-export type EmptyKind = "inbox" | "snoozed" | "sent" | "drafts" | "trash" | "spam" | "search" | "scheduled";
+export type EmptyKind = "fetching" | "inbox" | "snoozed" | "sent" | "drafts" | "trash" | "spam" | "search" | "scheduled";
 
 const A = { stroke: "var(--accent)" };
 
 const ART: Record<EmptyKind, JSX.Element> = {
+  // An envelope arriving, with motion lines behind it.
+  fetching: (
+    <>
+      <rect x="34" y="30" width="46" height="34" rx="4" />
+      <path d="m35 32 22 17 22-17" />
+      <path d="M14 38h12M10 47h16M16 56h10" style={A} />
+    </>
+  ),
   // A sun rising over a quiet horizon: inbox zero.
   inbox: (
     <>

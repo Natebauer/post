@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useId, useRef, useState } from "react";
 import { getCurrentWindow } from "@tauri-apps/api/window";
 import { AlertCircle, Clock, CloudOff, Copy, Minus, PanelLeft, Search, Square, X } from "lucide-react";
 import { api, type Contact, type SyncStatus } from "../api";
@@ -267,12 +267,13 @@ export function TitleBar() {
   );
 }
 
-/** The app icon's stamp, small, in the current accent color so it follows the mood. */
-function StampMark() {
+/** The app icon's stamp, in the current accent color so it follows the mood. */
+export function StampMark({ size = 18 }: { size?: number }) {
+  const id = `stamp-perf-${useId().replace(/:/g, "")}`;
   const holes = [2, 6.5, 11, 15.5, 20];
   return (
-    <svg className="stamp" width="18" height="18" viewBox="0 0 22 22" data-tauri-drag-region>
-      <mask id="stamp-perf">
+    <svg className="stamp" width={size} height={size} viewBox="0 0 22 22" data-tauri-drag-region aria-hidden>
+      <mask id={id}>
         <rect width="22" height="22" fill="#fff" />
         {holes.map((p) => (
           <g key={p} fill="#000">
@@ -283,7 +284,7 @@ function StampMark() {
           </g>
         ))}
       </mask>
-      <rect x="1" y="1" width="20" height="20" fill="var(--accent)" mask="url(#stamp-perf)" />
+      <rect x="1" y="1" width="20" height="20" fill="var(--accent)" mask={`url(#${id})`} />
       <path fill="var(--accent-ink)" d="M9.3 16.3H6.9V6.9h3.9q1.1 0 1.9.3.8.3 1.3 1 .5.7.5 2 0 1.1-.5 1.9-.5.8-1.4 1.1-.9.4-1.9.4H9.3Zm0-7.2v2.4h1.4q.7 0 1.1-.3.4-.3.4-1 0-.5-.3-.8-.4-.3-1.2-.3Z" />
     </svg>
   );

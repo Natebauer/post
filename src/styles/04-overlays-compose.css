@@ -593,8 +593,10 @@ select.input {
   margin: 0 0 var(--s-3);
 }
 .logo {
-  width: 44px;
-  height: 44px;
+  display: inline-grid;
+  width: 52px;
+  height: 52px;
+  filter: drop-shadow(0 4px 10px color-mix(in srgb, var(--accent) 30%, transparent));
 }
 /* After a first sign-in: the optional extras (Setup.tsx Welcome). */
 .welcome-step {
