@@ -254,11 +254,37 @@ export function TitleBar() {
       >
         <PanelLeft size={17} />
       </button>
+      <div className="tb-brand" data-tauri-drag-region aria-hidden>
+        <StampMark />
+        <span data-tauri-drag-region>Post</span>
+      </div>
       <div className="drag" data-tauri-drag-region />
       <SearchBox />
       <div className="drag" data-tauri-drag-region />
       <SyncIndicator />
       <WindowControls />
     </header>
+  );
+}
+
+/** The app icon's stamp, small, in the current accent color so it follows the mood. */
+function StampMark() {
+  const holes = [2, 6.5, 11, 15.5, 20];
+  return (
+    <svg className="stamp" width="18" height="18" viewBox="0 0 22 22" data-tauri-drag-region>
+      <mask id="stamp-perf">
+        <rect width="22" height="22" fill="#fff" />
+        {holes.map((p) => (
+          <g key={p} fill="#000">
+            <circle cx={p} cy="1" r="1.15" />
+            <circle cx={p} cy="21" r="1.15" />
+            <circle cx="1" cy={p} r="1.15" />
+            <circle cx="21" cy={p} r="1.15" />
+          </g>
+        ))}
+      </mask>
+      <rect x="1" y="1" width="20" height="20" fill="var(--accent)" mask="url(#stamp-perf)" />
+      <path fill="var(--accent-ink)" d="M9.3 16.3H6.9V6.9h3.9q1.1 0 1.9.3.8.3 1.3 1 .5.7.5 2 0 1.1-.5 1.9-.5.8-1.4 1.1-.9.4-1.9.4H9.3Zm0-7.2v2.4h1.4q.7 0 1.1-.3.4-.3.4-1 0-.5-.3-.8-.4-.3-1.2-.3Z" />
+    </svg>
   );
 }
