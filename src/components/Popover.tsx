@@ -29,7 +29,7 @@ export function Popover({
   onMouseLeave?: () => void;
 }) {
   const ref = useRef<HTMLDivElement>(null);
-  const [pos, setPos] = useState<{ left: number; top: number } | null>(null);
+  const [pos, setPos] = useState<{ left: number; top: number; ox: number; oy: number } | null>(null);
   const [closing, setClosing] = useState(false);
 
   const close = useCallback(() => {
@@ -54,9 +54,20 @@ export function Popover({
     } else return;
     if (top < 8) top = 8;
     left = Math.max(8, Math.min(left, window.innerWidth - m.width - 8));
+    // It grows out of where it came from: the click, or the middle of the button's near edge.
+    let ox: number;
+    let oy: number;
+    if (point) {
+      ox = point.x - left;
+      oy = point.y - top;
+    } else {
+      const a = anchor!.getBoundingClientRect();
+      ox = a.left + a.width / 2 - left;
+      oy = a.top + a.height / 2 < top ? 0 : m.height;
+    }
     // Only update when it actually moved, so a caller passing a fresh `point` object each render
     // can't start a render loop.
-    setPos((prev) => (prev && prev.left === left && prev.top === top ? prev : { left, top }));
+    setPos((prev) => (prev && prev.left === left && prev.top === top ? prev : { left, top, ox, oy }));
   }, [anchor, point?.x, point?.y, align, placement]);
 
   useEffect(() => {
@@ -111,7 +122,7 @@ export function Popover({
       ref={ref}
       role={isMenu ? "menu" : "dialog"}
       className={cx("menu", closing && "closing", className)}
-      style={pos ? { left: pos.left, top: pos.top } : { left: -9999, top: -9999 }}
+      style={pos ? { left: pos.left, top: pos.top, transformOrigin: `${pos.ox}px ${pos.oy}px` } : { left: -9999, top: -9999 }}
       onMouseDown={(e) => e.stopPropagation()}
       onMouseEnter={onMouseEnter}
       onMouseLeave={onMouseLeave}
