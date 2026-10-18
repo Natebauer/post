@@ -32,6 +32,7 @@ import { Typography } from "../typography";
 import { motionMs, scrollBehavior } from "../motionTokens";
 import { checkBeforeSend, type SendIssue } from "../sendCheck";
 import { cx, escapeHtml, formatBytes, isValidEmail, sanitizeHtml } from "../util";
+import { flySend } from "../sendFly";
 import { RecipientField } from "./RecipientField";
 import { TimePicker } from "./TimePicker";
 import { WindowControls } from "./TitleBar";
@@ -80,6 +81,7 @@ export function Composer({ draft: original, mode: initialMode }: { draft: Compos
   const closed = useRef(false);
   const imgInput = useRef<HTMLInputElement>(null);
   const rootRef = useRef<HTMLDivElement>(null);
+  const sendBtn = useRef<HTMLButtonElement>(null);
   /** Whether you've typed, pasted or attached anything since this composer opened. */
   const touched = useRef(false);
   const [leaving, setLeaving] = useState(false);
@@ -287,6 +289,7 @@ export function Composer({ draft: original, mode: initialMode }: { draft: Compos
         await broadcastSent(info);
         await getCurrentWindow().close();
       } else {
+        if (sendBtn.current && !sendAt) flySend(sendBtn.current);
         dismiss();
         announceSent(info);
       }
@@ -515,7 +518,7 @@ export function Composer({ draft: original, mode: initialMode }: { draft: Compos
             )}
             <div className="c-foot">
               <div className="split-btn">
-                <button className="btn primary" disabled={busy || checking} onClick={() => void send(null)} title="Send (Ctrl+Enter)">
+                <button ref={sendBtn} className="btn primary" disabled={busy || checking} onClick={() => void send(null)} title="Send (Ctrl+Enter)">
                   {checking ? <Loader2 size={14} className="spin" /> : null}
                   {checking ? "Checking…" : "Send"}
                 </button>
