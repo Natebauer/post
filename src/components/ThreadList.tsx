@@ -20,7 +20,7 @@ import {
   Sparkles,
   Trash2,
 } from "lucide-react";
-import type { ThreadSummary } from "../api";
+import type { MailFolder, ThreadSummary } from "../api";
 import { useStore } from "../store";
 import { motionEase, motionMs, reduceMotion, scrollBehavior } from "../motionTokens";
 import { claimHighlight } from "../motion";
@@ -30,7 +30,7 @@ import { Avatar } from "./Avatar";
 import { RollingCount } from "./RollingCount";
 import { InboxZeroConfetti } from "./Confetti";
 import { EmptyArt, partOfDay, type EmptyKind } from "./EmptyArt";
-import { folderTitle } from "./Sidebar";
+import { folderTitle, ICONS } from "./Sidebar";
 import { TimePicker } from "./TimePicker";
 import { Popover } from "./Popover";
 import { Highlight } from "./Highlight";
@@ -626,6 +626,8 @@ export function ThreadList() {
           </>
         ) : (
           <>
+            {/* The folder's own icon, in the accent, beside its name. */}
+            {ICONS[folder as MailFolder] && <span className="lh-folder" aria-hidden>{ICONS[folder as MailFolder]}</span>}
             <h2>{title}</h2>
             <span className="sub tnum" aria-live="polite">
               {sub}

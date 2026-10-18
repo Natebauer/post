@@ -20,7 +20,7 @@ export const FOLDER_NAMES: Record<MailFolder, string> = {
   SPAM: "Spam",
 };
 
-const ICONS: Record<MailFolder, JSX.Element> = {
+export const ICONS: Record<MailFolder, JSX.Element> = {
   INBOX: <Inbox size={16} />,
   SNOOZED: <AlarmClock size={16} />,
   SCHEDULED: <CalendarClock size={16} />,

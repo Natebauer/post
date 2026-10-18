@@ -131,6 +131,21 @@
 .list-head .lh-clear {
   margin-left: auto;
 }
+.lh-folder {
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: 24px;
+  height: 24px;
+  margin-left: -4px;
+  border-radius: 7px;
+  color: var(--accent-text);
+  background: var(--accent-soft);
+}
+.lh-folder svg {
+  width: 14px;
+  height: 14px;
+}
 .list-head h2 {
   font-size: var(--fs-3);
   font-weight: 650;
