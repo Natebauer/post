@@ -25,6 +25,7 @@ import { claimHighlight } from "../motion";
 import * as A from "../actions";
 import { cx, participantLine, shortDate, whenLabel } from "../util";
 import { Avatar } from "./Avatar";
+import { RollingCount } from "./RollingCount";
 import { EmptyArt, partOfDay, type EmptyKind } from "./EmptyArt";
 import { folderTitle } from "./Sidebar";
 import { TimePicker } from "./TimePicker";
@@ -530,7 +531,7 @@ export function ThreadList() {
     : checked.length
       ? `${checked.length} selected`
       : unread
-        ? `${unread} unread`
+        ? (<><RollingCount value={unread} /> unread</>)
         : "";
   const selIndex = items.findIndex((t) => t.threadId === selectedId);
   const selItem = selIndex >= 0 ? v.getVirtualItems().find((vi) => vi.index === selIndex) : undefined;

@@ -410,3 +410,50 @@ body.dragging-mail .sidebar-inner {
   border-bottom: 1px solid var(--border);
   pointer-events: none;
 }
+
+/* ---------- counts that roll (RollingCount.tsx) ---------- */
+.roll {
+  display: inline-grid;
+  overflow: hidden;
+  vertical-align: bottom;
+}
+.roll > span {
+  grid-area: 1 / 1;
+  text-align: center;
+}
+.roll.rolling.up .roll-in {
+  animation: roll-in-up 360ms var(--ease) both;
+}
+.roll.rolling.up .roll-out {
+  animation: roll-out-up 360ms var(--ease) both;
+}
+.roll.rolling.down .roll-in {
+  animation: roll-in-down 360ms var(--ease) both;
+}
+.roll.rolling.down .roll-out {
+  animation: roll-out-down 360ms var(--ease) both;
+}
+@keyframes roll-in-up {
+  from {
+    transform: translateY(100%);
+    opacity: 0;
+  }
+}
+@keyframes roll-out-up {
+  to {
+    transform: translateY(-100%);
+    opacity: 0;
+  }
+}
+@keyframes roll-in-down {
+  from {
+    transform: translateY(-100%);
+    opacity: 0;
+  }
+}
+@keyframes roll-out-down {
+  to {
+    transform: translateY(100%);
+    opacity: 0;
+  }
+}

@@ -5,6 +5,7 @@ import { GroupPopover, SectionEditor, SectionItem } from "./Sections";
 import { useStore } from "../store";
 import { compose, goFolder, openAssistant } from "../actions";
 import { cx } from "../util";
+import { RollingCount } from "./RollingCount";
 import { etaText, SyncRing } from "./TitleBar";
 
 export const FOLDER_NAMES: Record<MailFolder, string> = {
@@ -44,7 +45,11 @@ function Item({ f, count }: { f: MailFolder; count?: number; tab?: number }) {
     >
       {ICONS[f]}
       <span className="nav-text">{FOLDER_NAMES[f]}</span>
-      {!!count && <span className="count">{count > 999 ? "999+" : count}</span>}
+      {!!count && (
+        <span className="count">
+          <RollingCount value={count} format={(n) => (n > 999 ? "999+" : String(n))} />
+        </span>
+      )}
     </button>
   );
 }
