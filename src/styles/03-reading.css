@@ -509,3 +509,45 @@
 .att:hover {
   transform: translateY(-1px);
 }
+
+/* ---------- a thread reads as a timeline ---------- */
+/* One thin line joins the senders' avatars from the first message to the last, in place of the
+   rules between messages. Small (collapsed) avatars sit on the same center line as large ones. */
+.msg {
+  position: relative;
+  border-top: 0;
+  --av-top: 10px;
+  --av-bottom: 38px;
+}
+.msg:not(.collapsed) {
+  --av-top: 20px;
+  --av-bottom: 60px;
+}
+.msg.collapsed .msg-head .avatar.sm {
+  margin: 0 6px;
+}
+.msg::before,
+.msg::after {
+  content: "";
+  position: absolute;
+  left: 19px;
+  width: 2px;
+  border-radius: 1px;
+  /* Opaque, so the overlapping ends of two segments don't show as a darker joint. */
+  background: color-mix(in srgb, var(--text) 16%, var(--surface));
+  pointer-events: none;
+}
+/* From the top of this message down to its avatar... */
+.msg::before {
+  top: 0;
+  height: calc(var(--av-top) - 4px);
+}
+/* ...and from below the avatar to the next message. */
+.msg::after {
+  top: calc(var(--av-bottom) + 4px);
+  bottom: -12px; /* bridges any gap before the next message */
+}
+.msg:first-of-type::before,
+.msg:last-of-type::after {
+  display: none;
+}
