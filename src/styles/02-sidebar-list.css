@@ -151,6 +151,26 @@
   overflow-y: auto;
   contain: strict;
   position: relative;
+  /* More mail below: the list fades softly into the pane's bottom edge, and stops fading once
+     you reach the end (driven by its own scroll). */
+  -webkit-mask-image: linear-gradient(to bottom, #000 calc(100% - var(--lf-bot)), transparent);
+  mask-image: linear-gradient(to bottom, #000 calc(100% - var(--lf-bot)), transparent);
+  animation: list-edge linear both;
+  animation-timeline: scroll(self);
+}
+@property --lf-bot {
+  syntax: "<length>";
+  inherits: false;
+  initial-value: 36px;
+}
+@keyframes list-edge {
+  0%,
+  96% {
+    --lf-bot: 36px;
+  }
+  100% {
+    --lf-bot: 0px;
+  }
 }
 /* The keyboard cursor ring on rows shows focus inside the list. */
 .list-scroll:focus-visible {
