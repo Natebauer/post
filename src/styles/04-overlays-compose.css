@@ -481,6 +481,46 @@ body:has(.composer.floating:not(.min)) .snacks {
   color: var(--accent);
   filter: drop-shadow(0 4px 8px color-mix(in srgb, var(--accent) 35%, transparent));
 }
+/* The formatting bubble over selected text (Composer.tsx). */
+.fmt-bubble {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  padding: 3px;
+  border-radius: 10px;
+  background: var(--snack-bg);
+  color: var(--snack-ink);
+  box-shadow:
+    var(--shadow-3),
+    inset 0 1px 0 rgba(255, 255, 255, 0.08);
+}
+.fmt-bubble button {
+  display: grid;
+  place-items: center;
+  width: 28px;
+  height: 26px;
+  border-radius: 7px;
+  color: inherit;
+  opacity: 0.85;
+  transition:
+    background-color var(--fast) var(--ease),
+    opacity var(--fast) var(--ease);
+}
+.fmt-bubble button:hover {
+  opacity: 1;
+  background: rgba(255, 255, 255, 0.1);
+}
+.fmt-bubble button.on {
+  opacity: 1;
+  color: var(--accent-ink);
+  background: var(--accent);
+}
+.fmt-sep {
+  width: 1px;
+  height: 16px;
+  margin: 0 3px;
+  background: rgba(255, 255, 255, 0.16);
+}
 .quote-toggle {
   margin-top: var(--s-3);
 }

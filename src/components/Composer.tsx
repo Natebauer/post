@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from "react";
-import { useEditor, EditorContent } from "@tiptap/react";
+import { useEditor, EditorContent, BubbleMenu } from "@tiptap/react";
 import StarterKit from "@tiptap/starter-kit";
 import Link from "@tiptap/extension-link";
 import Image from "@tiptap/extension-image";
@@ -448,6 +448,43 @@ export function Composer({ draft: original, mode: initialMode }: { draft: Compos
             )}
             <div className="c-editor" onClick={() => editor?.commands.focus()}>
               <EditorContent editor={editor} spellCheck />
+              {/* Selecting text raises a small bar of formatting just above it. */}
+              {editor && (
+                <BubbleMenu
+                  editor={editor}
+                  className="fmt-bubble"
+                  tippyOptions={{ duration: [140, 100], placement: "top", offset: [0, 8], moveTransition: "transform 0.15s ease-out" }}
+                >
+                  <button
+                    type="button"
+                    className={cx(editor.isActive("bold") && "on")}
+                    title="Bold (Ctrl+B)"
+                    onClick={() => editor.chain().focus().toggleBold().run()}
+                  >
+                    <Bold size={14} />
+                  </button>
+                  <button
+                    type="button"
+                    className={cx(editor.isActive("italic") && "on")}
+                    title="Italic (Ctrl+I)"
+                    onClick={() => editor.chain().focus().toggleItalic().run()}
+                  >
+                    <Italic size={14} />
+                  </button>
+                  <span className="fmt-sep" />
+                  <button
+                    type="button"
+                    className={cx(editor.isActive("bulletList") && "on")}
+                    title="Bulleted list"
+                    onClick={() => editor.chain().focus().toggleBulletList().run()}
+                  >
+                    <List size={14} />
+                  </button>
+                  <button type="button" className={cx(editor.isActive("link") && "on")} title="Link" onClick={setLink}>
+                    <Link2 size={14} />
+                  </button>
+                </BubbleMenu>
+              )}
               {d.quoteHtml && (
                 <div className="quote-toggle" onClick={(e) => e.stopPropagation()}>
                   <button type="button" className="quote-pill" aria-expanded={showQuote} onClick={() => setShowQuote((s) => !s)}>
