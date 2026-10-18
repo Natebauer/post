@@ -56,6 +56,22 @@ function fetchCalendar(force: boolean) {
     .catch(() => {});
 }
 
+/**
+ * The color an invite's date block should wear: the matching event's calendar color when the
+ * event is already on your calendar, otherwise the color most of your events use.
+ */
+export function calendarColorFor(summary?: string, start?: Date | null): string | null {
+  const events = calCache.cal?.events ?? [];
+  const name = summary?.trim().toLowerCase();
+  const match = events.find(
+    (e) => (name && e.title.trim().toLowerCase() === name) || (start && new Date(e.start).getTime() === start.getTime()),
+  );
+  if (match?.color) return match.color;
+  const counts = new Map<string, number>();
+  for (const e of events) if (e.color) counts.set(e.color, (counts.get(e.color) ?? 0) + 1);
+  return [...counts].sort((a, b) => b[1] - a[1])[0]?.[0] ?? null;
+}
+
 function useCalendar() {
   // Show what we already have immediately; refresh quietly when it's stale.
   const [cal, setCal] = useState<CalendarResult | null>(calCache.cal);

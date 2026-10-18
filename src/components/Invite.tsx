@@ -1,8 +1,10 @@
 import { useEffect, useState } from "react";
+import type React from "react";
 import { Check, HelpCircle, MapPin, X } from "lucide-react";
 import { api, errText, type Message } from "../api";
 import { useStore } from "../store";
 import { cx } from "../util";
+import { calendarColorFor } from "./Calendar";
 
 export interface Invite {
   uid: string;
@@ -105,7 +107,12 @@ export function InviteCard({ m }: { m: Message }) {
   };
 
   return (
-    <div className="invite" role="group" aria-label={`Invitation: ${inv.summary}`}>
+    <div
+      className="invite"
+      role="group"
+      aria-label={`Invitation: ${inv.summary}`}
+      style={{ "--cal": calendarColorFor(inv.summary, inv.start) ?? undefined } as React.CSSProperties}
+    >
       <div className="cal" aria-hidden>
         <div className="m">{inv.start?.toLocaleDateString(undefined, { month: "short" }) ?? ""}</div>
         <div className="d">{inv.start?.getDate() ?? "?"}</div>

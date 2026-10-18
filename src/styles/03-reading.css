@@ -551,3 +551,23 @@
 .msg:last-of-type::after {
   display: none;
 }
+
+/* ---------- invitations wear their calendar's color ---------- */
+/* --cal is the calendar the event belongs to (or your main calendar), as on Home. */
+.invite {
+  --cal-c: var(--cal, var(--accent));
+  background: color-mix(in srgb, var(--cal-c) 5%, var(--surface-2));
+  border-color: color-mix(in srgb, var(--cal-c) 22%, var(--border));
+}
+.invite .cal {
+  border-color: color-mix(in srgb, var(--cal-c) 35%, var(--border));
+  box-shadow: var(--shadow-1);
+}
+.invite .cal .m {
+  background: var(--cal-c);
+  color: #fff;
+  letter-spacing: 0.06em;
+}
+.invite .cal .d {
+  color: color-mix(in srgb, var(--cal-c) 55%, var(--text));
+}
