@@ -183,6 +183,8 @@ export interface Settings {
   sendCheck: boolean;
   /** A mood from moods.ts ("classic", "paper", …). */
   mood: string;
+  /** The window background behind the panes, as #rrggbb ("" = the mood's own). */
+  windowColor: string;
 }
 
 export interface AskSource {

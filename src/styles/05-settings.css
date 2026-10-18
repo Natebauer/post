@@ -401,3 +401,16 @@
 .shortcuts > div:first-child {
   margin-bottom: 18px !important;
 }
+
+/* "The mood's own" background: the window's current default color, crossed through. */
+.swatch-default {
+  background:
+    linear-gradient(135deg, transparent 45%, var(--text-3) 45% 55%, transparent 55%),
+    linear-gradient(var(--chrome), var(--chrome)),
+    var(--window-base);
+}
+:root[style*="--window-base"] .swatch-default {
+  background:
+    linear-gradient(135deg, transparent 45%, var(--text-3) 45% 55%, transparent 55%),
+    var(--surface-3);
+}

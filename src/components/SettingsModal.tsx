@@ -3,7 +3,7 @@ import { createPortal } from "react-dom";
 import { Bell, Keyboard, Monitor, Palette, PenLine, Plus, Sparkles, Trash2, UserRound, X } from "lucide-react";
 import { api, errText, type AiStatus, type ComposeMode, type Settings, type Template } from "../api";
 import { useStore } from "../store";
-import { ACCENTS } from "../theme";
+import { ACCENTS, WINDOW_COLORS } from "../theme";
 import { MoodPicker } from "./MoodPicker";
 import { moodById } from "../moods";
 import { ShortcutList } from "./Shortcuts";
@@ -405,6 +405,36 @@ export function SettingsModal() {
                     aria-label="Custom accent color"
                     value={settings.accent}
                     onChange={(e) => look({ accent: e.target.value })}
+                  />
+                </div>
+              </Row>
+              <Row title="Background" sub="The color behind the panes. Text on it turns light or dark to match" col look>
+                <div className="swatches">
+                  <button
+                    className={cx("swatch swatch-default", !settings.windowColor && "on")}
+                    title="The mood's own"
+                    aria-label="The mood's own background"
+                    aria-pressed={!settings.windowColor}
+                    onClick={() => look({ windowColor: "" })}
+                  />
+                  {WINDOW_COLORS.map((c) => (
+                    <button
+                      key={c.value}
+                      className={cx("swatch", settings.windowColor?.toLowerCase() === c.value && "on")}
+                      style={{ background: c.value }}
+                      title={c.name}
+                      aria-label={c.name}
+                      aria-pressed={settings.windowColor?.toLowerCase() === c.value}
+                      onClick={() => look({ windowColor: c.value })}
+                    />
+                  ))}
+                  <input
+                    type="color"
+                    className="swatch-custom"
+                    title="Custom background"
+                    aria-label="Custom background color"
+                    value={settings.windowColor || "#e4e4e1"}
+                    onChange={(e) => look({ windowColor: e.target.value })}
                   />
                 </div>
               </Row>

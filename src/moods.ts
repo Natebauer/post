@@ -53,7 +53,7 @@ const DARK_A: [number, number, number, number] = [0.08, 0.14, 0.05, 0.09];
 export const MOODS: Mood[] = [
   { id: "classic", name: "Classic", blurb: "Post's original: neutral and calm, with Post teal.", accent: "#2a737b" },
   // Follows the time of day (autoMoodId); its colors and accent are whichever mood is current.
-  { id: "auto", name: "Auto", blurb: "Follows the day: cool in the morning, Classic by day, warm in the evening.", accent: "" },
+  { id: "auto", name: "Auto", blurb: "Follows the day: cool in the morning, Classic by day, warm in the evening and dark late at night.", accent: "" },
   {
     id: "paper",
     name: "Paper",
@@ -247,17 +247,18 @@ export const MOODS: Mood[] = [
     },
   },
 ];
-/** Which mood Auto stands for at a given time: Slate 5–11, Classic 11–17, Sand from 17. */
+/** Which mood Auto stands for at a given time: Slate 5–11, Classic 11–17, Sand 17–21, then
+    Ember (a dark mood, so Post goes dark) until 5. */
 export function autoMoodId(d = new Date()): string {
   const h = d.getHours();
-  return h >= 5 && h < 11 ? "slate" : h >= 11 && h < 17 ? "classic" : "sand";
+  return h >= 5 && h < 11 ? "slate" : h >= 11 && h < 17 ? "classic" : h >= 17 && h < 21 ? "sand" : "ember";
 }
 
 /** When Auto next changes mood. */
 export function nextAutoChange(d = new Date()): Date {
   const next = new Date(d);
   const h = d.getHours();
-  const at = h < 5 ? 5 : h < 11 ? 11 : h < 17 ? 17 : 29; // 29 = 5 tomorrow
+  const at = h < 5 ? 5 : h < 11 ? 11 : h < 17 ? 17 : h < 21 ? 21 : 29; // 29 = 5 tomorrow
   next.setHours(at, 0, 0, 0);
   return next;
 }
@@ -266,7 +267,29 @@ export function nextAutoChange(d = new Date()): Date {
 export const moodById = (id: string | undefined) =>
   MOODS.find((m) => m.id === (id === "auto" ? autoMoodId() : id)) ?? MOODS[0];
 
-const KEYS: (keyof MoodPalette)[] = [
+/** Classic's colors (the defaults in styles/01-base.css), as a palette like the other moods'. */
+export const CLASSIC_PALETTE: Record<"light" | "dark", MoodPalette> = {
+  light: {
+    chrome: "rgba(243, 243, 240, 0.55)", surface: "#ffffff", "surface-2": "#f6f6f4", "surface-3": "#ececea", elevated: "#ffffff",
+    text: "#1b1c1f", "text-2": "#55585f", "text-3": "#6c6f77",
+    ...tint("20, 20, 30", [0.08, 0.14, 0.04, 0.07]),
+    "avatar-bg": "#e7e7e4", "avatar-ink": "#5b5e65", "tint-base": "#f4f4f2",
+  },
+  dark: {
+    chrome: "rgba(28, 28, 31, 0.5)", surface: "#1d1e21", "surface-2": "#232428", "surface-3": "#2c2d32", elevated: "#2a2b30",
+    text: "#ececee", "text-2": "#adb0b6", "text-3": "#8b8e95",
+    ...tint("255, 255, 255", [0.07, 0.13, 0.045, 0.08]),
+    "avatar-bg": "#34353a", "avatar-ink": "#b9bcc2", "tint-base": "#222326",
+  },
+};
+
+/** A mood's colors for one scheme; a mood made only for dark falls back to Classic in light. */
+export function paletteFor(id: string | undefined, scheme: "light" | "dark"): MoodPalette {
+  const mood = moodById(id);
+  return (scheme === "dark" ? mood.dark : mood.scheme === "dark" ? undefined : mood.light) ?? CLASSIC_PALETTE[scheme];
+}
+
+export const KEYS: (keyof MoodPalette)[] = [
   "chrome", "surface", "surface-2", "surface-3", "elevated", "text", "text-2", "text-3", "border", "border-strong",
   "hover", "press", "avatar-bg", "avatar-ink", "tint-base",
 ];

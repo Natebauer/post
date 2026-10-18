@@ -219,6 +219,8 @@ pub struct Settings {
     pub send_check: bool,
     /// The app's mood (see src/moods.ts): "classic", "paper", "slate", …
     pub mood: String,
+    /// The window background behind the panes, as #rrggbb ("" = the mood's own).
+    pub window_color: String,
 }
 
 /// A section in the sidebar: one sender, a group (senders, domains or subject words), or an AI
@@ -319,6 +321,7 @@ impl Default for Settings {
             sender_views: Vec::new(),
             send_check: true,
             mood: "classic".into(),
+            window_color: String::new(),
         }
     }
 }

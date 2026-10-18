@@ -174,6 +174,7 @@ const settings: Settings = {
   senderViews: [],
   sendCheck: true,
   mood: "classic",
+  windowColor: "",
 };
 
 const mockMembers = new Set<string>();
