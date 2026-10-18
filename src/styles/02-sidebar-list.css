@@ -335,6 +335,39 @@
   padding: var(--s-6);
   font-size: var(--fs-2);
 }
+.list-skeleton {
+  padding: 34px 6px 0;
+  animation: fade var(--med) var(--ease);
+}
+.sk-row {
+  display: flex;
+  align-items: center;
+  gap: var(--s-3);
+  height: 68px;
+  padding: 0 var(--s-3) 0 var(--s-5);
+}
+.list-skeleton .skeleton {
+  background-color: color-mix(in srgb, var(--text) 7%, transparent);
+}
+.list-skeleton .sk-av {
+  flex: none;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+}
+.sk-lines {
+  flex: 1;
+  display: grid;
+  gap: 9px;
+}
+.list-skeleton .sk-line {
+  height: 10px;
+  border-radius: 5px;
+}
+.sk-line.thin {
+  height: 8px;
+  max-width: 100%;
+}
 .empty .big {
   font-size: var(--fs-4);
   color: var(--text-2);

@@ -144,6 +144,24 @@ function ThreadMenu({ t, point, onClose }: { t: ThreadSummary; point: { x: numbe
   );
 }
 
+/** While a list loads with nothing to show yet: shimmering rows in its shape, fading down the list. */
+function ListSkeleton() {
+  const widths = [62, 48, 70, 55, 66, 44, 58, 50];
+  return (
+    <div className="list-skeleton" aria-busy="true" aria-label="Loading">
+      {widths.map((w, i) => (
+        <div key={i} className="sk-row" style={{ opacity: 1 - i * 0.11 }}>
+          <span className="skeleton sk-av" />
+          <span className="sk-lines">
+            <span className="skeleton sk-line" style={{ width: `${w - 18}%` }} />
+            <span className="skeleton sk-line thin" style={{ width: `${w + 22}%` }} />
+          </span>
+        </div>
+      ))}
+    </div>
+  );
+}
+
 /** Who a row is from. In Sent it's who it went to, after a quiet "To"; a draft says so in a tag. */
 function SenderText({ sender, folder }: { sender: string; folder: string }) {
   const to = sender.startsWith("To: ") ? sender.slice(4) : null;
@@ -363,7 +381,7 @@ function EmptyState() {
   const folder = useStore((s) => s.folder);
   const status = useStore((s) => s.status);
   const loading = useStore((s) => s.loadingList);
-  if (loading) return null;
+  if (loading) return <ListSkeleton />;
   if (status?.phase === "backfill" && folder === "INBOX")
     return (
       <div className="empty">
