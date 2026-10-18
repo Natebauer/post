@@ -69,12 +69,12 @@ function SyncIndicator() {
     const offline = /error sending request|dns|connect|timed out/i.test(status.error);
     return (
       <button
-        className="sync-pill"
+        className={cx("sync-pill", "sync-issue", offline ? "offline" : "problem")}
         title={`${status.error}\n\nClick to retry now.`}
         onClick={() => void api.syncNow()}
-        style={offline ? undefined : { color: "var(--danger)" }}
       >
         {offline ? <CloudOff size={14} /> : <AlertCircle size={14} />} {offline ? "Offline" : "Sync problem"}
+        <span className="sync-retry">Retry</span>
       </button>
     );
   }

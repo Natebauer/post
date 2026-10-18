@@ -769,3 +769,41 @@ body {
   background: var(--surface-2);
   color: var(--text-3);
 }
+
+/* ---------- problems, calmly ---------- */
+/* Offline or a sync problem shows as a soft tinted pill with one clear action, rather than red
+   text: amber when the connection dropped, red when something actually failed. */
+.sync-issue {
+  --tone: var(--warning);
+  height: 28px;
+  padding: 0 4px 0 10px;
+  border-radius: 14px;
+  font-weight: 550;
+  color: color-mix(in srgb, var(--tone) 70%, var(--text));
+  background: color-mix(in srgb, var(--tone) 14%, transparent);
+  border: 1px solid color-mix(in srgb, var(--tone) 30%, transparent);
+}
+.sync-issue.problem {
+  --tone: var(--danger);
+}
+.sync-retry {
+  margin-left: 4px;
+  padding: 2px 8px;
+  border-radius: 10px;
+  font-size: 11px;
+  font-weight: 650;
+  color: var(--accent-ink);
+  background: color-mix(in srgb, var(--tone) 80%, black);
+}
+button.sync-issue:hover {
+  background: color-mix(in srgb, var(--tone) 22%, transparent);
+}
+/* An error over Home sits on the same kind of strip. */
+.home-bar .error {
+  margin: 0;
+  padding: 8px 14px;
+  border-radius: var(--r-2);
+  color: color-mix(in srgb, var(--danger) 75%, var(--text));
+  background: color-mix(in srgb, var(--danger) 10%, transparent);
+  border: 1px solid color-mix(in srgb, var(--danger) 25%, transparent);
+}
