@@ -1,3 +1,5 @@
+import { useLayoutEffect, useRef } from "react";
+
 /**
  * Small line drawings for empty lists. They draw in the text color with one accent detail, so
  * they follow the mood and theme.
@@ -110,8 +112,18 @@ export function partOfDay(d = new Date()): "morning" | "afternoon" | "evening" {
 }
 
 export function EmptyArt({ kind }: { kind: EmptyKind }) {
+  // Each line draws itself in, one after another, the accent details last (see 02-sidebar-list.css).
+  const ref = useRef<SVGSVGElement>(null);
+  useLayoutEffect(() => {
+    ref.current?.querySelectorAll<SVGGeometryElement>("path, rect, circle").forEach((el, i) => {
+      if (!el.hasAttribute("stroke-dasharray")) el.setAttribute("pathLength", "1");
+      el.style.setProperty("--i", String(i));
+    });
+  }, [kind]);
   return (
     <svg
+      ref={ref}
+      key={kind}
       className="empty-art"
       viewBox="0 0 96 96"
       width="88"

@@ -310,6 +310,32 @@
     transform: translateY(var(--travel-sm));
   }
 }
+/* The drawing sketches itself in, a line at a time, then its accent details breathe gently. */
+@media (prefers-reduced-motion: no-preference) {
+  .empty-art [pathLength] {
+    stroke-dasharray: 1;
+    stroke-dashoffset: 1;
+    animation: empty-draw 700ms var(--ease-move) calc(120ms + var(--i, 0) * 110ms) forwards;
+  }
+  .empty-art [style*="accent"] {
+    animation:
+      empty-draw 700ms var(--ease-move) calc(120ms + var(--i, 0) * 110ms) forwards,
+      empty-breathe 3.2s var(--ease) calc(900ms + var(--i, 0) * 110ms) infinite;
+  }
+  .empty-art [style*="accent"]:not([pathLength]) {
+    animation: empty-breathe 3.2s var(--ease) 900ms infinite;
+  }
+}
+@keyframes empty-draw {
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+@keyframes empty-breathe {
+  50% {
+    opacity: 0.45;
+  }
+}
 .search-banner {
   font-size: var(--fs-1);
   color: var(--text-3);
