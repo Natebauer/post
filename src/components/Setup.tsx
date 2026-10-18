@@ -32,10 +32,6 @@ function Frame({ children }: { children: React.ReactNode }) {
   return (
     <div className="app">
       <div className="titlebar" data-tauri-drag-region>
-        <div className="tb-brand" data-tauri-drag-region aria-hidden>
-          <StampMark />
-          <span data-tauri-drag-region>Post</span>
-        </div>
         <div className="drag" data-tauri-drag-region />
         <WindowControls />
       </div>

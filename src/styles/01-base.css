@@ -688,24 +688,6 @@ body {
   border-radius: calc(var(--r-1) + 6px);
 }
 
-/* ---------- title bar mark ---------- */
-/* The stamp from the app icon and a small wordmark, beside the sidebar toggle. */
-.tb-brand {
-  display: flex;
-  align-items: center;
-  gap: 7px;
-  margin-left: 2px;
-  padding-right: var(--s-2);
-  font-family: var(--font-display);
-  font-weight: 700;
-  font-size: var(--fs-3);
-  letter-spacing: -0.02em;
-  color: var(--text);
-}
-.tb-brand .stamp {
-  flex: none;
-  filter: drop-shadow(0 1px 1px color-mix(in srgb, var(--shadow-ink) 18%, transparent));
-}
 /* ---------- changing the look ---------- */
 /* Picking a mood, accent or theme cross-fades the whole window from the old colors (theme.ts). */
 ::view-transition-old(root),

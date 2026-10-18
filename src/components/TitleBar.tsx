@@ -254,10 +254,6 @@ export function TitleBar() {
       >
         <PanelLeft size={17} />
       </button>
-      <div className="tb-brand" data-tauri-drag-region aria-hidden>
-        <StampMark />
-        <span data-tauri-drag-region>Post</span>
-      </div>
       <div className="drag" data-tauri-drag-region />
       <SearchBox />
       <div className="drag" data-tauri-drag-region />
