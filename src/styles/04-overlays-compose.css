@@ -155,8 +155,8 @@ body:has(.composer.floating:not(.min)) .snacks {
   display: flex;
   align-items: center;
   gap: var(--s-3);
-  background: #2a2b30;
-  color: #f2f2f4;
+  background: var(--snack-bg);
+  color: var(--snack-ink);
   border-radius: var(--r-2);
   padding: var(--s-2) var(--s-2) var(--s-2) var(--s-4);
   box-shadow: var(--shadow-2);
@@ -167,9 +167,6 @@ body:has(.composer.floating:not(.min)) .snacks {
 }
 .snack.leaving {
   animation: fade-out var(--med-out) var(--ease-in) forwards;
-}
-:root[data-theme="dark"] .snack {
-  background: #3a3b41;
 }
 /* Sending: the ring empties over the undo window, then fills with the accent and a check. */
 .send-ring {
@@ -226,7 +223,7 @@ body:has(.composer.floating:not(.min)) .snacks {
   background: rgba(255, 255, 255, 0.08);
 }
 .snack .x {
-  color: #a0a2a8;
+  color: var(--snack-dim);
 }
 
 /* ---------- compose ---------- */

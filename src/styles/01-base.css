@@ -30,6 +30,15 @@
   --hover: rgba(20, 20, 30, 0.04);
   --press: rgba(20, 20, 30, 0.07);
   --danger: #c93d31;
+  /* Status colors, so nothing in the styles hardcodes a hue. */
+  --success: #2f9e5b;
+  --warning: #f5a524;
+  --mark: #f5c542; /* search-match highlight */
+  --close-hover: #c42b1c; /* Windows' own close-button red */
+  /* Snackbars are dark in both themes. */
+  --snack-bg: #2a2b30;
+  --snack-ink: #f2f2f4;
+  --snack-dim: #a0a2a8;
   /* Shadows take their color from the mood: its text color with a little of the accent, so a
      popover on Paper casts a warm shadow and one on Slate a cool one. */
   --shadow-ink: color-mix(in srgb, var(--text) 82%, var(--accent));
@@ -118,6 +127,8 @@
   --hover: rgba(255, 255, 255, 0.045);
   --press: rgba(255, 255, 255, 0.08);
   --danger: #ef6b5f;
+  --success: #4cc37e;
+  --snack-bg: #3a3b41;
   --shadow-ink: color-mix(in srgb, black 88%, var(--accent));
   /* Raised surfaces catch a hairline of light along their top edge, a soft bevel. */
   --lift: inset 0 1px 0 rgba(255, 255, 255, 0.05);
@@ -207,7 +218,7 @@ a {
   color: var(--accent-text);
 }
 mark {
-  background: color-mix(in srgb, #f5c542 45%, transparent);
+  background: color-mix(in srgb, var(--mark) 45%, transparent);
   color: inherit;
   border-radius: 2px;
   padding: 0 1px;
@@ -432,7 +443,7 @@ a:focus-visible {
   color: var(--text);
 }
 .winctl button.close:hover {
-  background: #c42b1c;
+  background: var(--close-hover);
   color: white;
 }
 .sync-pill {

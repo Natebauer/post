@@ -142,8 +142,8 @@
   color: var(--accent-text);
 }
 .hstatus.ok {
-  background: color-mix(in srgb, #2f9e5b 14%, transparent);
-  color: color-mix(in srgb, #2f9e5b 80%, var(--text));
+  background: color-mix(in srgb, var(--success) 14%, transparent);
+  color: color-mix(in srgb, var(--success) 80%, var(--text));
 }
 
 .hcard .progress {
@@ -405,7 +405,7 @@ body.dragging .read-pane.bare {
   color: var(--text-2);
 }
 .crash-x:hover {
-  background: #c42b1c;
+  background: var(--close-hover);
   color: white;
 }
 .crash-body {
