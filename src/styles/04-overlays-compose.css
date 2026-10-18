@@ -1187,3 +1187,36 @@ div.ob-check {
 .palette-foot kbd {
   margin-right: 2px;
 }
+
+/* ---------- snooze and schedule picker ---------- */
+.tp-item {
+  gap: var(--s-3);
+  min-width: 300px;
+}
+.tp-ic {
+  width: 26px;
+  height: 26px;
+  flex: none;
+  display: grid;
+  place-items: center;
+  border-radius: var(--r-1);
+  color: var(--t);
+  background: color-mix(in srgb, var(--t) 14%, transparent);
+}
+.tp-when {
+  margin-left: auto;
+  padding-left: var(--s-4);
+  font-size: var(--fs-2);
+  color: var(--text-3);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+.tp-when b {
+  font-weight: 550;
+  color: var(--text-2);
+}
+.tp-custom-label {
+  font-size: var(--fs-1);
+  font-weight: 600;
+  color: var(--text-3);
+}
