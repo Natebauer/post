@@ -386,7 +386,12 @@ function MonthView() {
       if (s < next && en > d) byDay.set(dayKey(d), [...(byDay.get(dayKey(d)) ?? []), e]);
     }
   }
-  const step = (n: number) => setMonth((m) => new Date(m.getFullYear(), m.getMonth() + n, 1));
+  // Which way the last move went, so the new month slides in from that side.
+  const [dir, setDir] = useState(0);
+  const step = (n: number) => {
+    setDir(n);
+    setMonth((m) => new Date(m.getFullYear(), m.getMonth() + n, 1));
+  };
   const todayKey = dayKey(now);
 
   return (
@@ -410,7 +415,12 @@ function MonthView() {
         </button>
         {!events && <Loader2 size={14} className="spin faint" />}
       </div>
-      <div className="cm-grid" role="grid" aria-label={month.toLocaleDateString(undefined, { month: "long", year: "numeric" })}>
+      <div
+        key={month.getTime()}
+        className={cx("cm-grid", dir > 0 && "from-right", dir < 0 && "from-left")}
+        role="grid"
+        aria-label={month.toLocaleDateString(undefined, { month: "long", year: "numeric" })}
+      >
         {cells.slice(0, 7).map((d) => (
           <div key={`h${d.getDay()}`} className="cm-dow">
             {d.toLocaleDateString(undefined, { weekday: "short" })}

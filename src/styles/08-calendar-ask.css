@@ -687,3 +687,65 @@ label.ask-pick {
   align-items: center;
   gap: 6px;
 }
+
+/* ---------- month view: cards, colored event pills, a slide between months ---------- */
+.cm-nav h4 {
+  font-family: var(--font-display);
+  font-size: var(--fs-5);
+  letter-spacing: -0.018em;
+  min-width: 190px;
+}
+.cm-cell {
+  border-radius: var(--r-2);
+  background: color-mix(in srgb, var(--surface) 55%, transparent);
+  border: 1px solid var(--border);
+  transition: border-color var(--fast) var(--ease);
+}
+.cm-cell:hover {
+  border-color: var(--border-strong);
+}
+/* Weekends keep the same darker tint as the week strip on Home. */
+.cm-cell.weekend {
+  background: color-mix(in srgb, var(--text) 5%, transparent);
+}
+.cm-cell.today {
+  background: color-mix(in srgb, var(--accent) 8%, var(--surface));
+  border-color: color-mix(in srgb, var(--accent) 45%, transparent);
+  box-shadow: 0 0 0 1px color-mix(in srgb, var(--accent) 30%, transparent);
+}
+.cm-cell.other {
+  opacity: 0.4;
+  border-style: dashed;
+}
+/* Each event is a pill tinted with its calendar's color, with a bar of it down the side. */
+.cm-ev {
+  padding: 2px 6px;
+  border-radius: 5px;
+  background: color-mix(in srgb, var(--cal, var(--accent)) 14%, var(--tint-base));
+  box-shadow: inset 2px 0 0 var(--cal-strong);
+}
+.cm-ev::before {
+  display: none;
+}
+.cm-ev .cm-t {
+  color: color-mix(in srgb, var(--cal-strong) 75%, var(--text-2));
+  font-weight: 600;
+}
+.cm-grid.from-right {
+  animation: cm-from-right var(--slow) var(--ease);
+}
+.cm-grid.from-left {
+  animation: cm-from-left var(--slow) var(--ease);
+}
+@keyframes cm-from-right {
+  from {
+    opacity: 0;
+    transform: translateX(24px);
+  }
+}
+@keyframes cm-from-left {
+  from {
+    opacity: 0;
+    transform: translateX(-24px);
+  }
+}
