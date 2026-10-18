@@ -375,3 +375,28 @@
 .list-pane.relayout .row {
   transition: none;
 }
+
+/* ---------- row hierarchy ---------- */
+/* Read emails step back, so the unread ones stand out at a glance: their subject softens and their
+   sender loses a little weight. The preview text fades out at the edge instead of ending in "…". */
+.row:not(.unread) .row-sub .subj {
+  color: var(--text-2);
+  font-weight: 450;
+}
+.row:not(.unread) .row-from {
+  color: var(--text-2);
+}
+.row.unread .row-sub {
+  color: color-mix(in srgb, var(--text-2) 80%, var(--text-3));
+}
+.row-sub {
+  text-overflow: clip;
+  -webkit-mask-image: linear-gradient(to right, #000 calc(100% - 36px), transparent);
+  mask-image: linear-gradient(to right, #000 calc(100% - 36px), transparent);
+}
+.row .dot {
+  width: 7px;
+  height: 7px;
+  margin-top: -3.5px;
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 16%, transparent);
+}
