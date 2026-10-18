@@ -18,8 +18,12 @@ export function resolvedTheme(s: Settings | null): "light" | "dark" {
 let lastLook = "";
 let autoTimer: number | undefined;
 
-/** Apply theme, mood and accent to the document and the native window (title bar colors). */
-export function applyTheme(s: Settings | null) {
+/**
+ * Apply theme, mood and accent to the document and the native window (title bar colors).
+ * `slow`: the change happened on its own (Auto turning over), so it fades in gently over a few
+ * seconds instead of the quick fade that answers a click.
+ */
+export function applyTheme(s: Settings | null, { slow = false }: { slow?: boolean } = {}) {
   const t = resolvedTheme(s);
   const root = document.documentElement;
   // When the look changes, every color switches together (no hover colors trailing behind; see
@@ -34,9 +38,12 @@ export function applyTheme(s: Settings | null) {
     lastLook = look;
   }
   // A new look cross-fades from the old one (a view transition), unless motion is reduced.
-  const doc = document as Document & { startViewTransition?: (cb: () => void) => unknown };
-  if (changed && doc.startViewTransition && !reduceMotion()) doc.startViewTransition(() => paint(s, t));
-  else paint(s, t);
+  const doc = document as Document & { startViewTransition?: (cb: () => void) => { finished: Promise<void> } };
+  if (changed && doc.startViewTransition && !reduceMotion()) {
+    if (slow) root.classList.add("look-slow");
+    const vt = doc.startViewTransition(() => paint(s, t));
+    vt.finished.finally(() => root.classList.remove("look-slow"));
+  } else paint(s, t);
 }
 
 function paint(s: Settings | null, t: "light" | "dark") {
@@ -47,7 +54,8 @@ function paint(s: Settings | null, t: "light" | "dark") {
   const accent = s?.accent || moodById(s?.mood).accent || DEFAULT_ACCENT;
   // Auto changes mood through the day: re-apply when it next turns over.
   window.clearTimeout(autoTimer);
-  if (s?.mood === "auto") autoTimer = window.setTimeout(() => applyTheme(s), nextAutoChange().getTime() - Date.now() + 1000);
+  if (s?.mood === "auto")
+    autoTimer = window.setTimeout(() => applyTheme(s, { slow: true }), nextAutoChange().getTime() - Date.now() + 1000);
   root.style.setProperty("--accent", accent);
   // Text on the accent (buttons, badges) is dark when the accent is light, so it stays readable.
   root.style.setProperty("--accent-ink", isLight(accent) ? "#1b1c1f" : "#ffffff");

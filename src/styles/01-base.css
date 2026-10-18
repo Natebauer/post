@@ -696,3 +696,14 @@ body {
   animation-duration: 240ms;
   animation-timing-function: var(--ease-move);
 }
+/* Auto changing mood on its own (theme.ts): a slow dusk-like fade instead, eased at both ends so
+   it starts and settles imperceptibly. */
+:root.look-slow::view-transition-old(root),
+:root.look-slow::view-transition-new(root) {
+  animation-duration: 3s;
+  animation-timing-function: cubic-bezier(0.45, 0, 0.55, 1);
+}
+/* Post keeps working while a look fades: clicks and typing reach the app underneath. */
+::view-transition {
+  pointer-events: none;
+}
