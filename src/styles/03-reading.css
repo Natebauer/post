@@ -472,3 +472,40 @@
 .copy-addr.copied .copy-icon {
   color: var(--accent-text);
 }
+
+/* ---------- attachment cards: colored by file type ---------- */
+/* --k is the type's color (Attachments.tsx kindOf): the label wears it, and a file without a
+   preview gets a soft wash of it behind its icon. */
+.att-thumb {
+  background: color-mix(in srgb, var(--k, var(--text-3)) 9%, var(--surface-3));
+  color: color-mix(in srgb, var(--k, var(--text-3)) 75%, var(--text));
+}
+.att-meta {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 2px;
+}
+.att-kind {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  line-height: 16px;
+  padding: 0 5px;
+  border-radius: 4px;
+  color: var(--k);
+  background: color-mix(in srgb, var(--k) 13%, transparent);
+  font-feature-settings: "cv11", "ss03", "case";
+}
+:root[data-theme="dark"] .att-kind {
+  color: color-mix(in srgb, var(--k) 65%, white);
+}
+.att {
+  transition:
+    box-shadow var(--fast) var(--ease),
+    border-color var(--fast) var(--ease),
+    transform var(--fast) var(--ease);
+}
+.att:hover {
+  transform: translateY(-1px);
+}

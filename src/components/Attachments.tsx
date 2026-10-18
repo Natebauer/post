@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import type React from "react";
 import { Download, ExternalLink, FileArchive, FileImage, FileSpreadsheet, FileText, File as FileIcon, X } from "lucide-react";
 import { api, errText, type Attachment } from "../api";
 import { useStore } from "../store";
@@ -16,6 +17,18 @@ function iconFor(a: Attachment) {
   if (/sheet|excel|csv/.test(a.mimeType)) return <FileSpreadsheet size={28} strokeWidth={1.4} />;
   if (isPdf(a) || /word|text/.test(a.mimeType)) return <FileText size={28} strokeWidth={1.4} />;
   return <FileIcon size={28} strokeWidth={1.4} />;
+}
+
+/** A short type label and a color for it: PDFs red, sheets green, documents blue, and so on. */
+function kindOf(a: Attachment): { label: string; color: string } {
+  const ext = (/\.([a-z0-9]{1,5})$/i.exec(a.filename)?.[1] ?? "").toUpperCase();
+  if (isPdf(a)) return { label: "PDF", color: "#d5483c" };
+  if (isImage(a)) return { label: ext || "IMG", color: "#8a5aa8" };
+  if (/sheet|excel|csv/.test(a.mimeType) || /^(XLSX?|CSV|NUMBERS)$/.test(ext)) return { label: ext || "XLS", color: "#2f9e5b" };
+  if (/word|document|rtf/.test(a.mimeType) || /^(DOCX?|RTF|PAGES|ODT)$/.test(ext)) return { label: ext || "DOC", color: "#3e6fd8" };
+  if (/presentation|powerpoint/.test(a.mimeType) || /^(PPTX?|KEY)$/.test(ext)) return { label: ext || "PPT", color: "#d9822b" };
+  if (/zip|compressed|tar/.test(a.mimeType)) return { label: ext || "ZIP", color: "#7a7062" };
+  return { label: ext || "FILE", color: "#6c6f77" };
 }
 
 async function saveAs(messageId: string, a: Attachment) {
@@ -100,11 +113,13 @@ export function Attachments({ messageId, attachments }: { messageId: string; att
     <div className="atts">
       {list.map((a) => {
         const previewable = isImage(a) || isPdf(a) || isText(a);
+        const kind = kindOf(a);
         return (
           <div
             key={a.partId}
             className="att"
             title={a.filename}
+            style={{ "--k": kind.color } as React.CSSProperties}
             onClick={() => (previewable ? setPreview(a) : void openExternal(messageId, a))}
           >
             <div className="att-thumb">
@@ -112,7 +127,10 @@ export function Attachments({ messageId, attachments }: { messageId: string; att
             </div>
             <div className="att-info">
               <div className="att-name">{a.filename}</div>
-              <div className="faint">{formatBytes(a.size)}</div>
+              <div className="att-meta">
+                <span className="att-kind">{kind.label}</span>
+                <span className="faint">{formatBytes(a.size)}</span>
+              </div>
             </div>
             <div className="att-actions" onClick={(e) => e.stopPropagation()}>
               <button className="icon-btn sm" title="Open with default app" onClick={() => void openExternal(messageId, a)}>
