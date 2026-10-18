@@ -561,3 +561,34 @@ p,
 .empty {
   text-wrap: pretty;
 }
+
+/* ---------- Inter's finer features ---------- */
+/* All-caps labels use Inter's case-sensitive forms (punctuation and the en dash sit at cap
+   height) and a hair more tracking. */
+.list-group,
+.palette-group,
+.hchip,
+.cw-name,
+.cm-dow,
+.ask-rich h5,
+.mood-group-label,
+.invite .cal .m,
+.hcal-badge b {
+  font-feature-settings: "cv11", "ss03", "case";
+}
+/* Times, dates and counts line up in columns. */
+.cw-time,
+.cw-num,
+.row-date,
+.msg-date,
+.nav-item .count,
+.invite .cal .d,
+.chip-snooze,
+.list-head .sub {
+  font-variant-numeric: tabular-nums;
+}
+/* A real slashed zero in addresses and codes would be noisy; keep "zero" off, but use Inter's
+   contextual alternates so arrows (->) and times (10:30) set nicely. */
+body {
+  font-feature-settings: "cv11", "ss03", "calt";
+}
