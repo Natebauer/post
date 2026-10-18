@@ -188,6 +188,8 @@ export interface Settings {
   /** When the Auto mood goes dark and comes back, in minutes after midnight. */
   autoDarkStart: number;
   autoDarkEnd: number;
+  /** A faint pattern for the season behind the panes. */
+  seasonal: boolean;
 }
 
 export interface AskSource {

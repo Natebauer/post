@@ -225,6 +225,8 @@ pub struct Settings {
     pub auto_dark_start: i64,
     /// When the Auto mood comes back from dark, in minutes after midnight (05:00 = 300).
     pub auto_dark_end: i64,
+    /// A faint pattern for the season (leaves, snowflakes, petals, sun) behind the panes.
+    pub seasonal: bool,
 }
 
 /// A section in the sidebar: one sender, a group (senders, domains or subject words), or an AI
@@ -328,6 +330,7 @@ impl Default for Settings {
             window_color: String::new(),
             auto_dark_start: 21 * 60,
             auto_dark_end: 5 * 60,
+            seasonal: false,
         }
     }
 }

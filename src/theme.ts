@@ -53,6 +53,9 @@ function paint(s: Settings | null, t: "light" | "dark") {
   root.dataset.theme = t;
   applyMood(root, s?.mood, t);
   paintWindow(s, t);
+  // The season's pattern behind the panes, when turned on.
+  if (s?.seasonal) root.dataset.season = season();
+  else delete root.dataset.season;
   const accent = s?.accent || moodById(s?.mood).accent || DEFAULT_ACCENT;
   // Auto changes mood through the day: re-apply when it next turns over.
   window.clearTimeout(autoTimer);
@@ -161,3 +164,9 @@ export const WINDOW_COLORS: { name: string; value: string }[] = [
   { name: "Charcoal", value: "#232427" },
   { name: "Midnight", value: "#18203a" },
 ];
+
+/** The season now (northern hemisphere): spring from March, summer June, autumn September, winter December. */
+function season(d = new Date()): "spring" | "summer" | "autumn" | "winter" {
+  const m = d.getMonth();
+  return m >= 2 && m < 5 ? "spring" : m >= 5 && m < 8 ? "summer" : m >= 8 && m < 11 ? "autumn" : "winter";
+}

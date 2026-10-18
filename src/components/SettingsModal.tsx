@@ -472,6 +472,9 @@ export function SettingsModal() {
                   />
                 </div>
               </Row>
+              <Row title="Seasonal touch" sub="A faint pattern behind the panes that follows the season: petals, sun, leaves or snow" look>
+                <Switch label="Seasonal touch" on={!!settings.seasonal} onChange={(v) => look({ seasonal: v })} />
+              </Row>
               <Row title="Text size" sub="Also Ctrl + and Ctrl −">
                 <Seg
                   label="Text size"

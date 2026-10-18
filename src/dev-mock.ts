@@ -177,6 +177,7 @@ const settings: Settings = {
   windowColor: "",
   autoDarkStart: 21 * 60,
   autoDarkEnd: 5 * 60,
+  seasonal: false,
 };
 
 const mockMembers = new Set<string>();
