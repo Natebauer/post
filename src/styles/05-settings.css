@@ -330,3 +330,74 @@
 .settings nav .nav-item.active svg {
   color: var(--accent-text);
 }
+
+/* ---------- keyboard shortcuts as key caps ---------- */
+/* The ? sheet lays its groups out side by side, each key drawn as a cap. */
+.shortcuts {
+  width: min(1040px, calc(100vw - 48px));
+  max-height: calc(100vh - 80px);
+}
+.shortcuts > div:last-child,
+.shortcuts {
+  display: block;
+}
+@media (min-width: 900px) {
+  .shortcuts {
+    column-count: 2;
+    column-gap: var(--s-8);
+  }
+  .shortcuts > div:first-child {
+    column-span: all;
+  }
+  .shortcuts .shortcut-group {
+    break-inside: avoid;
+  }
+}
+.sk-keys {
+  display: inline-flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 3px;
+}
+.sk-keys kbd,
+.sk-combo kbd {
+  font: inherit;
+  font-size: 11px;
+  font-weight: 600;
+  min-width: 20px;
+  height: 20px;
+  padding: 0 5px;
+  display: inline-grid;
+  place-items: center;
+  border-radius: 5px;
+  color: var(--text);
+  background: var(--surface);
+  border: 1px solid var(--border-strong);
+  border-bottom-width: 2px;
+  box-shadow: 0 1px 0 var(--border);
+}
+.sk-join,
+.sk-text {
+  font-size: var(--fs-1);
+  color: var(--text-3);
+  padding: 0 2px;
+}
+.sk-combo {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+}
+.shortcut-group .menu-label {
+  color: var(--accent-text);
+  font-weight: 650;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  font-size: 11px;
+}
+.modal.shortcuts .shortcut-group {
+  margin: 0 0 18px;
+}
+.shortcuts > div:first-child {
+  margin-bottom: 18px !important;
+}

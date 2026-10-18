@@ -47,6 +47,34 @@ const GROUPS: [string, [string, string][]][] = [
   ],
 ];
 
+/** Words in a shortcut that join keys rather than being keys themselves. */
+const JOINERS = new Set(["/", "then", "or"]);
+
+/** "Shift I / Shift U" as key caps: each key in a cap, the words between them as plain text. */
+function Keys({ k }: { k: string }) {
+  if (/click|conversation/i.test(k) && !/[+]/.test(k)) return <span className="sk-text">{k}</span>;
+  const tokens = k.split(/\s+/).filter(Boolean);
+  return (
+    <span className="sk-keys">
+      {tokens.map((t, i) =>
+          // A lone "/" is the search key itself, not a separator.
+          JOINERS.has(t) && tokens.length > 1 ? (
+            <span key={i} className="sk-join">
+              {t}
+            </span>
+          ) : /\+click$/i.test(t) ? (
+            <span key={i} className="sk-combo">
+              <kbd>{t.replace(/\+click$/i, "")}</kbd>
+              <span className="sk-join">+ click</span>
+            </span>
+          ) : (
+            <kbd key={i}>{t}</kbd>
+          ),
+        )}
+    </span>
+  );
+}
+
 /** Every keyboard shortcut, grouped (shown in Settings and on ?). */
 export function ShortcutList() {
   return (
@@ -62,9 +90,7 @@ export function ShortcutList() {
                 <tr key={a}>
                   <td>{a}</td>
                   <td>
-                    <span className="kbd" style={{ fontSize: 12, padding: "1px 6px" }}>
-                      {k}
-                    </span>
+                    <Keys k={k} />
                   </td>
                 </tr>
               ))}
