@@ -221,6 +221,10 @@ pub struct Settings {
     pub mood: String,
     /// The window background behind the panes, as #rrggbb ("" = the mood's own).
     pub window_color: String,
+    /// When the Auto mood goes dark, in minutes after midnight (21:00 = 1260).
+    pub auto_dark_start: i64,
+    /// When the Auto mood comes back from dark, in minutes after midnight (05:00 = 300).
+    pub auto_dark_end: i64,
 }
 
 /// A section in the sidebar: one sender, a group (senders, domains or subject words), or an AI
@@ -322,6 +326,8 @@ impl Default for Settings {
             send_check: true,
             mood: "classic".into(),
             window_color: String::new(),
+            auto_dark_start: 21 * 60,
+            auto_dark_end: 5 * 60,
         }
     }
 }

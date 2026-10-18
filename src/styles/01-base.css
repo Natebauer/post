@@ -700,7 +700,7 @@ body {
    it starts and settles imperceptibly. */
 :root.look-slow::view-transition-old(root),
 :root.look-slow::view-transition-new(root) {
-  animation-duration: 3s;
+  animation-duration: 2s;
   animation-timing-function: cubic-bezier(0.45, 0, 0.55, 1);
 }
 /* Post keeps working while a look fades: clicks and typing reach the app underneath. */

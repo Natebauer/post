@@ -53,7 +53,7 @@ const DARK_A: [number, number, number, number] = [0.08, 0.14, 0.05, 0.09];
 export const MOODS: Mood[] = [
   { id: "classic", name: "Classic", blurb: "Post's original: neutral and calm, with Post teal.", accent: "#2a737b" },
   // Follows the time of day (autoMoodId); its colors and accent are whichever mood is current.
-  { id: "auto", name: "Auto", blurb: "Follows the day: cool in the morning, Classic by day, warm in the evening and dark late at night.", accent: "" },
+  { id: "auto", name: "Auto", blurb: "Follows the day: cool in the morning, Classic by day, warm in the evening and dark at night, at the times you choose.", accent: "" },
   {
     id: "paper",
     name: "Paper",
@@ -247,19 +247,39 @@ export const MOODS: Mood[] = [
     },
   },
 ];
-/** Which mood Auto stands for at a given time: Slate 5–11, Classic 11–17, Sand 17–21, then
-    Ember (a dark mood, so Post goes dark) until 5. */
+/** When Auto is dark, in minutes after midnight (Settings, Appearance); theme.ts keeps it current. */
+let darkFrom = 21 * 60;
+let darkUntil = 5 * 60;
+export function setAutoSchedule(from: number, until: number) {
+  darkFrom = from;
+  darkUntil = until;
+}
+
+/** Morning ends and evening begins at these times (minutes after midnight). */
+const DAY_FROM = 11 * 60;
+const EVENING_FROM = 17 * 60;
+
+function isDark(m: number): boolean {
+  if (darkFrom === darkUntil) return false;
+  return darkFrom < darkUntil ? m >= darkFrom && m < darkUntil : m >= darkFrom || m < darkUntil;
+}
+
+/** Which mood Auto stands for at a given time: Ember (dark) between the chosen times, otherwise
+    Slate in the morning, Classic during the day and Sand in the evening. */
 export function autoMoodId(d = new Date()): string {
-  const h = d.getHours();
-  return h >= 5 && h < 11 ? "slate" : h >= 11 && h < 17 ? "classic" : h >= 17 && h < 21 ? "sand" : "ember";
+  const m = d.getHours() * 60 + d.getMinutes();
+  if (isDark(m)) return "ember";
+  return m < DAY_FROM ? "slate" : m < EVENING_FROM ? "classic" : "sand";
 }
 
 /** When Auto next changes mood. */
 export function nextAutoChange(d = new Date()): Date {
+  const m = d.getHours() * 60 + d.getMinutes();
+  const turns = [darkFrom, darkUntil, DAY_FROM, EVENING_FROM];
+  const ahead = turns.filter((t) => t > m);
+  const at = ahead.length ? Math.min(...ahead) : Math.min(...turns) + 24 * 60;
   const next = new Date(d);
-  const h = d.getHours();
-  const at = h < 5 ? 5 : h < 11 ? 11 : h < 17 ? 17 : h < 21 ? 21 : 29; // 29 = 5 tomorrow
-  next.setHours(at, 0, 0, 0);
+  next.setHours(0, at, 0, 0);
   return next;
 }
 

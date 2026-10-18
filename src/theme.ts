@@ -1,6 +1,6 @@
 import { getCurrentWindow } from "@tauri-apps/api/window";
 import type { Settings } from "./api";
-import { applyMood, KEYS, moodById, nextAutoChange, paletteFor } from "./moods";
+import { applyMood, KEYS, moodById, nextAutoChange, paletteFor, setAutoSchedule } from "./moods";
 import { reduceMotion } from "./motionTokens";
 
 /** Post's teal, the app icon's color. */
@@ -24,11 +24,13 @@ let autoTimer: number | undefined;
  * seconds instead of the quick fade that answers a click.
  */
 export function applyTheme(s: Settings | null, { slow = false }: { slow?: boolean } = {}) {
+  setAutoSchedule(s?.autoDarkStart ?? 21 * 60, s?.autoDarkEnd ?? 5 * 60);
   const t = resolvedTheme(s);
   const root = document.documentElement;
   // When the look changes, every color switches together (no hover colors trailing behind; see
   // 01-base.css). Other settings re-apply the theme too, and leave motion alone.
   const look = `${t}|${s?.mood ?? ""}|${moodById(s?.mood).id}|${s?.accent ?? ""}|${s?.windowColor ?? ""}`;
+  // (A new dark time that changes Auto's mood right now changes `look` too, so it fades.)
   const changed = look !== lastLook && !!lastLook;
   if (look !== lastLook) {
     if (lastLook) {

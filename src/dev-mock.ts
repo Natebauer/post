@@ -175,6 +175,8 @@ const settings: Settings = {
   sendCheck: true,
   mood: "classic",
   windowColor: "",
+  autoDarkStart: 21 * 60,
+  autoDarkEnd: 5 * 60,
 };
 
 const mockMembers = new Set<string>();
@@ -185,6 +187,7 @@ let mockConfigured = !new URLSearchParams(location.search).has("firstrun");
 
 export function installMock() {
   mockWindows("main");
+  if (new URLSearchParams(location.search).has("dusk")) duskDemo();
   mockIPC(((cmd: string, args?: unknown): unknown => {
     const a = (args ?? {}) as Record<string, unknown>;
     switch (cmd) {
@@ -355,4 +358,35 @@ export function installMock() {
         return null;
     }
   }) as never);
+}
+
+/**
+ * Preview only (?dusk): starts in Sand with a button that plays Auto's evening change to Ember and
+ * back, with the same slow fade Auto uses on its own.
+ */
+function duskDemo() {
+  settings.mood = "sand";
+  settings.theme = "light"; // Sand in light, so the change to Ember shows evening turning to night
+  const add = () => {
+    const b = document.createElement("button");
+    b.id = "dusk-demo";
+    b.style.cssText =
+      "position:fixed;right:20px;bottom:20px;z-index:9999;padding:10px 16px;border-radius:999px;border:0;" +
+      "font:600 13px Inter,system-ui,sans-serif;color:#fff;background:#2a2b30;box-shadow:0 6px 20px rgba(0,0,0,.25);cursor:pointer";
+    // Whichever way the window is now, the button goes the other way.
+    const isNight = () => document.documentElement.dataset.mood === "ember";
+    const label = (night: boolean) => (b.textContent = night ? "Fade back to evening (Sand)" : "Fade to night (Ember)");
+    label(isNight());
+    b.onclick = async () => {
+      const [{ applyTheme }, { useStore }] = await Promise.all([import("./theme"), import("./store")]);
+      const s = useStore.getState().settings;
+      if (!s) return;
+      const night = !isNight();
+      applyTheme({ ...s, mood: night ? "ember" : "sand" }, { slow: true });
+      label(night);
+    };
+    document.body.appendChild(b);
+  };
+  if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", add);
+  else add();
 }

@@ -185,6 +185,9 @@ export interface Settings {
   mood: string;
   /** The window background behind the panes, as #rrggbb ("" = the mood's own). */
   windowColor: string;
+  /** When the Auto mood goes dark and comes back, in minutes after midnight. */
+  autoDarkStart: number;
+  autoDarkEnd: number;
 }
 
 export interface AskSource {

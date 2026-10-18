@@ -25,6 +25,13 @@ const TAB_ICONS: Record<Tab, JSX.Element> = {
   account: <UserRound size={16} />,
 };
 
+/** Minutes after midnight as "HH:MM" for a time field, and back. */
+const toClock = (m: number) => `${String(Math.floor(m / 60) % 24).padStart(2, "0")}:${String(m % 60).padStart(2, "0")}`;
+const fromClock = (v: string) => {
+  const [h, m] = v.split(":").map(Number);
+  return h * 60 + m;
+};
+
 const money = (n: number) => (n > 0 && n < 0.01 ? "<$0.01" : `$${n.toFixed(2)}`);
 
 function AiSettings({ settings, set }: { settings: Settings; set: (p: Partial<Settings>) => void }) {
@@ -385,6 +392,25 @@ export function SettingsModal() {
               <Row title="Mood" sub="The feel of the whole app: colors, tints and headings. Each mood works in light and dark." col look>
                 <MoodPicker settings={settings} onPick={(mood, accent) => look({ mood, accent })} />
               </Row>
+              {settings.mood === "auto" && (
+                <Row title="Auto goes dark" sub="Ember, Auto's dark mood, between these times" look>
+                  <div className="time-range">
+                    <input
+                      type="time"
+                      aria-label="Dark from"
+                      value={toClock(settings.autoDarkStart ?? 21 * 60)}
+                      onChange={(e) => e.target.value && look({ autoDarkStart: fromClock(e.target.value) })}
+                    />
+                    <span>until</span>
+                    <input
+                      type="time"
+                      aria-label="Dark until"
+                      value={toClock(settings.autoDarkEnd ?? 5 * 60)}
+                      onChange={(e) => e.target.value && look({ autoDarkEnd: fromClock(e.target.value) })}
+                    />
+                  </div>
+                </Row>
+              )}
               <Row title="Accent color" sub="Used for unread markers, selection and buttons" col look>
                 <div className="swatches">
                   {ACCENTS.map((a) => (
@@ -403,7 +429,7 @@ export function SettingsModal() {
                     className="swatch-custom"
                     title="Custom color"
                     aria-label="Custom accent color"
-                    value={settings.accent}
+                    value={settings.accent || moodById(settings.mood).accent || "#2a737b"}
                     onChange={(e) => look({ accent: e.target.value })}
                   />
                 </div>
