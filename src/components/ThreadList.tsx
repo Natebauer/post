@@ -9,6 +9,8 @@ import {
   Mail,
   MailOpen,
   MoreHorizontal,
+  Search,
+  X,
   OctagonAlert,
   Paperclip,
   Pin,
@@ -605,11 +607,31 @@ export function ThreadList() {
 
   return (
     <section className={cx("list-pane", `size-${listSize}`)} ref={paneRef} aria-label={title}>
-      <div className="list-head">
-        <h2>{title}</h2>
-        <span className="sub tnum" aria-live="polite">
-          {sub}
-        </span>
+      <div className={cx("list-head", search && "searching")}>
+        {search ? (
+          // Searching: the query itself is the heading, with how many were found and a way out.
+          <>
+            <Search size={15} className="lh-ic" aria-hidden />
+            <h2 className="lh-query" title={search.query}>
+              <span className="q">“</span>
+              {search.query}
+              <span className="q">”</span>
+            </h2>
+            <span className="found-pill tnum" aria-live="polite">
+              {sub}
+            </span>
+            <button className="icon-btn sm lh-clear" title="Clear search (Esc)" aria-label="Clear search" onClick={() => useStore.getState().setSearch(null)}>
+              <X size={14} />
+            </button>
+          </>
+        ) : (
+          <>
+            <h2>{title}</h2>
+            <span className="sub tnum" aria-live="polite">
+              {sub}
+            </span>
+          </>
+        )}
         {!search && folder !== "SENT" && folder !== "DRAFT" && !folder.startsWith("sec:") && (
           <button className="icon-btn sm" title="More" aria-label="List options" onClick={(e) => setListMenu(e.currentTarget)}>
             <MoreHorizontal size={16} />

@@ -102,6 +102,35 @@
   gap: var(--s-2);
   border-bottom: 1px solid var(--border);
 }
+/* Searching: the query in quotes as the heading, a count pill and a clear button. */
+.list-head.searching {
+  gap: 8px;
+}
+.list-head .lh-ic {
+  flex: none;
+  color: var(--accent-text);
+}
+.list-head .lh-query {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.lh-query .q {
+  color: var(--text-3);
+  font-weight: 500;
+}
+.found-pill {
+  flex: none;
+  padding: 1px 8px;
+  border-radius: 999px;
+  font-size: 11.5px;
+  font-weight: 600;
+  color: var(--accent-text);
+  background: var(--accent-soft);
+}
+.list-head .lh-clear {
+  margin-left: auto;
+}
 .list-head h2 {
   font-size: var(--fs-3);
   font-weight: 650;
