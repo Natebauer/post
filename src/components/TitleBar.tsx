@@ -1,6 +1,6 @@
 import { useEffect, useId, useRef, useState } from "react";
 import { getCurrentWindow } from "@tauri-apps/api/window";
-import { AlertCircle, Clock, CloudOff, Copy, Minus, PanelLeft, Search, Square, X } from "lucide-react";
+import { AlertCircle, AtSign, Clock, CloudOff, Copy, Minus, PanelLeft, Paperclip, Search, Square, Type, X } from "lucide-react";
 import { api, type Contact, type SyncStatus } from "../api";
 import { useStore } from "../store";
 import { toggleSidebar } from "../actions";
@@ -163,7 +163,14 @@ function SearchBox() {
         return { kind: "person" as const, label: c.name || c.email, value: words.join(" "), c };
       })
     : recent.map((r) => ({ kind: "recent" as const, label: r, value: r }));
-  const showPop = focused && items.length > 0;
+  const showPop = focused;
+  // Quick filters: a complete one runs straight away; one that needs a value waits for it.
+  const addFilter = (token: string) => {
+    const next = `${q.trim()}${q.trim() ? " " : ""}${token}`;
+    if (token.endsWith(":")) setQ(next);
+    else onChange(next);
+    input.current?.focus();
+  };
 
   return (
     <div className="search-wrap">
@@ -206,7 +213,26 @@ function SearchBox() {
       </label>
       {showPop && (
         <div className="search-pop" role="listbox" aria-label="Search suggestions">
-          <div className="menu-label">{q.trim() ? "People" : "Recent searches"}</div>
+          <div className="search-chips" aria-label="Filters">
+            {[
+              ["has:attachment", "Has attachment", <Paperclip size={13} key="a" />],
+              ["from:", "From…", <AtSign size={13} key="f" />],
+              ["subject:", "Subject…", <Type size={13} key="s" />],
+            ].map(([token, label, icon]) => (
+              <button
+                key={token as string}
+                className="search-chip"
+                onMouseDown={(e) => {
+                  e.preventDefault();
+                  addFilter(token as string);
+                }}
+              >
+                {icon}
+                {label}
+              </button>
+            ))}
+          </div>
+          {items.length > 0 && <div className="menu-label">{q.trim() ? "People" : "Recent searches"}</div>}
           {items.map((it, i) => (
             <button
               key={it.value}
@@ -229,7 +255,9 @@ function SearchBox() {
                 </>
               ) : (
                 <>
-                  <Clock size={14} className="faint" />
+                  <span className="search-ic">
+                    <Clock size={14} />
+                  </span>
                   {it.label}
                 </>
               )}

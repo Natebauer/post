@@ -707,3 +707,65 @@ body {
 ::view-transition {
   pointer-events: none;
 }
+
+/* ---------- search suggestions ---------- */
+.search-pop {
+  top: 40px;
+  padding: var(--s-2);
+  border-radius: var(--r-3);
+  box-shadow: var(--shadow-3);
+}
+.search-pop > .menu-label {
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  font-size: 11px;
+  font-feature-settings: "cv11", "ss03", "case";
+  padding-top: var(--s-2);
+}
+/* Quick filters across the top. */
+.search-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  padding: 2px 2px var(--s-2);
+  border-bottom: 1px solid var(--border);
+  margin-bottom: 2px;
+}
+.search-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  height: 26px;
+  padding: 0 10px;
+  border-radius: 13px;
+  font-size: var(--fs-1);
+  font-weight: 550;
+  color: var(--text-2);
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  transition:
+    background var(--fast) var(--ease),
+    color var(--fast) var(--ease),
+    border-color var(--fast) var(--ease);
+}
+.search-chip:hover {
+  background: var(--accent-soft);
+  border-color: color-mix(in srgb, var(--accent) 35%, transparent);
+  color: var(--accent-text);
+}
+.search-pop .menu-item {
+  height: 36px;
+}
+.search-pop .menu-item.person {
+  height: 44px;
+}
+.search-ic {
+  width: 26px;
+  height: 26px;
+  flex: none;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  background: var(--surface-2);
+  color: var(--text-3);
+}
