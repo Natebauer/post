@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { Fragment, useEffect, useRef, useState } from "react";
 import { READY_WAIT_MS } from "../motionTokens";
 import { flushSync } from "react-dom";
 import { listen } from "@tauri-apps/api/event";
@@ -330,9 +330,15 @@ function ThreadDetailView() {
   const unsub = shown ? unsubscribeFor(shown) : null;
   const messagesOf = (t: ThreadDetail) => {
     const one = t.messages.length === 1;
-    return t.messages.map((m) => (
+    return t.messages.map((m, i) => (
+      <Fragment key={m.id}>
+      {/* Where the conversation crosses into another day, a quiet marker on its timeline. */}
+      {i > 0 && new Date(t.messages[i - 1].date).toDateString() !== new Date(m.date).toDateString() && (
+        <div className="msg-day" role="separator">
+          <span>{dayName(m.date)}</span>
+        </div>
+      )}
       <MessageCard
-        key={m.id}
         m={m}
         me={me}
         headless={one}
@@ -347,6 +353,7 @@ function ThreadDetailView() {
           })
         }
       />
+      </Fragment>
     ));
   };
   const inlineCompose =
@@ -692,4 +699,16 @@ function StarToggle({ threadId, starred }: { threadId: string; starred: boolean 
       )}
     </button>
   );
+}
+
+/** "Today", "Yesterday", a weekday within the last week, else a short date. */
+function dayName(ms: number): string {
+  const d = new Date(ms);
+  const start = new Date();
+  start.setHours(0, 0, 0, 0);
+  const days = Math.round((start.getTime() - new Date(d).setHours(0, 0, 0, 0)) / 86_400_000);
+  if (days <= 0) return "Today";
+  if (days === 1) return "Yesterday";
+  if (days < 7) return d.toLocaleDateString(undefined, { weekday: "long" });
+  return d.toLocaleDateString(undefined, { weekday: "short", month: "short", day: "numeric", year: d.getFullYear() === start.getFullYear() ? undefined : "numeric" });
 }
