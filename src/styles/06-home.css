@@ -433,3 +433,34 @@ body.dragging .read-pane.bare {
   display: flex;
   gap: var(--s-2);
 }
+
+/* ---------- the dragged email ---------- */
+/* A small tilted card with the sender's avatar, lifted off the page. */
+.mail-ghost {
+  flex-direction: row;
+  align-items: center;
+  gap: var(--s-3);
+  padding: var(--s-2) var(--s-4) var(--s-2) var(--s-2);
+  border-radius: var(--r-3);
+  box-shadow: var(--shadow-3);
+  opacity: 1;
+  rotate: -3deg;
+}
+.mg-text {
+  min-width: 0;
+  display: grid;
+  gap: 1px;
+}
+.mail-ghost b,
+.mail-ghost span {
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+/* Where it can land glows in the accent. */
+.read-pane.bare.drop-over,
+.sidebar.drop-over .sidebar-inner {
+  box-shadow:
+    0 0 0 2px color-mix(in srgb, var(--accent) 55%, transparent),
+    0 0 32px color-mix(in srgb, var(--accent) 30%, transparent);
+}

@@ -3,6 +3,8 @@ import { useStore } from "./store";
 import { motionMs, reduceMotion } from "./motionTokens";
 import { setPin } from "./components/Home";
 import { addSender, addToCategory, findSection } from "./senders";
+import { hueFor } from "./components/Avatar";
+import { initials } from "./util";
 
 /**
  * Drag and drop with the pointer (HTML5 drag events don't reach the page in Post's window):
@@ -23,6 +25,8 @@ function pointerDrag(
   targets: string,
   bodyClass: string,
   onDrop: (target: HTMLElement) => void,
+  /** The sender, drawn as their avatar on the ghost. */
+  who?: { email: string; name: string },
 ) {
   if (e.button !== 0) return;
   const x0 = e.clientX;
@@ -48,7 +52,17 @@ function pointerDrag(
       a.textContent = ghostText[0];
       const b = document.createElement("span");
       b.textContent = ghostText[1];
-      ghost.append(a, b);
+      const text = document.createElement("div");
+      text.className = "mg-text";
+      text.append(a, b);
+      if (who) {
+        const av = document.createElement("div");
+        av.className = "avatar sm";
+        av.style.setProperty("--h", String(hueFor((who.email || who.name).toLowerCase())));
+        av.textContent = initials(who.name || who.email);
+        ghost.append(av);
+      }
+      ghost.append(text);
       document.body.appendChild(ghost);
       document.body.classList.add("dragging", bodyClass);
     }
@@ -121,5 +135,5 @@ export function startMailDrag(
       }
       await setPin(threadId, true);
     })();
-  });
+  }, from);
 }

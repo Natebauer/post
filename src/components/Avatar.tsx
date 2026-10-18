@@ -8,7 +8,7 @@ import { cx, initials } from "../util";
 const loaded = new Set<string>();
 
 /** A hue from 0–359 that stays the same for an address, so each sender keeps their color. */
-function hueFor(key: string): number {
+export function hueFor(key: string): number {
   let h = 0;
   for (let i = 0; i < key.length; i++) h = (h * 31 + key.charCodeAt(i)) | 0;
   return Math.abs(h) % 360;
