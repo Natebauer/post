@@ -617,10 +617,43 @@ body:has(.composer.floating:not(.min)) .snacks {
   margin: 0 6px;
 }
 .c-foot .status {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
   font-size: var(--fs-1);
   color: var(--text-3);
   margin-left: auto;
   margin-right: 6px;
+}
+.c-foot .status.saved {
+  animation: saved-settle 2.4s var(--ease) both;
+}
+.c-foot .status.error {
+  color: var(--danger);
+}
+.saved-tick {
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+.saved-tick path {
+  stroke-dasharray: 1;
+  stroke-dashoffset: 1;
+  animation: tick-draw 360ms var(--ease-move) 60ms forwards;
+}
+@keyframes saved-settle {
+  0%,
+  45% {
+    color: var(--accent-text);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .saved-tick path {
+    animation: none;
+    stroke-dashoffset: 0;
+  }
 }
 
 /* ---------- setup ---------- */

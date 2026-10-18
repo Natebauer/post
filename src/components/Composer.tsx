@@ -627,7 +627,13 @@ export function Composer({ draft: original, mode: initialMode }: { draft: Compos
                   e.target.value = "";
                 }}
               />
-              <span className="status">
+              <span className={cx("status", saveState)} key={saveState}>
+                {/* Saved: a check draws itself in the accent, then the line settles back to gray. */}
+                {saveState === "saved" && (
+                  <svg className="saved-tick" viewBox="0 0 16 16" width="13" height="13" aria-hidden>
+                    <path d="m3.5 8.4 2.9 2.9 6.1-6.6" pathLength={1} />
+                  </svg>
+                )}
                 {saveState === "saving" ? "Saving…" : saveState === "saved" ? "Draft saved" : saveState === "error" ? "Couldn't save draft" : ""}
               </span>
               <button className="icon-btn sm" title="Discard draft" onClick={() => void discard()}>
