@@ -400,3 +400,34 @@
   margin-top: -3.5px;
   box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 16%, transparent);
 }
+
+/* ---------- row actions slide in over the row ---------- */
+/* No floating box: the buttons slide in from the right on the row's own color, which fades in
+   over the text so the subject runs under them instead of being cut by a card. */
+.row-actions {
+  top: 0;
+  bottom: 0;
+  right: 0;
+  transform: translateX(var(--travel-lg));
+  align-items: center;
+  padding: 0 var(--s-2) 0 40px;
+  border: 0;
+  border-radius: 0 calc(var(--r-3) - 6px) calc(var(--r-3) - 6px) 0;
+  box-shadow: none;
+  background: linear-gradient(var(--hover), var(--hover)), var(--surface);
+  -webkit-mask-image: linear-gradient(to right, transparent, #000 32px);
+  mask-image: linear-gradient(to right, transparent, #000 32px);
+  transition:
+    opacity var(--fast) var(--ease),
+    transform var(--med) var(--ease);
+}
+.row:hover .row-actions {
+  transform: none;
+}
+.row.selected .row-actions {
+  background: var(--selected-bg);
+}
+.row.cursor .row-actions,
+.row.checked .row-actions {
+  background: linear-gradient(var(--accent-softer), var(--accent-softer)), var(--surface);
+}
