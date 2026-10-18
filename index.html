@@ -4,8 +4,76 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Post</title>
+    <style>
+      /* Shown while Post starts, so the window never opens blank; it fades out once Post is
+         ready (hideSplash in main.tsx). */
+      #splash {
+        position: fixed;
+        inset: 0;
+        z-index: 1000;
+        display: grid;
+        place-items: center;
+        background: #e4e4e1;
+        transition: opacity 260ms cubic-bezier(0.4, 0, 1, 1);
+      }
+      #splash.gone {
+        opacity: 0;
+        pointer-events: none;
+      }
+      #splash svg {
+        filter: drop-shadow(0 6px 18px rgba(42, 115, 123, 0.28));
+        animation: splash-in 520ms cubic-bezier(0.2, 0.9, 0.3, 1.2) both;
+      }
+      #splash .glow {
+        position: absolute;
+        width: 220px;
+        height: 220px;
+        border-radius: 50%;
+        background: radial-gradient(circle, rgba(42, 115, 123, 0.14), transparent 65%);
+        animation: splash-glow 1.6s ease-in-out infinite alternate;
+      }
+      @keyframes splash-in {
+        from {
+          opacity: 0;
+          transform: scale(0.82) rotate(-6deg);
+        }
+      }
+      @keyframes splash-glow {
+        to {
+          transform: scale(1.12);
+          opacity: 0.6;
+        }
+      }
+      @media (prefers-color-scheme: dark) {
+        #splash {
+          background: #18191c;
+        }
+      }
+      @media (prefers-reduced-motion: reduce) {
+        #splash svg,
+        #splash .glow {
+          animation: none;
+        }
+      }
+    </style>
   </head>
   <body>
+    <div id="splash" aria-hidden="true">
+      <span class="glow"></span>
+      <svg width="64" height="64" viewBox="0 0 22 22">
+        <mask id="splash-perf">
+          <rect width="22" height="22" fill="#fff" />
+          <g fill="#000">
+            <circle cx="2" cy="1" r="1.15" /><circle cx="6.5" cy="1" r="1.15" /><circle cx="11" cy="1" r="1.15" /><circle cx="15.5" cy="1" r="1.15" /><circle cx="20" cy="1" r="1.15" />
+            <circle cx="2" cy="21" r="1.15" /><circle cx="6.5" cy="21" r="1.15" /><circle cx="11" cy="21" r="1.15" /><circle cx="15.5" cy="21" r="1.15" /><circle cx="20" cy="21" r="1.15" />
+            <circle cx="1" cy="2" r="1.15" /><circle cx="1" cy="6.5" r="1.15" /><circle cx="1" cy="11" r="1.15" /><circle cx="1" cy="15.5" r="1.15" /><circle cx="1" cy="20" r="1.15" />
+            <circle cx="21" cy="2" r="1.15" /><circle cx="21" cy="6.5" r="1.15" /><circle cx="21" cy="11" r="1.15" /><circle cx="21" cy="15.5" r="1.15" /><circle cx="21" cy="20" r="1.15" />
+          </g>
+        </mask>
+        <rect x="1" y="1" width="20" height="20" fill="#2a737b" mask="url(#splash-perf)" />
+        <path fill="#ffffff" d="M9.3 16.3H6.9V6.9h3.9q1.1 0 1.9.3.8.3 1.3 1 .5.7.5 2 0 1.1-.5 1.9-.5.8-1.4 1.1-.9.4-1.9.4H9.3Zm0-7.2v2.4h1.4q.7 0 1.1-.3.4-.3.4-1 0-.5-.3-.8-.4-.3-1.2-.3Z" />
+      </svg>
+    </div>
     <div id="root"></div>
     <script type="module" src="/src/main.tsx"></script>
   </body>

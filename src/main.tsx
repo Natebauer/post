@@ -12,6 +12,7 @@ import "./styles/07-sections-motion.css";
 import "./styles/08-calendar-ask.css";
 import "./styles/09-moods-header-layouts.css";
 import { App } from "./App";
+import { hideSplash } from "./splash";
 import { ComposeWindow } from "./ComposeWindow";
 import { ErrorBoundary, logToBackend } from "./components/ErrorBoundary";
 
@@ -65,7 +66,10 @@ async function start() {
     (await import("./dev-mock")).installMock();
   }
   const compose = await isComposeWindow();
-  if (compose) logToBackend("Compose window starting");
+  if (compose) {
+    logToBackend("Compose window starting");
+    hideSplash();
+  }
   ReactDOM.createRoot(document.getElementById("root")!).render(
     <React.StrictMode>
       <ErrorBoundary>{compose ? <ComposeWindow /> : <App />}</ErrorBoundary>

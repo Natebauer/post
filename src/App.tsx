@@ -2,6 +2,7 @@ import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { listen } from "@tauri-apps/api/event";
 import { api, type ComposeData, type Settings, type SyncStatus } from "./api";
 import { useStore } from "./store";
+import { hideSplash } from "./splash";
 import { announceSent, newDraft, openCompose, type ComposeDraft, type SentInfo } from "./compose";
 import { applyTheme, onSystemThemeChange } from "./theme";
 import { updateBadge } from "./badge";
@@ -208,6 +209,8 @@ export function App() {
 
   useEffect(() => {
     applyTheme(settings);
+    // The splash goes once the mood is on and there's a first frame to show.
+    if (settings) requestAnimationFrame(() => requestAnimationFrame(hideSplash));
     return onSystemThemeChange(() => applyTheme(useStore.getState().settings));
   }, [settings]);
 
