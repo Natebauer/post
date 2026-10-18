@@ -350,6 +350,25 @@ body:has(.composer.floating:not(.min)) .snacks {
   overflow: hidden;
   text-overflow: ellipsis;
 }
+/* Who it's to, as a little overlapping row of avatars before the title. */
+.c-head-people {
+  flex: none;
+  display: flex;
+  margin-right: 6px;
+}
+.c-head-people .avatar {
+  box-shadow: 0 0 0 2px var(--elevated, var(--surface));
+  animation: c-head-person 260ms cubic-bezier(0.3, 1.4, 0.5, 1);
+}
+.c-head-people .avatar + .avatar {
+  margin-left: -6px;
+}
+@keyframes c-head-person {
+  from {
+    opacity: 0;
+    transform: scale(0.6);
+  }
+}
 .c-field {
   display: flex;
   align-items: flex-start;

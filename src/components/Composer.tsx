@@ -34,6 +34,7 @@ import { checkBeforeSend, type SendIssue } from "../sendCheck";
 import { cx, escapeHtml, formatBytes, isValidEmail, sanitizeHtml } from "../util";
 import { flySend } from "../sendFly";
 import { RecipientField } from "./RecipientField";
+import { Avatar } from "./Avatar";
 import { TimePicker } from "./TimePicker";
 import { WindowControls } from "./TitleBar";
 import { Popover } from "./Popover";
@@ -333,7 +334,12 @@ export function Composer({ draft: original, mode: initialMode }: { draft: Compos
   };
 
   const isMin = mode === "floating" && minimized;
-  const title = d.subject.trim() || TITLES[d.kind];
+  // Once there's someone to write to, the title says who (and shows them) until there's a subject.
+  const people = [...d.to, ...d.cc];
+  const toLine = people.length
+    ? `To ${people[0].name || people[0].email}${people.length > 1 ? ` and ${people.length - 1} other${people.length > 2 ? "s" : ""}` : ""}`
+    : "";
+  const title = d.subject.trim() || (d.kind === "new" && toLine) || TITLES[d.kind];
 
   return (
     <>
@@ -358,6 +364,13 @@ export function Composer({ draft: original, mode: initialMode }: { draft: Compos
             data-tauri-drag-region={mode === "window" ? true : undefined}
             onClick={() => isMin && useStore.setState({ composeMinimized: false })}
           >
+            {people.length > 0 && (
+              <span className="c-head-people" aria-hidden>
+                {people.slice(0, 3).map((a) => (
+                  <Avatar key={a.email} email={a.email} name={a.name || a.email} size="xs" />
+                ))}
+              </span>
+            )}
             <span className="title" data-tauri-drag-region={mode === "window" ? true : undefined}>
               {title}
             </span>
