@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { createPortal } from "react-dom";
-import { Plus, Trash2, X } from "lucide-react";
+import { Bell, Keyboard, Monitor, Palette, PenLine, Plus, Sparkles, Trash2, UserRound, X } from "lucide-react";
 import { api, errText, type AiStatus, type ComposeMode, type Settings, type Template } from "../api";
 import { useStore } from "../store";
 import { ACCENTS } from "../theme";
@@ -13,6 +13,17 @@ import { setZoom } from "../actions";
 import { etaText } from "./TitleBar";
 
 type Tab = "appearance" | "compose" | "notifications" | "ai" | "shortcuts" | "system" | "account";
+
+/** An icon for each section of Settings, shown beside its name. */
+const TAB_ICONS: Record<Tab, JSX.Element> = {
+  appearance: <Palette size={16} />,
+  compose: <PenLine size={16} />,
+  notifications: <Bell size={16} />,
+  ai: <Sparkles size={16} />,
+  shortcuts: <Keyboard size={16} />,
+  system: <Monitor size={16} />,
+  account: <UserRound size={16} />,
+};
 
 const money = (n: number) => (n > 0 && n < 0.01 ? "<$0.01" : `$${n.toFixed(2)}`);
 
@@ -341,6 +352,7 @@ export function SettingsModal() {
           <h3>Settings</h3>
           {tabs.map(([t, l]) => (
             <button key={t} className={cx("nav-item", tab === t && "active")} aria-current={tab === t ? "page" : undefined} onClick={() => setTab(t)}>
+              {TAB_ICONS[t]}
               {l}
             </button>
           ))}

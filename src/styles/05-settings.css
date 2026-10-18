@@ -300,3 +300,16 @@
     scroll-behavior: auto !important;
   }
 }
+
+/* Section icons in the Settings sidebar, tinted with the accent on the open section. */
+.settings nav .nav-item svg {
+  flex: none;
+  color: var(--text-3);
+  transition: color var(--fast) var(--ease);
+}
+.settings nav .nav-item:hover svg {
+  color: var(--text-2);
+}
+.settings nav .nav-item.active svg {
+  color: var(--accent-text);
+}
