@@ -225,8 +225,10 @@
   color: var(--text-3);
   white-space: nowrap;
   overflow: hidden;
-  text-overflow: ellipsis;
   max-height: 20px;
+  /* The line fades out at its end rather than breaking off with "…". */
+  -webkit-mask-image: linear-gradient(to right, #000 calc(100% - 44px), transparent);
+  mask-image: linear-gradient(to right, #000 calc(100% - 44px), transparent);
 }
 .rh-name,
 .rh-name .who-btn {
