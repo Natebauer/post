@@ -33,6 +33,8 @@ export interface Mood {
   accent: string;
   /** Heading typeface (conversation subjects, list and module titles). */
   display?: string;
+  /** Body face for plain-text emails; defaults to the UI face. */
+  read?: string;
   /** "dark": a dark-only mood. It stays dark whatever the Theme setting says. */
   scheme?: "dark";
   light?: MoodPalette;
@@ -56,6 +58,7 @@ export const MOODS: Mood[] = [
     blurb: "Warm off-white paper, ink-blue accents and serif headings.",
     accent: "#33598a",
     display: `Georgia, "Times New Roman", serif`,
+    read: `Charter, "Iowan Old Style", "Sitka Text", Georgia, serif`,
     light: {
       chrome: "rgba(244, 239, 228, 0.72)", surface: "#fffdf8", "surface-2": "#f7f2e8", "surface-3": "#ece5d7", elevated: "#fffdf8",
       text: "#2a2621", "text-2": "#5e564b", "text-3": "#7a7062", ...tint("60, 45, 20", [0.1, 0.18, 0.05, 0.09]),
@@ -259,5 +262,7 @@ export function applyMood(root: HTMLElement, id: string | undefined, theme: "lig
   }
   if (mood.display) root.style.setProperty("--font-display", mood.display);
   else root.style.removeProperty("--font-display");
+  if (mood.read) root.style.setProperty("--font-read", mood.read);
+  else root.style.removeProperty("--font-read");
   root.dataset.mood = mood.id;
 }

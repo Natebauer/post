@@ -168,12 +168,28 @@
   user-select: text;
   cursor: auto;
 }
+/* Plain-text bodies are set for reading: a comfortable measure (about 70 characters a line),
+   generous leading and the mood's reading face. */
 .msg-text {
   white-space: pre-wrap;
   word-wrap: break-word;
   overflow-wrap: anywhere;
-  font-size: 15px;
-  line-height: 1.65;
+  max-width: 68ch;
+  font-family: var(--font-read);
+  font-size: 15.5px;
+  line-height: 1.72;
+  text-wrap: pretty;
+  color: color-mix(in srgb, var(--text) 92%, var(--surface));
+}
+.msg-text a {
+  color: var(--accent-text);
+  text-decoration-color: color-mix(in srgb, var(--accent) 40%, transparent);
+  text-decoration-thickness: 1px;
+  text-underline-offset: 3px;
+  transition: text-decoration-color var(--fast) var(--ease);
+}
+.msg-text a:hover {
+  text-decoration-color: currentColor;
 }
 .msg-tools {
   display: flex;
