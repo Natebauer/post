@@ -121,9 +121,31 @@
 .swatch:hover {
   transform: scale(1.1);
 }
+/* The chosen one: a ring in its own color, set off by a gap, and a check on it. */
+.swatch {
+  position: relative;
+}
 .swatch.on {
-  outline: 2px solid var(--text);
-  outline-offset: 2px;
+  box-shadow:
+    inset 0 0 0 1px rgba(0, 0, 0, 0.1),
+    0 0 0 2px var(--surface),
+    0 0 0 4px var(--sw, var(--text));
+}
+.swatch.on::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: #fff;
+  -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='3.2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6.5 12.5 3.6 3.6 7.4-8'/%3E%3C/svg%3E") center / 14px no-repeat;
+  mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='3.2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6.5 12.5 3.6 3.6 7.4-8'/%3E%3C/svg%3E") center / 14px no-repeat;
+  filter: drop-shadow(0 0 1px rgba(0, 0, 0, 0.55));
+  animation: swatch-check 260ms cubic-bezier(0.3, 1.5, 0.5, 1);
+}
+@keyframes swatch-check {
+  from {
+    transform: scale(0.4);
+    opacity: 0;
+  }
 }
 .swatch-custom {
   width: 24px;

@@ -1,5 +1,6 @@
 import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
+import type React from "react";
 import { Bell, Keyboard, Monitor, Palette, PenLine, Plus, Sparkles, Trash2, UserRound, X } from "lucide-react";
 import { api, errText, type AiStatus, type ComposeMode, type Settings, type Template } from "../api";
 import { useStore } from "../store";
@@ -454,7 +455,7 @@ export function SettingsModal() {
                     <button
                       key={a.value}
                       className={cx("swatch", settings.accent.toLowerCase() === a.value && "on")}
-                      style={{ background: a.value }}
+                      style={{ background: a.value, "--sw": a.value } as React.CSSProperties}
                       title={a.name}
                       aria-label={a.name}
                       aria-pressed={settings.accent.toLowerCase() === a.value}
@@ -484,7 +485,7 @@ export function SettingsModal() {
                     <button
                       key={c.value}
                       className={cx("swatch", settings.windowColor?.toLowerCase() === c.value && "on")}
-                      style={{ background: c.value }}
+                      style={{ background: c.value, "--sw": c.value } as React.CSSProperties}
                       title={c.name}
                       aria-label={c.name}
                       aria-pressed={settings.windowColor?.toLowerCase() === c.value}
