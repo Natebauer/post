@@ -528,3 +528,36 @@ button.sync-pill:hover {
 :is(.icon-btn, .btn, .nav-item, .winctl button, .search, .msg.collapsed .msg-head, .reply-box, .att, .copy-icon, .seg button, .hitem, .hatt, .home-ai, .cw-event, .cm-ev, .mood):hover {
   transition-duration: 0s;
 }
+
+/* ---------- display type ---------- */
+/* Inter is drawn for text sizes; from 16px up it reads better a touch tighter. Headings break
+   into balanced lines instead of leaving one word on the last. */
+.thread-subject,
+.list-head h2,
+.settings nav h3,
+.settings h4,
+.setup-card h1,
+.crash-body h1,
+.section-editor h3,
+.ob-tour-note h3,
+.cm-nav h4,
+.empty .big,
+.bulk .big {
+  letter-spacing: -0.016em;
+  text-wrap: balance;
+}
+.thread-subject,
+.rh-title .thread-subject {
+  letter-spacing: -0.021em;
+}
+.cw-num,
+.invite .cal .d {
+  letter-spacing: -0.02em;
+}
+/* Body copy avoids a lonely last word. */
+p,
+.msg-text,
+.hempty,
+.empty {
+  text-wrap: pretty;
+}
