@@ -326,6 +326,36 @@ const READING_CSS = (dark: boolean) => {
     color: ${muted};
   }
   .gmail_attr { color: ${muted}; font-size: .9em; }
+  /* Quoted history, folded behind a pill (see foldQuote). */
+  details.post-quote { margin: 1em 0 0; }
+  details.post-quote > summary {
+    display: inline-flex; align-items: center; gap: 8px;
+    list-style: none; cursor: pointer; user-select: none;
+    padding: 3px 12px 3px 8px;
+    border-radius: 999px;
+    font: 500 12.5px/1.4 ${font};
+    color: ${muted};
+    background: color-mix(in srgb, ${text} ${dark ? 9 : 5}%, transparent);
+    border: 1px solid color-mix(in srgb, ${text} ${dark ? 14 : 10}%, transparent);
+    transition: background-color .15s ease, color .15s ease, border-color .15s ease;
+  }
+  details.post-quote > summary::-webkit-details-marker { display: none; }
+  details.post-quote > summary:hover {
+    color: ${link};
+    background: color-mix(in srgb, ${accent} 10%, transparent);
+    border-color: color-mix(in srgb, ${accent} 30%, transparent);
+  }
+  details.post-quote > summary .dots {
+    display: inline-grid; place-items: center;
+    height: 16px; padding: 0 5px; border-radius: 8px;
+    font-size: 9px; letter-spacing: 1px;
+    color: ${dark ? "#1b1c1f" : "#fff"};
+    background: color-mix(in srgb, ${accent} 75%, ${muted});
+  }
+  details.post-quote[open] > summary { margin-bottom: .5em; }
+  details.post-quote[open] > :not(summary) { animation: post-unfold .26s cubic-bezier(.2,.8,.2,1); }
+  @keyframes post-unfold { from { opacity: 0; transform: translateY(-4px); } }
+  @media (prefers-reduced-motion: reduce) { details.post-quote[open] > :not(summary) { animation: none; } }
 `;
 };
 

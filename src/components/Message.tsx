@@ -30,6 +30,7 @@ import { Attachments } from "./Attachments";
 import { Popover } from "./Popover";
 import { Highlight } from "./Highlight";
 import { InviteCard } from "./Invite";
+import { earlierLabel } from "../safeHtml";
 
 /**
  * An email address followed by a small copy icon. Clicking the address or the icon copies it; the
@@ -60,7 +61,48 @@ export function CopyAddress({ email, className, iconOnly }: { email: string; cla
   );
 }
 
+/**
+ * Splits a plain-text reply from the history quoted under it ("On … wrote:" and the "> " lines
+ * after it), so the history can fold away. Nothing folds when there's nothing above the quote.
+ */
+function splitQuote(text: string): { main: string; quote: string; n: number } | null {
+  const lines = text.split("\n");
+  const wrote = (i: number) => /^On\b/.test(lines[i]) && (/wrote:\s*$/.test(lines[i]) || /wrote:\s*$/.test(lines[i + 1] ?? ""));
+  let at = lines.findIndex((l, i) => wrote(i) || /^-{2,}\s*Original Message/i.test(l));
+  if (at < 0) {
+    at = lines.findIndex((l, i) => l.startsWith(">") && lines.slice(i).every((x) => !x.trim() || x.startsWith(">")));
+  }
+  if (at <= 0) return null;
+  const main = lines.slice(0, at).join("\n").trimEnd();
+  if (!main.trim()) return null;
+  const quote = lines.slice(at).join("\n");
+  const n = Math.max(1, (quote.match(/wrote:\s*$/gm) ?? []).length);
+  return { main, quote, n };
+}
+
 export function PlainBody({ text }: { text: string }) {
+  const parts = splitQuote(text);
+  const [open, setOpen] = useState(false);
+  if (!parts) return <PlainText text={text} />;
+  return (
+    <>
+      <PlainText text={parts.main} />
+      <div className={cx("plain-quote", open && "open")}>
+        <button type="button" className="quote-pill" aria-expanded={open} onClick={() => setOpen((o) => !o)}>
+          <span className="dots">•••</span>
+          {open ? "Hide quoted text" : earlierLabel(parts.n)}
+        </button>
+        {open && (
+          <div className="plain-quote-body">
+            <PlainText text={parts.quote.replace(/^> ?/gm, "")} />
+          </div>
+        )}
+      </div>
+    </>
+  );
+}
+
+function PlainText({ text }: { text: string }) {
   return (
     <div className="msg-text">
       {linkify(text).map((p, i) =>

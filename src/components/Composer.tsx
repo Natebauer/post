@@ -447,8 +447,9 @@ export function Composer({ draft: original, mode: initialMode }: { draft: Compos
               <EditorContent editor={editor} spellCheck />
               {d.quoteHtml && (
                 <div className="quote-toggle" onClick={(e) => e.stopPropagation()}>
-                  <button className="link-btn" onClick={() => setShowQuote((s) => !s)}>
-                    {showQuote ? "Hide quoted text" : "••• Show quoted text"}
+                  <button type="button" className="quote-pill" aria-expanded={showQuote} onClick={() => setShowQuote((s) => !s)}>
+                    <span className="dots">•••</span>
+                    {showQuote ? "Hide quoted text" : "Show quoted text"}
                   </button>
                   {showQuote && (
                     <div className="quote-preview" dangerouslySetInnerHTML={{ __html: sanitizeHtml(d.quoteHtml) }} />

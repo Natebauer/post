@@ -48,6 +48,36 @@ function cleanTree(root: ParentNode, keepStyles: boolean) {
   }
 }
 
+/** "1 earlier email", "3 earlier emails": how a folded quote describes itself. */
+export function earlierLabel(n: number): string {
+  return n > 1 ? `${n} earlier emails` : "1 earlier email";
+}
+
+/**
+ * The quoted history under a reply (Gmail's and Apple Mail's) folds away behind a small pill,
+ * the way Gmail shows it. A forwarded message stays open, since it is the point of the email, and
+ * so does a quote with nothing written above it.
+ */
+function foldQuote(doc: Document) {
+  const q = Array.from(doc.querySelectorAll<HTMLElement>("div.gmail_quote, blockquote[type='cite']")).find(
+    (el) => !el.parentElement?.closest("div.gmail_quote, blockquote[type='cite']"),
+  );
+  if (!q) return;
+  if (/forwarded message|begin forwarded/i.test(q.querySelector(".gmail_attr")?.textContent ?? q.textContent?.slice(0, 200) ?? "")) return;
+  const before = doc.createRange();
+  before.setStart(doc.body, 0);
+  before.setEndBefore(q);
+  if (!(before.toString().trim() || before.cloneContents().querySelector("img"))) return;
+  const n = Math.max(1, q.querySelectorAll(".gmail_attr").length + (q.matches("blockquote") ? 1 : q.querySelectorAll("blockquote[type='cite']").length));
+  const details = doc.createElement("details");
+  details.className = "post-quote";
+  const summary = doc.createElement("summary");
+  summary.innerHTML = `<span class="dots">•••</span>`;
+  summary.append(doc.createTextNode(earlierLabel(n)));
+  q.replaceWith(details);
+  details.append(summary, q);
+}
+
 /** Strict cleanup for HTML shown in Post's own window. */
 export function sanitizeHtml(html: string): string {
   const doc = new DOMParser().parseFromString(html, "text/html");
@@ -97,6 +127,7 @@ export function prepareEmail(html: string, blockRemote: boolean): { body: string
       }
     }
   }
+  foldQuote(doc);
   const styles = Array.from(doc.querySelectorAll("style"))
     .map((s) => {
       const css = s.textContent ?? "";
