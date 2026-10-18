@@ -48,7 +48,18 @@ export function MoodPicker({ settings, onPick }: { settings: Settings; onPick: (
         onClick={() => onPick(m.id, m.accent)}
         title={m.blurb}
       >
-        <span className="mood-preview" style={{ background: solid(p.chrome) }} aria-hidden>
+        <span
+          className="mood-preview"
+          style={{
+            background: `radial-gradient(120% 90% at 0% 0%, color-mix(in srgb, ${accent} 14%, transparent), transparent 70%), ${solid(p.chrome)}`,
+          }}
+          aria-hidden
+        >
+          <span className="mp-rail">
+            <i style={{ background: accent }} />
+            <i style={{ background: p["text-3"] }} />
+            <i style={{ background: p["text-3"] }} />
+          </span>
           <span className="mp-list" style={{ background: p.surface, borderColor: p.border }}>
             <span
               className="mp-row sel"
@@ -57,15 +68,24 @@ export function MoodPicker({ settings, onPick }: { settings: Settings; onPick: (
               }}
             >
               <i style={{ background: accent }} />
-              <b style={{ background: p.text }} />
+              <span className="mp-lines">
+                <b style={{ background: p.text }} />
+                <b style={{ background: p["text-3"], width: "55%" }} />
+              </span>
             </span>
             <span className="mp-row">
               <i style={{ background: p["surface-3"] }} />
-              <b style={{ background: p["text-3"] }} />
+              <span className="mp-lines">
+                <b style={{ background: p.text, opacity: 0.45 }} />
+                <b style={{ background: p["text-3"], width: "55%" }} />
+              </span>
             </span>
             <span className="mp-row">
               <i style={{ background: p["surface-3"] }} />
-              <b style={{ background: p["text-3"] }} />
+              <span className="mp-lines">
+                <b style={{ background: p.text, opacity: 0.45 }} />
+                <b style={{ background: p["text-3"], width: "55%" }} />
+              </span>
             </span>
           </span>
           <span className="mp-read" style={{ background: p.surface, borderColor: p.border }}>
@@ -73,6 +93,7 @@ export function MoodPicker({ settings, onPick }: { settings: Settings; onPick: (
               Aa
             </span>
             <b style={{ background: p["text-3"] }} />
+            <b style={{ background: p["text-3"], width: "86%" }} />
             <b style={{ background: p["text-3"], width: "60%" }} />
             <span className="mp-btn" style={{ background: accent }} />
           </span>
