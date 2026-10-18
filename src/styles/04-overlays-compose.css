@@ -1053,3 +1053,54 @@ div.ob-check {
 .composer:not(:has(.c-editor:focus-within)) .c-foot:not(:hover) .icon-btn {
   opacity: 0.45;
 }
+
+/* ---------- tooltips (Tooltip.tsx) ---------- */
+.tooltip {
+  position: fixed;
+  z-index: 200;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  max-width: 320px;
+  padding: 4px 8px;
+  border-radius: var(--r-1);
+  background: var(--snack-bg);
+  color: var(--snack-ink);
+  font-size: var(--fs-1);
+  font-weight: 500;
+  line-height: 1.4;
+  box-shadow: var(--shadow-2);
+  pointer-events: none;
+  white-space: nowrap;
+  animation: tip-in var(--fast) var(--ease);
+}
+.tooltip.below {
+  transform: translateX(-50%);
+}
+.tooltip.above {
+  transform: translate(-50%, -100%);
+}
+.tooltip span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.tooltip kbd {
+  font: inherit;
+  font-size: 11px;
+  font-weight: 600;
+  min-width: 18px;
+  padding: 0 4px;
+  text-align: center;
+  border-radius: 4px;
+  color: var(--snack-ink);
+  background: rgba(255, 255, 255, 0.12);
+  box-shadow: inset 0 -1px 0 rgba(255, 255, 255, 0.12);
+}
+.tooltip kbd + kbd {
+  margin-left: -3px;
+}
+@keyframes tip-in {
+  from {
+    opacity: 0;
+  }
+}

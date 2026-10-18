@@ -21,6 +21,7 @@ import { AskPanel } from "./components/Ask";
 import { SettingsModal } from "./components/SettingsModal";
 import { Shortcuts } from "./components/Shortcuts";
 import { Snackbar } from "./components/Snackbar";
+import { Tooltips } from "./components/Tooltip";
 import { ClientSetup, SignIn, Tour, Welcome } from "./components/Setup";
 import { TimePicker } from "./components/TimePicker";
 
@@ -185,6 +186,7 @@ function MainView() {
       <SettingsModal />
       <Shortcuts />
       <Snackbar />
+      <Tooltips />
     </div>
   );
 }
