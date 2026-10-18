@@ -5,6 +5,8 @@ import { GroupPopover, SectionEditor, SectionItem } from "./Sections";
 import { useStore } from "../store";
 import { compose, goFolder, openAssistant } from "../actions";
 import { cx } from "../util";
+import { useGlide } from "../hooks";
+import { useRef } from "react";
 import { RollingCount } from "./RollingCount";
 import { etaText, SyncRing } from "./TitleBar";
 
@@ -83,9 +85,15 @@ export function Sidebar() {
   const senders = useStore((s) => s.settings?.senderViews ?? []);
   // Collapsed, the sidebar is a narrow rail of icons (labels come back while dragging an email).
   const tab = 0;
+  // The active item's highlight glides to the next one instead of jumping.
+  const inner = useRef<HTMLDivElement>(null);
+  const folder = useStore((s) => s.folder);
+  const searching = useStore((s) => !!s.search);
+  const glide = useGlide(inner, ".nav-item.active", [folder, searching, open, senders.length, outboxCount, counts.SNOOZED]);
   return (
     <nav className={cx("sidebar", open ? "open" : "rail")} aria-label="Folders" data-drop-label="Drop to add a sender">
-      <div className="sidebar-inner">
+      <div className={cx("sidebar-inner", glide && "has-glide")} ref={inner}>
+        {glide && <span className="nav-glide" style={glide} aria-hidden />}
         <button className="compose-btn" onClick={compose} title="Compose (C)" aria-label="Compose">
           <PenSquare size={16} /> <span className="nav-text">Compose</span>
         </button>

@@ -1,4 +1,5 @@
-import { useEffect, useState } from "react";
+import { useEffect, useLayoutEffect, useState } from "react";
+import type React from "react";
 import { exitMs } from "./store";
 
 /** Keep something mounted briefly after `open` turns false so it can animate out. */
@@ -74,4 +75,39 @@ export function useDialogFocus(ref: React.RefObject<HTMLElement>, active: boolea
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [active]);
+}
+
+/**
+ * Where a highlight should sit to cover the element matching `selector` inside `ref`, for a
+ * highlight that glides from one item to the next instead of jumping. Measured again whenever
+ * `deps` change or the container resizes; the first placement doesn't animate.
+ */
+export function useGlide(ref: React.RefObject<HTMLElement>, selector: string, deps: unknown[]): React.CSSProperties | null {
+  const [box, setBox] = useState<{ x: number; y: number; w: number; h: number } | null>(null);
+  const [moving, setMoving] = useState(false);
+  useLayoutEffect(() => {
+    const root = ref.current;
+    if (!root) return;
+    const measure = () => {
+      const el = root.querySelector<HTMLElement>(selector);
+      if (!el) return setBox(null);
+      setBox({ x: el.offsetLeft, y: el.offsetTop, w: el.offsetWidth, h: el.offsetHeight });
+    };
+    measure();
+    const ro = new ResizeObserver(measure);
+    ro.observe(root);
+    return () => ro.disconnect();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, deps);
+  useEffect(() => {
+    const t = window.setTimeout(() => setMoving(true), 80);
+    return () => window.clearTimeout(t);
+  }, []);
+  if (!box) return null;
+  return {
+    transform: `translate(${box.x}px, ${box.y}px)`,
+    width: box.w,
+    height: box.h,
+    transition: moving ? undefined : "none",
+  };
 }
