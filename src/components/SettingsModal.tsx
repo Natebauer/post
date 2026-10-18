@@ -7,7 +7,8 @@ import { ACCENTS, WINDOW_COLORS } from "../theme";
 import { MoodPicker } from "./MoodPicker";
 import { moodById } from "../moods";
 import { ShortcutList } from "./Shortcuts";
-import { cx } from "../util";
+import { cx, relativeAgo } from "../util";
+import { Avatar } from "./Avatar";
 import { usePresence } from "../hooks";
 import { setZoom } from "../actions";
 import { etaText } from "./TitleBar";
@@ -292,6 +293,34 @@ function Templates({ value, onChange }: { value: Template[]; onChange: (t: Templ
       <button className="btn outline" onClick={() => commit([...list, { name: "", body: "" }])}>
         <Plus size={14} /> Add template
       </button>
+    </div>
+  );
+}
+
+/** Who you're signed in as: your avatar, name and address, and how syncing is going. */
+function AccountCard({ email, name }: { email: string; name: string }) {
+  const status = useStore((s) => s.status);
+  const state = !status
+    ? null
+    : status.error
+      ? { tone: "problem", text: "Sync problem" }
+      : status.phase === "backfill" && status.total
+        ? { tone: "busy", text: `Indexing ${Math.min(100, Math.round((status.backfilled / status.total) * 100))}%` }
+        : { tone: "ok", text: status.lastSync ? `Up to date · synced ${relativeAgo(status.lastSync)}` : "Up to date" };
+  return (
+    <div className="account-card">
+      <Avatar email={email} name={name || email} size="lg" />
+      <div className="ac-who">
+        <div className="ac-name">{name || email || "Not signed in"}</div>
+        {name && <div className="ac-email">{email}</div>}
+        {state && (
+          <span className={cx("ac-sync", state.tone)}>
+            <span className="ac-dot" />
+            {state.text}
+          </span>
+        )}
+      </div>
+      <span className="ac-gmail">Gmail</span>
     </div>
   );
 }
@@ -667,7 +696,8 @@ export function SettingsModal() {
           {tab === "account" && (
             <>
               <h4>Account</h4>
-              <Row title={email || "Not signed in"} sub="Connected through your own Google Cloud OAuth client">
+              <AccountCard email={email ?? ""} name={settings?.displayName ?? ""} />
+              <Row title="Sign out" sub="Connected through your own Google Cloud OAuth client">
                 <button
                   className="btn danger"
                   onClick={() => {

@@ -259,6 +259,84 @@
 }
 /* A soft band of light sweeps across loading placeholders. With reduced motion they just
    breathe, as before. */
+/* ---------- the account card (Settings, Account) ---------- */
+.account-card {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: var(--s-4);
+  margin: 0 0 var(--s-4);
+  padding: var(--s-4) var(--s-5);
+  border-radius: var(--r-3);
+  overflow: hidden;
+  background:
+    radial-gradient(120% 140% at 0% 0%, color-mix(in srgb, var(--accent) 16%, transparent), transparent 60%),
+    var(--surface-2);
+  border: 1px solid var(--border);
+  box-shadow: var(--shadow-1);
+}
+.account-card .avatar {
+  width: 56px;
+  height: 56px;
+  font-size: 19px;
+  box-shadow:
+    0 0 0 3px var(--surface),
+    0 4px 12px -4px rgba(0, 0, 0, 0.3);
+}
+.ac-who {
+  min-width: 0;
+  display: grid;
+  gap: 2px;
+}
+.ac-name {
+  font-size: var(--fs-4);
+  font-weight: 650;
+  letter-spacing: -0.01em;
+}
+.ac-email {
+  font-size: var(--fs-2);
+  color: var(--text-2);
+  user-select: text;
+}
+.ac-sync {
+  justify-self: start;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 6px;
+  padding: 2px 9px 2px 7px;
+  border-radius: 999px;
+  font-size: 11.5px;
+  font-weight: 550;
+  color: var(--text-2);
+  background: var(--surface);
+  box-shadow: inset 0 0 0 1px var(--border);
+}
+.ac-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: #3aa36b;
+  box-shadow: 0 0 0 3px color-mix(in srgb, #3aa36b 18%, transparent);
+}
+.ac-sync.busy .ac-dot {
+  background: var(--accent);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 18%, transparent);
+}
+.ac-sync.problem .ac-dot {
+  background: var(--danger);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--danger) 18%, transparent);
+}
+.ac-gmail {
+  position: absolute;
+  top: 12px;
+  right: 14px;
+  font-size: 10.5px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--text-3);
+}
 .skeleton {
   background:
     linear-gradient(
