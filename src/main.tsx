@@ -21,6 +21,26 @@ document.addEventListener("contextmenu", (e) => {
   if (!t.closest("input, textarea, [contenteditable], .msg-body, .ProseMirror")) e.preventDefault();
 });
 
+// Scrollbars show while something scrolls and fade back afterwards (01-base.css).
+const scrolling = new Map<Element, number>();
+document.addEventListener(
+  "scroll",
+  (e) => {
+    const el = e.target instanceof Element ? e.target : document.scrollingElement;
+    if (!el) return;
+    el.classList.add("is-scrolling");
+    window.clearTimeout(scrolling.get(el));
+    scrolling.set(
+      el,
+      window.setTimeout(() => {
+        el.classList.remove("is-scrolling");
+        scrolling.delete(el);
+      }, 900),
+    );
+  },
+  true,
+);
+
 // Anything that goes wrong in the UI ends up in Post's log, so problems can be diagnosed.
 window.addEventListener("error", (e) => logToBackend(`Uncaught: ${e.message} at ${e.filename}:${e.lineno}`));
 window.addEventListener("unhandledrejection", (e) => {

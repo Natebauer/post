@@ -254,8 +254,17 @@ a:focus-visible {
   border: 3px solid transparent;
   background-clip: content-box;
 }
+/* Pointing at a scrollable area hints at its scrollbar; scrolling shows it fully, and it
+   widens when you reach for it. */
 *:hover::-webkit-scrollbar-thumb {
-  background-color: var(--border-strong);
+  background-color: color-mix(in srgb, var(--text) 9%, transparent);
+}
+.is-scrolling::-webkit-scrollbar-thumb {
+  background-color: color-mix(in srgb, var(--text) 26%, transparent);
+}
+::-webkit-scrollbar-thumb:hover {
+  border-width: 2px;
+  background-color: color-mix(in srgb, var(--text) 34%, transparent);
 }
 ::-webkit-scrollbar-track {
   background: transparent;
