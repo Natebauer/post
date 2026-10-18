@@ -513,6 +513,9 @@ export function ThreadList() {
   }
   const stuckPush = Math.min(0, nextGroupAt - scrollTop - GROUP);
 
+  // How many emails have scrolled out of sight above (for "Back to top").
+  const above = v.measurementsCache.findIndex((m) => m.end > scrollTop + 6);
+
   // Infinite scroll
   const last = v.getVirtualItems().at(-1);
   useEffect(() => {
@@ -543,22 +546,6 @@ export function ThreadList() {
         <span className="sub tnum" aria-live="polite">
           {sub}
         </span>
-        {deep && (
-          <button
-            className="icon-btn sm to-top"
-            title="Back to top"
-            aria-label="Back to top"
-            onClick={() => {
-              const el = scrollRef.current;
-              if (!el) return;
-              // From far down, jump most of the way, then glide the last stretch.
-              if (el.scrollTop > ROW * 12) el.scrollTop = ROW * 12;
-              el.scrollTo({ top: 0, behavior: scrollBehavior() });
-            }}
-          >
-            <ArrowUpToLine size={16} />
-          </button>
-        )}
         {!search && folder !== "SENT" && folder !== "DRAFT" && !folder.startsWith("sec:") && (
           <button className="icon-btn sm" title="More" aria-label="List options" onClick={(e) => setListMenu(e.currentTarget)}>
             <MoreHorizontal size={16} />
@@ -644,6 +631,22 @@ export function ThreadList() {
           </>
         )}
       </div>
+      {deep && (
+        <button
+          className="to-top-pill"
+          aria-label="Back to top"
+          onClick={() => {
+            const el = scrollRef.current;
+            if (!el) return;
+            // From far down, jump most of the way, then glide the last stretch.
+            if (el.scrollTop > ROW * 12) el.scrollTop = ROW * 12;
+            el.scrollTo({ top: 0, behavior: scrollBehavior() });
+          }}
+        >
+          <ArrowUpToLine size={14} />
+          {above} above
+        </button>
+      )}
       {menu && <ThreadMenu t={menu.t} point={menu.p} onClose={() => setMenu(null)} />}
       {listMenu && <ListMenu anchor={listMenu} onClose={() => setListMenu(null)} />}
     </section>

@@ -457,3 +457,41 @@ body.dragging-mail .sidebar-inner {
     opacity: 0;
   }
 }
+
+/* ---------- back to top ---------- */
+/* Once you're well down the list, a pill floats at its foot with how many emails are above. */
+.list-pane {
+  position: relative;
+}
+.to-top-pill {
+  position: absolute;
+  left: 50%;
+  bottom: var(--s-4);
+  z-index: 4;
+  translate: -50% 0;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 32px;
+  padding: 0 var(--s-4) 0 var(--s-3);
+  border-radius: 16px;
+  font-size: var(--fs-2);
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  color: var(--accent-ink);
+  background: var(--accent);
+  box-shadow:
+    var(--shadow-2),
+    0 4px 14px color-mix(in srgb, var(--accent) 35%, transparent);
+  animation: to-top-in var(--med) var(--ease);
+  transition: transform var(--fast) var(--ease);
+}
+.to-top-pill:hover {
+  transform: translateY(-2px);
+}
+@keyframes to-top-in {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+}
