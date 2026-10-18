@@ -655,6 +655,15 @@ export function ThreadList() {
           )}
         </div>
       )}
+      {!search && (folder === "TRASH" || folder === "SPAM") && items.length > 0 && (
+        // A gentle note on what happens to mail left here.
+        <div className={cx("folder-note", folder === "SPAM" && "spam")}>
+          {folder === "TRASH" ? <Trash2 size={14} /> : <OctagonAlert size={14} />}
+          <span>
+            {folder === "TRASH" ? "Conversations in Trash" : "Conversations in Spam"} are deleted for good after 30 days.
+          </span>
+        </div>
+      )}
       <div
         className="list-scroll"
         ref={scrollRef}
