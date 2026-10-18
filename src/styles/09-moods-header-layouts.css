@@ -397,6 +397,27 @@ body:not(.dragging-mail) .sidebar.rail .nav-sep {
 .sidebar .nav-text {
   white-space: nowrap;
 }
+/* Opening the sidebar, the labels fade and slide in one after another, down the list. */
+@media (prefers-reduced-motion: no-preference) {
+  .sidebar.open .nav-text {
+    animation: nav-label-in 300ms var(--ease-move) both;
+  }
+  .sidebar.open .sidebar-inner > :nth-child(2) .nav-text { animation-delay: 20ms; }
+  .sidebar.open .sidebar-inner > :nth-child(3) .nav-text { animation-delay: 45ms; }
+  .sidebar.open .sidebar-inner > :nth-child(4) .nav-text { animation-delay: 70ms; }
+  .sidebar.open .sidebar-inner > :nth-child(5) .nav-text { animation-delay: 95ms; }
+  .sidebar.open .sidebar-inner > :nth-child(6) .nav-text { animation-delay: 120ms; }
+  .sidebar.open .sidebar-inner > :nth-child(7) .nav-text { animation-delay: 145ms; }
+  .sidebar.open .sidebar-inner > :nth-child(8) .nav-text { animation-delay: 170ms; }
+  .sidebar.open .sidebar-inner > :nth-child(9) .nav-text { animation-delay: 195ms; }
+  .sidebar.open .sidebar-inner > :nth-child(n + 10) .nav-text { animation-delay: 220ms; }
+}
+@keyframes nav-label-in {
+  from {
+    opacity: 0;
+    transform: translateX(-8px);
+  }
+}
 .settings-shortcuts .shortcut-group {
   margin-top: var(--s-4);
 }
