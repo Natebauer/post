@@ -14,7 +14,7 @@ const CLASSIC: Record<
     surface: "#ffffff",
     "surface-3": "#ececea",
     text: "#1b1c1f",
-    "text-3": "#6f727a",
+    "text-3": "#6c6f77",
     border: "rgba(20,20,30,0.1)",
   },
   dark: {

@@ -24,7 +24,7 @@
   --elevated: #ffffff;
   --text: #1b1c1f;
   --text-2: #55585f;
-  --text-3: #6f727a; /* 4.6:1 on white */
+  --text-3: #6c6f77; /* 4.6:1 on surface-2, 5.0:1 on white */
   --border: rgba(20, 20, 30, 0.08);
   --border-strong: rgba(20, 20, 30, 0.14);
   --hover: rgba(20, 20, 30, 0.04);

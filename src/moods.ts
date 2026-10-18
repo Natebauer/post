@@ -61,7 +61,7 @@ export const MOODS: Mood[] = [
     read: `Charter, "Iowan Old Style", "Sitka Text", Georgia, serif`,
     light: {
       chrome: "rgba(244, 239, 228, 0.72)", surface: "#fffdf8", "surface-2": "#f7f2e8", "surface-3": "#ece5d7", elevated: "#fffdf8",
-      text: "#2a2621", "text-2": "#5e564b", "text-3": "#7a7062", ...tint("60, 45, 20", [0.1, 0.18, 0.05, 0.09]),
+      text: "#2a2621", "text-2": "#5e564b", "text-3": "#766c5f", ...tint("60, 45, 20", [0.1, 0.18, 0.05, 0.09]),
       "avatar-bg": "#ece4d4", "avatar-ink": "#6b5f4c", "tint-base": "#f6f0e4",
     },
     dark: {
@@ -77,7 +77,7 @@ export const MOODS: Mood[] = [
     accent: "#4f6b8a",
     light: {
       chrome: "rgba(226, 232, 240, 0.7)", surface: "#ffffff", "surface-2": "#f3f6f9", "surface-3": "#e6ebf1", elevated: "#ffffff",
-      text: "#18202b", "text-2": "#4b5868", "text-3": "#66748a", ...tint("20, 40, 70", [0.09, 0.16, 0.045, 0.08]),
+      text: "#18202b", "text-2": "#4b5868", "text-3": "#627085", ...tint("20, 40, 70", [0.09, 0.16, 0.045, 0.08]),
       "avatar-bg": "#e2e8ef", "avatar-ink": "#4b5868", "tint-base": "#f2f5f8",
     },
     dark: {
@@ -93,7 +93,7 @@ export const MOODS: Mood[] = [
     accent: "#2f7a55",
     light: {
       chrome: "rgba(228, 236, 228, 0.7)", surface: "#fdfefc", "surface-2": "#f2f6f1", "surface-3": "#e3ebe2", elevated: "#ffffff",
-      text: "#1c241e", "text-2": "#4d5c51", "text-3": "#65756a", ...tint("30, 60, 35", LIGHT_A),
+      text: "#1c241e", "text-2": "#4d5c51", "text-3": "#627267", ...tint("30, 60, 35", LIGHT_A),
       "avatar-bg": "#e1eadf", "avatar-ink": "#4d5c51", "tint-base": "#f1f5ef",
     },
     dark: {
@@ -109,7 +109,7 @@ export const MOODS: Mood[] = [
     accent: "#b0742a",
     light: {
       chrome: "rgba(240, 232, 218, 0.72)", surface: "#fffcf6", "surface-2": "#f8f1e5", "surface-3": "#efe5d3", elevated: "#fffcf6",
-      text: "#2b241b", "text-2": "#625545", "text-3": "#7d6e5b", ...tint("80, 55, 20", [0.11, 0.19, 0.05, 0.09]),
+      text: "#2b241b", "text-2": "#625545", "text-3": "#796a58", ...tint("80, 55, 20", [0.11, 0.19, 0.05, 0.09]),
       "avatar-bg": "#efe3cf", "avatar-ink": "#6b5a43", "tint-base": "#f8f0e3",
     },
     dark: {
