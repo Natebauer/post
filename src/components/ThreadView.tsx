@@ -86,6 +86,10 @@ function BulkView({ ids }: { ids: string[] }) {
   return (
     <div className="bulk" role="region" aria-label="Selected conversations">
       <div>
+        {/* How many, as a large accent numeral that pops as the count changes. */}
+        <div className="bulk-count" key={ids.length} aria-hidden>
+          {ids.length}
+        </div>
         <div className="big">{ids.length} conversations selected</div>
         <div className="actions">
           <button className="btn outline" onClick={() => void A.markRead(true, ids)}>
