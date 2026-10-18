@@ -82,8 +82,8 @@
   --ease: cubic-bezier(0.2, 0.7, 0.2, 1); /* entering */
   --ease-in: cubic-bezier(0.4, 0, 1, 1); /* leaving */
   --ease-move: cubic-bezier(0.4, 0, 0.2, 1); /* moving or resizing in place */
-  --pane-in: 70ms; /* an email opening */
-  --pane-out: 80ms; /* an email closing */
+  --pane-in: 170ms; /* an email opening */
+  --pane-out: 170ms; /* an email closing */
   --fast: 120ms;
   --med: 170ms;
   --slow: 220ms;
@@ -350,8 +350,9 @@ a:focus-visible {
 .read-pane.pane-waiting {
   opacity: 0;
 }
+/* Opening is closing played backwards: the same length, on the mirror of its curve. */
 .read-pane.pane-opening {
-  animation: fade var(--pane-in) var(--ease) both;
+  animation: fade var(--pane-in) cubic-bezier(0, 0, 0.6, 1) both;
 }
 /* The still copy shows things as they were: nothing inside it replays its entrance animation. */
 .pane-still * {

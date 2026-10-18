@@ -5,8 +5,8 @@
  */
 
 const FALLBACK_MS: Record<string, number> = {
-  "pane-in": 70,
-  "pane-out": 80,
+  "pane-in": 170,
+  "pane-out": 170,
   fast: 120,
   med: 170,
   slow: 220,
