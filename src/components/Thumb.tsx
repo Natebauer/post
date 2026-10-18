@@ -69,6 +69,8 @@ export function Thumb({ a, fallback }: { a: ThumbSource; fallback: ReactNode }) 
   const key = `${a.messageId}/${a.partId}`;
   const [src, setSrc] = useState<string | null>(isImage(a) ? a.url : cache.get(key) ?? null);
   const ref = useRef<HTMLSpanElement>(null);
+  // Until the picture has arrived its card breathes softly, then the picture fades in.
+  const [shown, setShown] = useState(false);
 
   useEffect(() => {
     if (isImage(a) || cache.has(key)) return;
@@ -90,8 +92,20 @@ export function Thumb({ a, fallback }: { a: ThumbSource; fallback: ReactNode }) 
   }, [key]);
 
   return (
-    <span ref={ref} className="thumb">
-      {src ? <img src={src} alt="" loading="lazy" draggable={false} /> : fallback}
+    <span ref={ref} className={src && !shown ? "thumb loading" : "thumb"}>
+      {src ? (
+        <img
+          src={src}
+          alt=""
+          loading="lazy"
+          draggable={false}
+          className={shown ? "shown" : undefined}
+          onLoad={() => setShown(true)}
+          onError={() => setShown(true)}
+        />
+      ) : (
+        fallback
+      )}
     </span>
   );
 }

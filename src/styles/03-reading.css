@@ -599,3 +599,27 @@
 .reply-bar .btn.outline {
   border-radius: 20px;
 }
+
+/* ---------- pictures arriving ---------- */
+/* A preview that's still downloading shimmers in place, then the picture fades in over it. */
+.thumb.loading {
+  display: block;
+  width: 100%;
+  height: 100%;
+  background:
+    linear-gradient(100deg, transparent 30%, color-mix(in srgb, var(--surface) 70%, transparent) 50%, transparent 70%) 0 0 / 250% 100% no-repeat,
+    var(--surface-3);
+  animation: shimmer 1.8s var(--ease-move) infinite;
+}
+.thumb img {
+  opacity: 0;
+  transition: opacity var(--slow) var(--ease);
+}
+.thumb img.shown {
+  opacity: 1;
+}
+@media (prefers-reduced-motion: reduce) {
+  .thumb.loading {
+    animation: none;
+  }
+}
