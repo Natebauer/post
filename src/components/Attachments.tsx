@@ -21,13 +21,18 @@ function iconFor(a: Attachment) {
 
 /** A short type label and a color for it: PDFs red, sheets green, documents blue, and so on. */
 function kindOf(a: Attachment): { label: string; color: string } {
-  const ext = (/\.([a-z0-9]{1,5})$/i.exec(a.filename)?.[1] ?? "").toUpperCase();
-  if (isPdf(a)) return { label: "PDF", color: "#d5483c" };
-  if (isImage(a)) return { label: ext || "IMG", color: "#8a5aa8" };
-  if (/sheet|excel|csv/.test(a.mimeType) || /^(XLSX?|CSV|NUMBERS)$/.test(ext)) return { label: ext || "XLS", color: "#2f9e5b" };
-  if (/word|document|rtf/.test(a.mimeType) || /^(DOCX?|RTF|PAGES|ODT)$/.test(ext)) return { label: ext || "DOC", color: "#3e6fd8" };
-  if (/presentation|powerpoint/.test(a.mimeType) || /^(PPTX?|KEY)$/.test(ext)) return { label: ext || "PPT", color: "#d9822b" };
-  if (/zip|compressed|tar/.test(a.mimeType)) return { label: ext || "ZIP", color: "#7a7062" };
+  return fileKind(a.filename, a.mimeType);
+}
+
+/** The same, from just a file's name (and its type when known), for files being attached. */
+export function fileKind(filename: string, mimeType = ""): { label: string; color: string } {
+  const ext = (/\.([a-z0-9]{1,5})$/i.exec(filename)?.[1] ?? "").toUpperCase();
+  if (mimeType === "application/pdf" || ext === "PDF") return { label: "PDF", color: "#d5483c" };
+  if (/^image\//i.test(mimeType) || /^(PNG|JPE?G|GIF|WEBP|BMP|SVG|HEIC)$/.test(ext)) return { label: ext || "IMG", color: "#8a5aa8" };
+  if (/sheet|excel|csv/.test(mimeType) || /^(XLSX?|CSV|NUMBERS)$/.test(ext)) return { label: ext || "XLS", color: "#2f9e5b" };
+  if (/word|document|rtf/.test(mimeType) || /^(DOCX?|RTF|PAGES|ODT)$/.test(ext)) return { label: ext || "DOC", color: "#3e6fd8" };
+  if (/presentation|powerpoint/.test(mimeType) || /^(PPTX?|KEY)$/.test(ext)) return { label: ext || "PPT", color: "#d9822b" };
+  if (/zip|compressed|tar/.test(mimeType) || /^(ZIP|RAR|7Z|GZ|TAR)$/.test(ext)) return { label: ext || "ZIP", color: "#7a7062" };
   return { label: ext || "FILE", color: "#6c6f77" };
 }
 

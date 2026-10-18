@@ -34,6 +34,7 @@ import { checkBeforeSend, type SendIssue } from "../sendCheck";
 import { cx, escapeHtml, formatBytes, isValidEmail, sanitizeHtml } from "../util";
 import { flySend } from "../sendFly";
 import { RecipientField } from "./RecipientField";
+import { fileKind } from "./Attachments";
 import { Avatar } from "./Avatar";
 import { TimePicker } from "./TimePicker";
 import { WindowControls } from "./TitleBar";
@@ -514,7 +515,7 @@ export function Composer({ draft: original, mode: initialMode }: { draft: Compos
               <div className="c-atts">
                 {d.forwardAttachments.map((a, i) => (
                   <span key={`f${i}`} className="c-att" title={a.filename}>
-                    <Paperclip size={13} />
+                    <TypeTile name={a.filename} mime={a.mimeType} />
                     <span>{a.filename}</span>
                     <span className="faint">{formatBytes(a.size)}</span>
                     <button
@@ -527,7 +528,7 @@ export function Composer({ draft: original, mode: initialMode }: { draft: Compos
                 ))}
                 {d.attachments.map((a, i) => (
                   <span key={`a${i}`} className="c-att" title={a.path}>
-                    <Paperclip size={13} />
+                    <TypeTile name={a.name} />
                     <span>{a.name}</span>
                     <button
                       className="icon-btn sm"
@@ -698,3 +699,12 @@ export function Composer({ draft: original, mode: initialMode }: { draft: Compos
   );
 }
 
+/** An attached file's type as a small colored tile (PDF red, images purple…), as in emails. */
+function TypeTile({ name, mime }: { name: string; mime?: string }) {
+  const k = fileKind(name, mime);
+  return (
+    <span className="c-att-type" style={{ "--k": k.color } as React.CSSProperties}>
+      {k.label.slice(0, 4)}
+    </span>
+  );
+}

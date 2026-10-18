@@ -614,6 +614,22 @@ body:has(.composer.floating:not(.min)) .snacks {
   max-width: 260px;
   animation: fade var(--fast) var(--ease);
 }
+.c-att .c-att-type {
+  flex: none;
+  display: grid;
+  place-items: center;
+  min-width: 26px;
+  height: 18px;
+  margin-left: -6px;
+  padding: 0 4px;
+  border-radius: 5px;
+  font-size: 9px;
+  font-weight: 750;
+  letter-spacing: 0.03em;
+  color: #fff;
+  background: var(--k);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.22);
+}
 .c-att span {
   white-space: nowrap;
   overflow: hidden;
