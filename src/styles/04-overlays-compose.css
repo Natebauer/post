@@ -187,6 +187,27 @@ body:has(.composer.floating:not(.min)) .snacks {
   font-size: var(--fs-2);
   animation: fade var(--med) var(--ease);
 }
+.snack-ic {
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: 26px;
+  height: 26px;
+  margin-left: calc(-1 * var(--s-2));
+  border-radius: 8px;
+  color: color-mix(in srgb, var(--accent) 55%, white);
+  background: rgba(255, 255, 255, 0.08);
+  animation: snack-ic-pop 360ms cubic-bezier(0.3, 1.5, 0.5, 1) 80ms both;
+}
+.snack-ic.bad {
+  color: #ff9b8f;
+}
+@keyframes snack-ic-pop {
+  from {
+    opacity: 0;
+    transform: scale(0.5) rotate(-12deg);
+  }
+}
 .snack.leaving {
   animation: fade-out var(--med-out) var(--ease-in) forwards;
 }
