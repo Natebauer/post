@@ -6,7 +6,7 @@ import { useStore } from "../store";
 import { resolvedTheme } from "../theme";
 import { fromComposeData, openCompose } from "../compose";
 import { escapeHtml, parseAddressList } from "../util";
-import { AArrowDown, AArrowUp, ImageOff, Type } from "lucide-react";
+import { AArrowDown, AArrowUp, Globe, ImageOff, Lock, LockOpen, Mail, Type } from "lucide-react";
 import { highlightDom } from "./Highlight";
 import { prepareEmail } from "../safeHtml";
 
@@ -384,6 +384,32 @@ function linkLabel(href: string) {
   }
 }
 
+/**
+ * A link's address, readable at a glance: a lock for a secure site (an open lock when it isn't),
+ * the site's name in full strength and the rest of the address quieter after it.
+ */
+function LinkAddress({ text }: { text: string }) {
+  const m = /^(https?):\/\/([^/?#]+)(.*)$/i.exec(text);
+  if (!m) {
+    const mail = !/^[a-z][a-z0-9+.-]*:/i.test(text);
+    return (
+      <>
+        {mail ? <Mail size={13} className="ls-ic" /> : <Globe size={13} className="ls-ic" />}
+        <span className="ls-host">{text}</span>
+      </>
+    );
+  }
+  const secure = m[1].toLowerCase() === "https";
+  const host = m[2].replace(/^www\./i, "");
+  return (
+    <>
+      {secure ? <Lock size={12} className="ls-ic" /> : <LockOpen size={12} className="ls-ic insecure" />}
+      <span className="ls-host">{host}</span>
+      {m[3] && m[3] !== "/" && <span className="ls-rest">{m[3]}</span>}
+    </>
+  );
+}
+
 export function EmailFrame({
   html,
   attachments,
@@ -635,7 +661,7 @@ export function EmailFrame({
       />
       {hover && (
         <div className="link-status" style={{ left: hover.left, bottom: hover.bottom }} role="status">
-          {hover.text}
+          <LinkAddress text={hover.text} />
         </div>
       )}
       {dark && (settings?.emailDarkMode ?? true) && (

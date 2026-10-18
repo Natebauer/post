@@ -71,19 +71,46 @@ body.dragging-mail .sidebar-inner {
 .link-status {
   position: fixed;
   z-index: 60;
+  display: flex;
+  align-items: center;
+  gap: 6px;
   max-width: min(640px, 60vw);
-  padding: 4px var(--s-2);
-  border-radius: var(--r-1);
-  background: var(--surface);
-  color: var(--text-2);
-  border: 1px solid var(--border-strong);
-  box-shadow: var(--shadow-1);
+  height: 28px;
+  padding: 0 12px 0 10px;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--surface) 78%, transparent);
+  backdrop-filter: blur(14px) saturate(1.4);
+  color: var(--text-3);
+  border: 1px solid var(--border);
+  box-shadow: var(--shadow-2);
   font-size: var(--fs-1);
   white-space: nowrap;
   overflow: hidden;
-  text-overflow: ellipsis;
   pointer-events: none;
-  animation: fade var(--fast) var(--ease);
+  animation: link-status-in var(--fast) var(--ease);
+}
+.link-status .ls-ic {
+  flex: none;
+  color: var(--accent-text);
+}
+.link-status .ls-ic.insecure {
+  color: var(--warn, #b7852a);
+}
+.link-status .ls-host {
+  flex: none;
+  color: var(--text);
+  font-weight: 600;
+}
+.link-status .ls-rest {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+@keyframes link-status-in {
+  from {
+    opacity: 0;
+    transform: translateY(4px);
+  }
 }
 /* ---------- date groups in the inbox list ---------- */
 .list-group {
