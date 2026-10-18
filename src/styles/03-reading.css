@@ -831,3 +831,12 @@
 .msg-fold-faces .avatar + .avatar {
   margin-left: -7px;
 }
+
+/* ---------- the sender's ring ---------- */
+/* The large avatar in the reading header wears a thin ring in the sender's own color, set off
+   from it by a hairline gap. */
+.read-head .avatar.lg {
+  box-shadow:
+    0 0 0 2px var(--band, var(--surface)),
+    0 0 0 3.5px oklch(70% calc(var(--av-c) * 3.6 + 0.02) var(--h, 250));
+}
