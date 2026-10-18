@@ -240,10 +240,34 @@
     transform: rotate(360deg);
   }
 }
+/* A soft band of light sweeps across loading placeholders. With reduced motion they just
+   breathe, as before. */
 .skeleton {
-  background: var(--surface-2);
-  animation: breathe var(--loop-breathe) var(--ease-move) infinite alternate;
+  background:
+    linear-gradient(
+      100deg,
+      transparent 30%,
+      color-mix(in srgb, var(--surface) 70%, transparent) 50%,
+      transparent 70%
+    )
+    0 0 / 250% 100% no-repeat,
+    var(--surface-2);
+  animation: shimmer calc(var(--loop-breathe) * 1.1) var(--ease-move) infinite;
   border-radius: var(--r-1);
+}
+@keyframes shimmer {
+  from {
+    background-position: 130% 0, 0 0;
+  }
+  to {
+    background-position: -30% 0, 0 0;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .skeleton {
+    background: var(--surface-2);
+    animation: breathe var(--loop-breathe) var(--ease-move) infinite alternate;
+  }
 }
 @keyframes breathe {
   to {
