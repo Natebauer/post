@@ -405,6 +405,7 @@ export function ThreadList() {
   const [fresh, setFresh] = useState<Set<string>>(new Set());
   // "Back to top" appears once you're well down the list (about 20 conversations), not after a nudge.
   const [deep, setDeep] = useState(false);
+  const [scrollTop, setScrollTop] = useState(0);
   const prev = useRef<{ key: string; ids: Set<string>; top: number }>({ key: "", ids: new Set(), top: 0 });
 
   // A label where the date group changes; that row gets room for it above.
@@ -487,11 +488,29 @@ export function ThreadList() {
   useEffect(() => {
     const el = scrollRef.current;
     if (!el) return;
-    const onScroll = () => setDeep(el.scrollTop > ROW * 20);
+    let frame = 0;
+    const onScroll = () => {
+      setDeep(el.scrollTop > ROW * 20);
+      cancelAnimationFrame(frame);
+      frame = requestAnimationFrame(() => setScrollTop(el.scrollTop));
+    };
     onScroll();
     el.addEventListener("scroll", onScroll, { passive: true });
     return () => el.removeEventListener("scroll", onScroll);
   }, [items.length > 0]);
+
+  // The date group you're scrolled into stays pinned at the top; the next one pushes it away.
+  let stuck: string | null = null;
+  let nextGroupAt = Infinity;
+  for (const m of v.measurementsCache) {
+    if (!groups[m.index]) continue;
+    if (m.start <= scrollTop + 6) stuck = groups[m.index];
+    else {
+      nextGroupAt = m.start;
+      break;
+    }
+  }
+  const stuckPush = Math.min(0, nextGroupAt - scrollTop - GROUP);
 
   // Infinite scroll
   const last = v.getVirtualItems().at(-1);
@@ -582,6 +601,12 @@ export function ThreadList() {
             <EmptyState />
           )
         ) : (
+          <>
+          {stuck && scrollTop > 6 && (
+            <div className="list-sticky" style={{ transform: `translateY(${stuckPush}px)` }} aria-hidden>
+              {stuck}
+            </div>
+          )}
           <div style={{ height: v.getTotalSize(), position: "relative" }}>
             {selItem && (
               <div
@@ -615,6 +640,7 @@ export function ThreadList() {
               );
             })}
           </div>
+          </>
         )}
       </div>
       {menu && <ThreadMenu t={menu.t} point={menu.p} onClose={() => setMenu(null)} />}

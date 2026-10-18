@@ -388,3 +388,25 @@ body.dragging-mail .sidebar-inner {
   }
 }
 
+
+/* The date group you're scrolled into stays at the top of the list on a frosted strip
+   (ThreadList.tsx); the next group's label pushes it up and out. */
+.list-sticky {
+  position: sticky;
+  top: 0;
+  z-index: 3;
+  height: 30px;
+  margin-bottom: -30px;
+  padding: 9px var(--s-3) 0 calc(var(--s-5) + 6px);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  font-feature-settings: "cv11", "ss03", "case";
+  color: var(--text-3);
+  background: color-mix(in srgb, var(--surface) 86%, transparent);
+  -webkit-backdrop-filter: blur(8px);
+  backdrop-filter: blur(8px);
+  border-bottom: 1px solid var(--border);
+  pointer-events: none;
+}
