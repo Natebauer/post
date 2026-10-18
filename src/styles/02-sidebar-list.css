@@ -366,6 +366,44 @@
   height: 40px;
   font-size: var(--fs-3);
 }
+/* A group conversation: the next person sits small at the avatar's lower right, ringed in the
+   list's color so the two read as a pair. */
+.avatar-group {
+  position: relative;
+  flex: none;
+}
+.avatar-group > .avatar {
+  -webkit-mask: radial-gradient(circle at calc(100% - 6px) calc(100% - 6px), transparent 12px, #000 12.5px);
+  mask: radial-gradient(circle at calc(100% - 6px) calc(100% - 6px), transparent 12px, #000 12.5px);
+}
+.avatar-second {
+  position: absolute;
+  right: -4px;
+  bottom: -4px;
+  display: flex;
+}
+.avatar-second .avatar {
+  width: 20px;
+  height: 20px;
+  font-size: 8px;
+  font-weight: 650;
+}
+.avatar-more {
+  position: absolute;
+  right: -6px;
+  top: -7px;
+  min-width: 14px;
+  height: 14px;
+  padding: 0 3px;
+  border-radius: 7px;
+  display: grid;
+  place-items: center;
+  font-size: 8.5px;
+  font-weight: 700;
+  color: var(--text-2);
+  background: var(--surface-2);
+  box-shadow: 0 0 0 1.5px var(--surface);
+}
 .avatar.check {
   background: var(--accent);
   color: var(--accent-ink);

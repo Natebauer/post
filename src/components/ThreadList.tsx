@@ -170,6 +170,10 @@ function Row({
   const viewFolder = t.folder || folder;
   const sender = participantLine(t.participants, viewFolder);
   const avatarName = t.participants.find((p) => p.email === t.avatarEmail)?.name ?? sender;
+  // A conversation with other people besides the sender shows the next one tucked behind.
+  const others = t.participants.filter(
+    (p, i, all) => !p.isMe && p.email !== t.avatarEmail && all.findIndex((q) => q.email === p.email) === i,
+  );
   const stop = (e: React.MouseEvent) => e.stopPropagation();
   const st = useStore.getState;
 
@@ -222,7 +226,17 @@ function Row({
       }
     >
       <span className="dot" />
-      <Avatar email={t.avatarEmail} name={avatarName} checked={checked} size={size === "large" ? "xs" : size === "small" ? "sm" : undefined} />
+      {others.length > 0 && !checked && size !== "small" && size !== "large" && size !== "tiny" ? (
+        <div className="avatar-group">
+          <Avatar email={t.avatarEmail} name={avatarName} />
+          <span className="avatar-second" title={others.map((p) => p.name || p.email).join(", ")}>
+            <Avatar email={others[0].email} name={others[0].name || others[0].email} size="xs" />
+            {others.length > 1 && <span className="avatar-more">+{others.length - 1}</span>}
+          </span>
+        </div>
+      ) : (
+        <Avatar email={t.avatarEmail} name={avatarName} checked={checked} size={size === "large" ? "xs" : size === "small" ? "sm" : undefined} />
+      )}
       {size === "tiny" ? null : size === "small" ? (
         <div className="row-main">
           <div className="row-line">
