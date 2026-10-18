@@ -404,6 +404,27 @@
   background: var(--surface-2);
   box-shadow: 0 0 0 1.5px var(--surface);
 }
+/* Sent and Drafts: a quiet "To" before the people it went to, a soft tag on drafts. */
+.row-tag {
+  display: inline-block;
+  margin-right: 6px;
+  vertical-align: 1px;
+  font-size: 10.5px;
+  font-weight: 650;
+  letter-spacing: 0.02em;
+  line-height: 16px;
+}
+.row-tag.to {
+  color: var(--text-3);
+  font-weight: 550;
+}
+.row-tag.draft {
+  padding: 0 6px;
+  border-radius: 5px;
+  color: color-mix(in srgb, var(--danger) 85%, var(--text));
+  background: color-mix(in srgb, var(--danger) 11%, transparent);
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--danger) 18%, transparent);
+}
 .avatar.check {
   background: var(--accent);
   color: var(--accent-ink);

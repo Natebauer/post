@@ -144,6 +144,25 @@ function ThreadMenu({ t, point, onClose }: { t: ThreadSummary; point: { x: numbe
   );
 }
 
+/** Who a row is from. In Sent it's who it went to, after a quiet "To"; a draft says so in a tag. */
+function SenderText({ sender, folder }: { sender: string; folder: string }) {
+  const to = sender.startsWith("To: ") ? sender.slice(4) : null;
+  if (folder === "DRAFT")
+    return (
+      <>
+        <span className="row-tag draft">Draft</span>
+        <Highlight text={to ?? sender} />
+      </>
+    );
+  if (to === null) return <Highlight text={sender} />;
+  return (
+    <>
+      <span className="row-tag to">To</span>
+      <Highlight text={to} />
+    </>
+  );
+}
+
 function Row({
   t,
   top,
@@ -250,7 +269,7 @@ function Row({
       ) : size === "large" ? (
         <>
           <span className="row-from">
-            <Highlight text={sender} />
+            <SenderText sender={sender} folder={viewFolder} />
             {t.count > 1 && <span className="n">{t.count}</span>}
           </span>
           <span className="row-sub">
@@ -274,7 +293,7 @@ function Row({
       <div className="row-main">
         <div className="row-line">
           <span className="row-from">
-            <Highlight text={sender} />
+            <SenderText sender={sender} folder={viewFolder} />
             {t.count > 1 && <span className="n">{t.count}</span>}
           </span>
           <span className="row-icons">
