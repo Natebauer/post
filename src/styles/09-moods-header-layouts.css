@@ -579,3 +579,108 @@ body:not(.dragging-mail) .sidebar.rail .nav-item .count {
   background: color-mix(in srgb, var(--accent) 12%, transparent);
   color: var(--accent-text);
 }
+
+/* ---------- AI assistant: answers as cards, sources as chips ---------- */
+/* The answer sits on a soft accent-tinted card with a spark in its corner; the emails it cites
+   are cards you can click, and the example prompts wrap as pills. */
+.ask-body > .ask-answer,
+.ask-body > div > .ask-answer:not(.ask-rich) {
+  position: relative;
+  padding: var(--s-4) var(--s-5) var(--s-4) 46px;
+  border-radius: var(--r-3);
+  background:
+    radial-gradient(120% 140% at 0% 0%, color-mix(in srgb, var(--accent) 12%, transparent), transparent 60%),
+    var(--surface-2);
+  border: 1px solid color-mix(in srgb, var(--accent) 18%, var(--border));
+}
+.ask-body > .ask-answer::before,
+.ask-body > div > .ask-answer:not(.ask-rich)::before {
+  content: "";
+  position: absolute;
+  left: 16px;
+  top: 19px;
+  width: 18px;
+  height: 18px;
+  background: var(--accent);
+  /* A four-point spark. */
+  -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M12 2c.6 4.8 2.9 7.4 8 8.1v1.8c-5.1.7-7.4 3.3-8 8.1h-1.8c-.6-4.8-2.9-7.4-8-8.1v-1.8c5.1-.7 7.4-3.3 8-8.1z'/%3E%3C/svg%3E") center / contain no-repeat;
+  mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M12 2c.6 4.8 2.9 7.4 8 8.1v1.8c-5.1.7-7.4 3.3-8 8.1h-1.8c-.6-4.8-2.9-7.4-8-8.1v-1.8c5.1-.7 7.4-3.3 8-8.1z'/%3E%3C/svg%3E") center / contain no-repeat;
+}
+.ask-cite {
+  background: var(--accent);
+  color: var(--accent-ink);
+  font-weight: 700;
+  vertical-align: 1px;
+}
+.ask-sources {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: var(--s-2);
+  border-top: 0;
+  padding-top: 0;
+}
+.ask-sources > .menu-label {
+  grid-column: 1 / -1;
+  padding-left: 2px;
+}
+.ask-source {
+  padding: var(--s-2) var(--s-3);
+  border: 1px solid var(--border);
+  border-radius: var(--r-2);
+  background: var(--surface);
+  transition:
+    box-shadow var(--fast) var(--ease),
+    border-color var(--fast) var(--ease),
+    transform var(--fast) var(--ease);
+}
+.ask-source:hover {
+  background: var(--surface);
+  border-color: color-mix(in srgb, var(--accent) 40%, var(--border-strong));
+  box-shadow: var(--shadow-2);
+  transform: translateY(-1px);
+}
+.ask-n {
+  background: var(--accent-soft);
+  color: var(--accent-text);
+}
+.ask-examples {
+  flex-direction: row;
+  flex-wrap: wrap;
+  gap: var(--s-2);
+}
+.ask-examples > .menu-label {
+  flex-basis: 100%;
+  margin-top: var(--s-2);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  font-size: 11px;
+  font-feature-settings: "cv11", "ss03", "case";
+}
+.ask-example {
+  background: var(--surface);
+  transition:
+    background var(--fast) var(--ease),
+    border-color var(--fast) var(--ease);
+}
+.ask-example:hover {
+  background: var(--accent-softer);
+}
+/* While Claude works, its status line shimmers. */
+.ask-thinking {
+  background: linear-gradient(90deg, var(--text-3) 30%, var(--accent) 50%, var(--text-3) 70%) 0 0 / 250% 100%;
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent !important;
+  animation: ask-shimmer 1.6s linear infinite;
+}
+.ask-thinking svg {
+  color: var(--accent);
+}
+@keyframes ask-shimmer {
+  from {
+    background-position: 100% 0;
+  }
+  to {
+    background-position: -50% 0;
+  }
+}
