@@ -433,3 +433,53 @@
   font: inherit;
   font-variant-numeric: tabular-nums;
 }
+
+/* ---------- switches and segmented controls ---------- */
+/* A slightly larger switch whose knob springs across and stretches while pressed. */
+.switch {
+  width: 40px;
+  height: 24px;
+  border-radius: 12px;
+  background: color-mix(in srgb, var(--text) 18%, transparent);
+}
+.switch::after {
+  width: 20px;
+  height: 20px;
+  box-shadow:
+    0 1px 3px rgba(0, 0, 0, 0.25),
+    0 0 0 0.5px rgba(0, 0, 0, 0.06);
+  transition:
+    transform var(--slow) cubic-bezier(0.34, 1.56, 0.64, 1),
+    width var(--fast) var(--ease);
+}
+.switch:active::after {
+  width: 25px;
+}
+.switch.on::after {
+  transform: translateX(16px);
+}
+.switch.on:active::after {
+  transform: translateX(11px);
+}
+/* The chosen option's highlight slides between options (Settings' Seg). */
+.seg-slide {
+  position: relative;
+  isolation: isolate;
+}
+.seg-slide .seg-pill {
+  position: absolute;
+  left: 0;
+  top: 2px;
+  bottom: 2px;
+  z-index: -1;
+  border-radius: 5px;
+  background: var(--surface);
+  box-shadow: var(--shadow-1);
+  transition:
+    transform var(--slow) var(--ease-move),
+    width var(--slow) var(--ease-move);
+}
+.seg-slide button.on {
+  background: transparent;
+  box-shadow: none;
+}

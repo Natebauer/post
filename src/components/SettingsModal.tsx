@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { Bell, Keyboard, Monitor, Palette, PenLine, Plus, Sparkles, Trash2, UserRound, X } from "lucide-react";
 import { api, errText, type AiStatus, type ComposeMode, type Settings, type Template } from "../api";
@@ -168,8 +168,16 @@ function Switch({ on, onChange, label }: { on: boolean; onChange: (v: boolean) =
 }
 
 function Seg<T extends string>({ value, options, onChange, label }: { value: T; options: [T, string][]; onChange: (v: T) => void; label?: string }) {
+  // A highlight that slides to the chosen option (the options can be different widths).
+  const ref = useRef<HTMLDivElement>(null);
+  const [pill, setPill] = useState<{ x: number; w: number } | null>(null);
+  useLayoutEffect(() => {
+    const on = ref.current?.querySelector<HTMLElement>("button.on");
+    if (on) setPill({ x: on.offsetLeft, w: on.offsetWidth });
+  }, [value]);
   return (
-    <div className="seg" role="radiogroup" aria-label={label}>
+    <div className="seg seg-slide" role="radiogroup" aria-label={label} ref={ref}>
+      {pill && <span className="seg-pill" style={{ transform: `translateX(${pill.x}px)`, width: pill.w }} aria-hidden />}
       {options.map(([v, l]) => (
         <button key={v} role="radio" aria-checked={value === v} className={cx(value === v && "on")} onClick={() => onChange(v)}>
           {l}
