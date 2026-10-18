@@ -621,6 +621,9 @@ function ThreadDetailView() {
                 shown &&
                 shown.messages.some((m) => !m.isDraft) && (
                   <div className="reply-bar">
+                    <span className="reply-me">
+                      <Avatar email={me} name={me} size="sm" />
+                    </span>
                     <button className="reply-box" onClick={() => void A.respond("reply")}>
                       <Reply size={15} /> Reply to {replyName(shown, me)}…
                     </button>

@@ -571,3 +571,31 @@
 .invite .cal .d {
   color: color-mix(in srgb, var(--cal-c) 55%, var(--text));
 }
+
+/* ---------- reply box: your avatar and a soft field ---------- */
+/* Your avatar sits on the thread's timeline, so the reply reads as the next message in it. */
+.reply-bar {
+  position: relative;
+}
+.reply-me {
+  position: absolute;
+  left: -46px;
+  top: 6px;
+}
+.reply-box {
+  border-color: transparent;
+  border-radius: 20px;
+  background: var(--surface-2);
+  transition:
+    background var(--fast) var(--ease),
+    border-color var(--fast) var(--ease),
+    box-shadow var(--fast) var(--ease);
+}
+.reply-box:hover {
+  background: var(--surface);
+  border-color: color-mix(in srgb, var(--accent) 40%, var(--border-strong));
+  box-shadow: var(--shadow-2);
+}
+.reply-bar .btn.outline {
+  border-radius: 20px;
+}
