@@ -22,6 +22,8 @@ export interface Snack {
   action?: { label: string; run: () => void };
   ms?: number;
   leaving?: boolean;
+  /** "sending": a ring that runs down the undo window, then a check as it goes. */
+  icon?: "sending";
 }
 
 interface SearchState {

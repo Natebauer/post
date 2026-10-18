@@ -171,6 +171,50 @@ body:has(.composer.floating:not(.min)) .snacks {
 :root[data-theme="dark"] .snack {
   background: #3a3b41;
 }
+/* Sending: the ring empties over the undo window, then fills with the accent and a check. */
+.send-ring {
+  flex: none;
+  margin-left: calc(-1 * var(--s-1));
+  fill: none;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+.send-ring .track {
+  stroke: rgba(255, 255, 255, 0.16);
+}
+.send-ring .run {
+  stroke: color-mix(in srgb, var(--accent) 55%, white);
+  stroke-dasharray: 100;
+  transform: rotate(-90deg);
+  transform-origin: center;
+  animation: ring-run var(--dur) linear forwards;
+}
+.send-ring .tick {
+  stroke: #fff;
+  stroke-dasharray: 100;
+  stroke-dashoffset: 100;
+  animation: tick-draw var(--med) var(--ease) var(--dur) forwards;
+}
+.send-ring .track {
+  animation: ring-done var(--fast) var(--ease) var(--dur) forwards;
+}
+@keyframes ring-run {
+  to {
+    stroke-dashoffset: 100;
+  }
+}
+@keyframes tick-draw {
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+@keyframes ring-done {
+  to {
+    fill: var(--accent);
+    stroke: var(--accent);
+  }
+}
 .snack .act {
   margin-left: auto;
   color: color-mix(in srgb, var(--accent) 55%, white);

@@ -25,7 +25,7 @@ import { claimHighlight } from "../motion";
 import * as A from "../actions";
 import { cx, participantLine, shortDate, whenLabel } from "../util";
 import { Avatar } from "./Avatar";
-import { EmptyArt, type EmptyKind } from "./EmptyArt";
+import { EmptyArt, partOfDay, type EmptyKind } from "./EmptyArt";
 import { folderTitle } from "./Sidebar";
 import { TimePicker } from "./TimePicker";
 import { Popover } from "./Popover";
@@ -359,6 +359,7 @@ function EmptyState() {
       <div>
         <EmptyArt kind={art[folder] ?? "inbox"} />
         <div className="big">{text[folder] ?? "Nothing here"}</div>
+        {folder === "INBOX" && `Enjoy the rest of your ${partOfDay()}.`}
       </div>
     </div>
   );

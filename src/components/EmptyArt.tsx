@@ -75,6 +75,32 @@ const ART: Record<EmptyKind, JSX.Element> = {
   ),
 };
 
+/** Inbox zero changes with the time of day: a sunrise, a high sun, then a moon over the horizon. */
+const DAY: Record<"morning" | "afternoon" | "evening", JSX.Element> = {
+  morning: ART.inbox,
+  afternoon: (
+    <>
+      <path d="M14 70h68" />
+      <path d="M22 78h52" opacity=".5" />
+      <circle cx="48" cy="40" r="12" style={A} />
+      <path d="M48 18v-5M48 67v-5M26 40h-5M75 40h-5M33 25l-3-3M66 58l3 3M63 25l3-3M30 58l3-3" style={A} opacity=".7" />
+    </>
+  ),
+  evening: (
+    <>
+      <path d="M14 70h68" />
+      <path d="M22 78h52" opacity=".5" />
+      <path d="M54 26a16 16 0 1 0 12 26 13 13 0 0 1-12-26Z" style={A} />
+      <path d="M26 30v6M23 33h6M74 24v4M72 26h4" opacity=".6" />
+    </>
+  ),
+};
+
+export function partOfDay(d = new Date()): "morning" | "afternoon" | "evening" {
+  const h = d.getHours();
+  return h >= 5 && h < 12 ? "morning" : h >= 12 && h < 18 ? "afternoon" : "evening";
+}
+
 export function EmptyArt({ kind }: { kind: EmptyKind }) {
   return (
     <svg
@@ -89,7 +115,7 @@ export function EmptyArt({ kind }: { kind: EmptyKind }) {
       strokeLinejoin="round"
       aria-hidden
     >
-      {ART[kind]}
+      {kind === "inbox" ? DAY[partOfDay()] : ART[kind]}
     </svg>
   );
 }

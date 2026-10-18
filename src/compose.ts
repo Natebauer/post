@@ -216,6 +216,7 @@ export function announceSent(info: SentInfo) {
   const snackId = st.snack({
     text: info.kind === "scheduled" ? `Scheduled for ${whenLabel(info.sendAt)}` : "Sending…",
     ms: info.kind === "scheduled" ? 8000 : Math.max(3000, info.sendAt - Date.now() + 500),
+    icon: info.kind === "undo" ? "sending" : undefined,
     action: {
       label: "Undo",
       run: async () => {
