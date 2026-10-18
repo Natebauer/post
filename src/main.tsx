@@ -42,6 +42,11 @@ document.addEventListener(
   true,
 );
 
+// While another app has focus, Post's frame (title bar and sidebar) quiets down, like a native
+// inactive window (01-base.css).
+window.addEventListener("blur", () => document.documentElement.classList.add("win-inactive"));
+window.addEventListener("focus", () => document.documentElement.classList.remove("win-inactive"));
+
 // Anything that goes wrong in the UI ends up in Post's log, so problems can be diagnosed.
 window.addEventListener("error", (e) => logToBackend(`Uncaught: ${e.message} at ${e.filename}:${e.lineno}`));
 window.addEventListener("unhandledrejection", (e) => {

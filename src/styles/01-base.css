@@ -380,6 +380,18 @@ a:focus-visible {
   padding-left: var(--s-2);
   height: 44px;
 }
+/* Another app has focus: the frame steps back (main.tsx); your mail stays as it is. */
+.titlebar > *,
+.sidebar-inner {
+  transition:
+    opacity var(--slow) var(--ease),
+    filter var(--slow) var(--ease);
+}
+.win-inactive .titlebar > :not(.winctl),
+.win-inactive .sidebar-inner {
+  opacity: 0.55;
+  filter: saturate(0.4);
+}
 .titlebar .drag {
   flex: 1;
   align-self: stretch;
