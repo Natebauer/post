@@ -1,4 +1,5 @@
 import { useState } from "react";
+import type React from "react";
 import { Check } from "lucide-react";
 import { avatarUrl } from "../api";
 import { cx, initials } from "../util";
@@ -6,7 +7,14 @@ import { cx, initials } from "../util";
 /** Photos already shown once: they appear at once next time instead of fading in again. */
 const loaded = new Set<string>();
 
-/** Neutral initials; color only comes from real photos and brand logos. */
+/** A hue from 0–359 that stays the same for an address, so each sender keeps their color. */
+function hueFor(key: string): number {
+  let h = 0;
+  for (let i = 0; i < key.length; i++) h = (h * 31 + key.charCodeAt(i)) | 0;
+  return Math.abs(h) % 360;
+}
+
+/** Initials on a soft color of their own; real photos and brand logos cover them when found. */
 export function Avatar({
   email,
   name,
@@ -30,7 +38,11 @@ export function Avatar({
     );
   }
   return (
-    <div className={cx("avatar", size)} aria-hidden>
+    <div
+      className={cx("avatar", size)}
+      style={{ "--h": hueFor((email || name).toLowerCase()) } as React.CSSProperties}
+      aria-hidden
+    >
       {initials(name || email)}
       {email && !failed && (
         <img

@@ -515,3 +515,8 @@ body:not(.dragging-mail) .sidebar.rail .nav-sep {
   color: var(--text-3);
   margin-top: var(--s-2);
 }
+
+/* Mono stays colorless: sender avatars go back to plain gray. */
+:root[data-mood="mono"] {
+  --av-c: 0;
+}

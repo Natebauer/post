@@ -39,6 +39,9 @@
      look the same while animating as at rest. */
   --tint-base: #f4f4f2;
   --avatar-ink: #5b5e65;
+  --av-bg-l: 91%;
+  --av-ink-l: 42%;
+  --av-c: 0.045;
 
   --fs-1: 12px;
   --fs-2: 13px;
@@ -113,6 +116,9 @@
   --avatar-bg: #34353a;
   --tint-base: #222326;
   --avatar-ink: #b9bcc2;
+  --av-bg-l: 33%;
+  --av-ink-l: 86%;
+  --av-c: 0.04;
   color-scheme: dark;
 }
 

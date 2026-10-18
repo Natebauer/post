@@ -317,8 +317,10 @@
   place-items: center;
   font-size: var(--fs-2);
   font-weight: 600;
-  background: var(--avatar-bg);
-  color: var(--avatar-ink);
+  /* Each sender's own soft color, even in lightness across hues (oklch). Moods tune how much
+     color shows with --av-c. */
+  background: oklch(var(--av-bg-l) var(--av-c) var(--h, 250));
+  color: oklch(var(--av-ink-l) calc(var(--av-c) * 2.2) var(--h, 250));
   transition: background var(--fast) var(--ease);
 }
 .avatar img {
