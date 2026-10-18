@@ -646,3 +646,15 @@ p,
 body {
   font-feature-settings: "cv11", "ss03", "calt";
 }
+
+/* ---------- concentric corners ---------- */
+/* Something rounded inside a rounded card takes the card's radius minus the gap between them, so
+   the two curves run parallel. Rows and the selection sit 6px inside the 14px list card. */
+.row,
+.sel-ind {
+  border-radius: calc(var(--r-3) - 6px);
+}
+/* Events sit 6px inside their day column. */
+.cw-day {
+  border-radius: calc(var(--r-1) + 6px);
+}
