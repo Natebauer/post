@@ -160,6 +160,16 @@
   white-space: nowrap;
   flex: 1;
 }
+/* "4 unread" as a small accent pill beside the folder's name. */
+.list-head .sub.pill {
+  flex: 0 0 auto;
+  margin-right: auto;
+  padding: 1px 8px;
+  border-radius: 999px;
+  font-weight: 600;
+  color: var(--accent-text);
+  background: var(--accent-soft);
+}
 .list-scroll {
   flex: 1;
   min-height: 0;

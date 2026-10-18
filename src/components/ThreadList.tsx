@@ -629,7 +629,7 @@ export function ThreadList() {
             {/* The folder's own icon, in the accent, beside its name. */}
             {ICONS[folder as MailFolder] && <span className="lh-folder" aria-hidden>{ICONS[folder as MailFolder]}</span>}
             <h2>{title}</h2>
-            <span className="sub tnum" aria-live="polite">
+            <span className={cx("sub tnum", !checked.length && unread > 0 && "pill")} aria-live="polite">
               {sub}
             </span>
           </>
