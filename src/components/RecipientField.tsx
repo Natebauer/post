@@ -66,6 +66,7 @@ export function RecipientField({
       <div className="chips">
         {value.map((a, i) => (
           <span key={a.email + i} className={cx("chip", !isValidEmail(a.email) && "bad")} title={a.email}>
+            {isValidEmail(a.email) && <Avatar email={a.email} name={a.name || a.email} size="xs" />}
             <span>{a.name || a.email}</span>
             <button
               tabIndex={-1}

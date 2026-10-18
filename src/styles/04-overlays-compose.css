@@ -1028,3 +1028,28 @@ div.ob-check {
   justify-content: space-between;
   align-items: center;
 }
+
+/* ---------- compose: recipients, subject and a quieter toolbar ---------- */
+/* Recipients wear their avatar (the same color they have in the inbox). */
+.chip .avatar {
+  margin-left: calc(-1 * var(--s-3) + 3px);
+}
+/* The subject reads like the heading it will become in their inbox. */
+.c-field:has(.c-subject) {
+  min-height: 50px;
+  align-items: center;
+}
+.c-field input.c-subject {
+  height: 36px;
+  font-family: var(--font-display);
+  font-size: var(--fs-4);
+  font-weight: 600;
+  letter-spacing: -0.012em;
+}
+/* Formatting buttons stay in the background until you're writing the body or reach for them. */
+.c-foot .icon-btn {
+  transition: opacity var(--fast) var(--ease);
+}
+.composer:not(:has(.c-editor:focus-within)) .c-foot:not(:hover) .icon-btn {
+  opacity: 0.45;
+}
