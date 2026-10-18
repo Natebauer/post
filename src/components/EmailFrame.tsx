@@ -257,6 +257,7 @@ const BASE_CSS = (dark: boolean) => `
   a { color: ${dark ? "#9db0ff" : "#3653d4"}; }
   blockquote { margin: 0 0 0 .8ex; border-left: 2px solid ${dark ? "#444" : "#ccc"}; padding-left: 1ex; }
   pre { white-space: pre-wrap; }
+  ${READING_CSS(dark)}
   /* Selection and search matches look the same as in the rest of Post. */
   ::selection { background: color-mix(in srgb, ${accentNow()} 30%, transparent); }
   mark {
@@ -267,6 +268,66 @@ const BASE_CSS = (dark: boolean) => `
     padding: 0 1px;
   }
 `;
+
+/**
+ * Email written by a person (no layout tables) reads like Post's plain-text mail: the same reading
+ * face and measure, links in the accent with a soft underline, lists and code set with care, and
+ * quoted replies set off by an accent rule instead of a gray one. Designed newsletters keep their
+ * own look, since they style what they need.
+ */
+const READING_CSS = (dark: boolean) => {
+  const root = getComputedStyle(document.documentElement);
+  const font = root.getPropertyValue("--font-read").trim() || '"Inter Variable", "Segoe UI", system-ui, sans-serif';
+  const accent = accentNow();
+  const link = `color-mix(in srgb, ${accent} ${dark ? 68 : 82}%, ${dark ? "white" : "black"})`;
+  const text = dark ? "#e6e6e8" : "#1b1c1f";
+  const muted = dark ? "#a3a4a8" : "#62646b";
+  return `
+  body:not(:has(table)) {
+    font-family: ${font};
+    font-size: 15.5px; line-height: 1.72;
+    color: color-mix(in srgb, ${text} 92%, transparent);
+    max-width: 68ch;
+    text-wrap: pretty;
+  }
+  body:not(:has(table)) a {
+    color: ${link};
+    text-decoration-line: underline;
+    text-decoration-thickness: 1px;
+    text-underline-offset: 3px;
+    text-decoration-color: color-mix(in srgb, ${accent} 40%, transparent);
+    transition: text-decoration-color .15s ease;
+  }
+  body:not(:has(table)) a:hover { text-decoration-color: currentColor; }
+  body:not(:has(table)) :is(ul, ol) { padding-left: 1.5em; margin: .5em 0 .9em; }
+  body:not(:has(table)) li { margin: .2em 0; padding-left: .15em; }
+  body:not(:has(table)) li::marker { color: color-mix(in srgb, ${accent} 70%, ${muted}); }
+  body:not(:has(table)) :is(code, kbd, samp) {
+    font-family: "Cascadia Mono", Consolas, ui-monospace, monospace;
+    font-size: .86em;
+    padding: .1em .4em;
+    border-radius: 5px;
+    background: color-mix(in srgb, ${text} ${dark ? 12 : 6}%, transparent);
+  }
+  body:not(:has(table)) pre {
+    font-family: "Cascadia Mono", Consolas, ui-monospace, monospace;
+    font-size: .86em;
+    padding: .8em 1em;
+    border-radius: 8px;
+    background: color-mix(in srgb, ${text} ${dark ? 10 : 5}%, transparent);
+  }
+  body:not(:has(table)) pre code { padding: 0; background: none; }
+  body:not(:has(table)) hr { border: 0; height: 1px; margin: 1.4em 0; background: color-mix(in srgb, ${text} 14%, transparent); }
+  body:not(:has(table)) :is(h1, h2, h3) { line-height: 1.25; letter-spacing: -0.012em; text-wrap: balance; }
+  blockquote:is(.gmail_quote, [type="cite"]), body:not(:has(table)) blockquote {
+    margin: .6em 0 .6em 2px !important;
+    padding: .1em 0 .1em 14px !important;
+    border-left: 2px solid color-mix(in srgb, ${accent} 38%, transparent) !important;
+    color: ${muted};
+  }
+  .gmail_attr { color: ${muted}; font-size: .9em; }
+`;
+};
 
 /** The app's current accent color, for styles inside the email's own document. */
 function accentNow(): string {
