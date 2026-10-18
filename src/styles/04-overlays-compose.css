@@ -1106,3 +1106,16 @@ div.ob-check {
     opacity: 0;
   }
 }
+
+/* ---------- a frosted backdrop behind dialogs ---------- */
+/* The app behind Settings, Quick Look and the palette softens into a blur, so the dialog is the
+   only sharp thing on screen. The tint is lighter, since the blur already pushes the app back. */
+.scrim {
+  background: color-mix(in srgb, var(--scrim) 70%, transparent);
+  -webkit-backdrop-filter: blur(6px) saturate(1.15);
+  backdrop-filter: blur(6px) saturate(1.15);
+}
+.scrim.peek {
+  -webkit-backdrop-filter: none;
+  backdrop-filter: none;
+}
