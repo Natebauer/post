@@ -232,8 +232,25 @@
   color: var(--text-2);
 }
 
+/* Spinners: an accent arc on a faint track, easing round instead of turning at a fixed speed. */
 .spin {
-  animation: spin var(--loop-spin) linear infinite;
+  color: var(--accent);
+  border-radius: 50%;
+  background: radial-gradient(
+    circle closest-side,
+    transparent 65%,
+    color-mix(in srgb, currentColor 18%, transparent) 67% 83%,
+    transparent 85%
+  );
+  animation: spin 0.9s cubic-bezier(0.5, 0.15, 0.5, 0.85) infinite;
+}
+.spin.faint {
+  color: var(--text-3);
+}
+@media (prefers-reduced-motion: reduce) {
+  .spin {
+    animation-duration: 1.8s;
+  }
 }
 @keyframes spin {
   to {
