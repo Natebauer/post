@@ -25,6 +25,7 @@ import { claimHighlight } from "../motion";
 import * as A from "../actions";
 import { cx, participantLine, shortDate, whenLabel } from "../util";
 import { Avatar } from "./Avatar";
+import { EmptyArt, type EmptyKind } from "./EmptyArt";
 import { folderTitle } from "./Sidebar";
 import { TimePicker } from "./TimePicker";
 import { Popover } from "./Popover";
@@ -338,16 +339,27 @@ function EmptyState() {
       </div>
     );
   const text: Record<string, string> = {
-    INBOX: "Your inbox is empty",
+    INBOX: "You're all caught up",
     SNOOZED: "Nothing snoozed",
     SENT: "No sent mail",
     DRAFT: "No drafts",
     TRASH: "Trash is empty",
     SPAM: "No spam. Nice.",
   };
+  const art: Record<string, EmptyKind> = {
+    INBOX: "inbox",
+    SNOOZED: "snoozed",
+    SENT: "sent",
+    DRAFT: "drafts",
+    TRASH: "trash",
+    SPAM: "spam",
+  };
   return (
     <div className="empty">
-      <div className="big">{text[folder] ?? "Nothing here"}</div>
+      <div>
+        <EmptyArt kind={art[folder] ?? "inbox"} />
+        <div className="big">{text[folder] ?? "Nothing here"}</div>
+      </div>
     </div>
   );
 }
@@ -554,6 +566,7 @@ export function ThreadList() {
           search ? (
             <div className="empty">
               <div>
+                {!search.loading && <EmptyArt kind="search" />}
                 <div className="big">{search.loading ? "Searching…" : "No matches"}</div>
                 {!search.loading && "Try different words, or from:, subject:, has:attachment"}
               </div>

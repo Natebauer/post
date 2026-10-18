@@ -294,6 +294,22 @@
   font-weight: 550;
   margin-bottom: var(--s-1);
 }
+.empty-art {
+  display: block;
+  box-sizing: content-box;
+  padding: 14px;
+  margin: 0 auto var(--s-3);
+  border-radius: 50%;
+  background: radial-gradient(circle, var(--accent-soft), transparent 68%);
+  color: color-mix(in srgb, var(--text) 38%, transparent);
+  animation: empty-in var(--emphasis) var(--ease);
+}
+@keyframes empty-in {
+  from {
+    opacity: 0;
+    transform: translateY(var(--travel-sm));
+  }
+}
 .search-banner {
   font-size: var(--fs-1);
   color: var(--text-3);

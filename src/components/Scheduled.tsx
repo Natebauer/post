@@ -3,6 +3,7 @@ import { api, errText, type OutboxItem } from "../api";
 import { fromComposeData, openCompose } from "../compose";
 import { useStore } from "../store";
 import { cx, longDate, sanitizeHtml, whenLabel } from "../util";
+import { EmptyArt } from "./EmptyArt";
 
 const key = (o: OutboxItem) => `outbox:${o.id}`;
 
@@ -50,6 +51,7 @@ export function ScheduledList() {
         {outbox.length === 0 ? (
           <div className="empty">
             <div>
+              <EmptyArt kind="scheduled" />
               <div className="big">Nothing scheduled</div>
               Use the arrow next to Send to schedule a message.
             </div>
