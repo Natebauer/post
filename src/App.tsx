@@ -210,7 +210,11 @@ export function App() {
   useEffect(() => {
     applyTheme(settings);
     // The splash goes once the mood is on and there's a first frame to show.
-    if (settings) requestAnimationFrame(() => requestAnimationFrame(hideSplash));
+    // (A hidden window gets no frames, so a timer makes sure it goes anyway.)
+    if (settings) {
+      requestAnimationFrame(() => requestAnimationFrame(hideSplash));
+      window.setTimeout(hideSplash, 250);
+    }
     return onSystemThemeChange(() => applyTheme(useStore.getState().settings));
   }, [settings]);
 
