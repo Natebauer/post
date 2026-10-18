@@ -170,6 +170,7 @@ function ThreadDetailView() {
   const settings = useStore((s) => s.settings);
   const me = useStore((s) => s.info?.email ?? "");
   const [expanded, setExpanded] = useState<Set<string>>(new Set());
+  const [unfolded, setUnfolded] = useState<string | null>(null);
   const [slow, setSlow] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [snoozeAnchor, setSnoozeAnchor] = useState<HTMLElement | null>(null);
@@ -330,7 +331,25 @@ function ThreadDetailView() {
   const unsub = shown ? unsubscribeFor(shown) : null;
   const messagesOf = (t: ThreadDetail) => {
     const one = t.messages.length === 1;
-    return t.messages.map((m, i) => (
+    // A long conversation folds its middle (the first email and the latest two stay) behind a pill
+    // with the folded senders' faces, until it's opened or one of them is.
+    const n = t.messages.length;
+    const middle = n >= 5 && unfolded !== t.threadId ? t.messages.slice(1, n - 2) : [];
+    const fold = middle.length >= 2 && !middle.some((m) => expanded.has(m.id)) ? middle : [];
+    const folded = new Set(fold.map((m) => m.id));
+    return t.messages.map((m, i) =>
+      folded.has(m.id) ? (
+        i === 1 ? (
+          <button key="fold" type="button" className="msg-fold" onClick={() => setUnfolded(t.threadId)}>
+            <span className="msg-fold-faces" aria-hidden>
+              {[...new Map(fold.map((f) => [f.from.email, f.from])).values()].slice(0, 3).map((a) => (
+                <Avatar key={a.email} email={a.email} name={a.name || a.email} size="xs" />
+              ))}
+            </span>
+            {fold.length} more
+          </button>
+        ) : null
+      ) : (
       <Fragment key={m.id}>
       {/* Where the conversation crosses into another day, a quiet marker on its timeline. */}
       {i > 0 && new Date(t.messages[i - 1].date).toDateString() !== new Date(m.date).toDateString() && (
@@ -354,7 +373,8 @@ function ThreadDetailView() {
         }
       />
       </Fragment>
-    ));
+      ),
+    );
   };
   const inlineCompose =
     compose && (settings?.composeMode ?? "inline") === "inline" && compose.threadId === selectedId && compose.kind !== "new";

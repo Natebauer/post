@@ -798,3 +798,36 @@
   background: var(--surface-2);
   box-shadow: inset 0 0 0 1px var(--border);
 }
+
+/* ---------- a long thread's folded middle ---------- */
+.msg-fold {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 2px 0 6px 2px;
+  padding: 4px 12px 4px 6px;
+  border-radius: 999px;
+  font: inherit;
+  font-size: var(--fs-2);
+  font-weight: 600;
+  color: var(--text-2);
+  background: var(--surface-2);
+  box-shadow: inset 0 0 0 1px var(--border);
+  cursor: pointer;
+  transition:
+    background-color var(--fast) var(--ease),
+    color var(--fast) var(--ease);
+}
+.msg-fold:hover {
+  color: var(--accent-text);
+  background: color-mix(in srgb, var(--accent) 9%, var(--surface-2));
+}
+.msg-fold-faces {
+  display: flex;
+}
+.msg-fold-faces .avatar {
+  box-shadow: 0 0 0 2px var(--surface-2);
+}
+.msg-fold-faces .avatar + .avatar {
+  margin-left: -7px;
+}
