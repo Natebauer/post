@@ -448,3 +448,46 @@
   background: var(--accent);
   transition: width var(--slow) var(--ease-move);
 }
+
+/* ---------- inbox zero ---------- */
+/* Little stamps burst up from the middle of the empty list and drift down (Confetti.tsx). */
+.confetti {
+  position: absolute;
+  left: 50%;
+  top: 46%;
+  width: 0;
+  height: 0;
+  z-index: 5;
+  pointer-events: none;
+}
+.confetti-bit {
+  position: absolute;
+  width: var(--s);
+  height: var(--s);
+  border-radius: 2px;
+  background: var(--accent);
+  /* A postage stamp's perforated edge. */
+  -webkit-mask: radial-gradient(circle at 50% 50%, #000 62%, transparent 64%) -1px -1px / 3px 3px, linear-gradient(#000, #000) 1px 1px / calc(100% - 2px) calc(100% - 2px) no-repeat;
+  opacity: 0;
+  animation: confetti-burst 1.6s cubic-bezier(0.2, 0.7, 0.2, 1) forwards;
+}
+.confetti-bit.t1 {
+  background: color-mix(in srgb, var(--accent) 55%, white);
+}
+.confetti-bit.t2 {
+  background: color-mix(in srgb, var(--accent) 60%, #f5c542);
+}
+@keyframes confetti-burst {
+  0% {
+    opacity: 1;
+    transform: translate(0, 0) rotate(0deg) scale(0.6);
+  }
+  45% {
+    opacity: 1;
+    transform: translate(var(--x), var(--y)) rotate(calc(var(--spin) * 0.5)) scale(1);
+  }
+  100% {
+    opacity: 0;
+    transform: translate(calc(var(--x) * 1.15), calc(var(--y) + 160px)) rotate(var(--spin)) scale(0.9);
+  }
+}

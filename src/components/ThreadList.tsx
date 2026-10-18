@@ -26,6 +26,7 @@ import * as A from "../actions";
 import { cx, participantLine, shortDate, whenLabel } from "../util";
 import { Avatar } from "./Avatar";
 import { RollingCount } from "./RollingCount";
+import { InboxZeroConfetti } from "./Confetti";
 import { EmptyArt, partOfDay, type EmptyKind } from "./EmptyArt";
 import { folderTitle } from "./Sidebar";
 import { TimePicker } from "./TimePicker";
@@ -407,6 +408,9 @@ export function ThreadList() {
   // "Back to top" appears once you're well down the list (about 20 conversations), not after a nudge.
   const [deep, setDeep] = useState(false);
   const [scrollTop, setScrollTop] = useState(0);
+  // Clearing the last email in the inbox (not just opening an empty folder) earns a small burst.
+  const [cleared, setCleared] = useState(0);
+  const lastCount = useRef<{ folder: string; n: number }>({ folder: "", n: 0 });
   const prev = useRef<{ key: string; ids: Set<string>; top: number }>({ key: "", ids: new Set(), top: 0 });
 
   // A label where the date group changes; that row gets room for it above.
@@ -512,6 +516,15 @@ export function ThreadList() {
     }
   }
   const stuckPush = Math.min(0, nextGroupAt - scrollTop - GROUP);
+
+  const loadingList = useStore((s) => s.loadingList);
+  useEffect(() => {
+    const was = lastCount.current;
+    if (folder === "INBOX" && !search && !loadingList && was.folder === folder && was.n > 0 && items.length === 0)
+      setCleared((c) => c + 1);
+    lastCount.current = { folder, n: items.length };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [items.length, folder, loadingList]);
 
   // How many emails have scrolled out of sight above (for "Back to top").
   const above = v.measurementsCache.findIndex((m) => m.end > scrollTop + 6);
@@ -647,6 +660,7 @@ export function ThreadList() {
           {above} above
         </button>
       )}
+      <InboxZeroConfetti fire={cleared} />
       {menu && <ThreadMenu t={menu.t} point={menu.p} onClose={() => setMenu(null)} />}
       {listMenu && <ListMenu anchor={listMenu} onClose={() => setListMenu(null)} />}
     </section>
