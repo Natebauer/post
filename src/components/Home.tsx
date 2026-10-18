@@ -1,11 +1,12 @@
 import { useCallback, useEffect, useState, type ReactNode } from "react";
+import type React from "react";
 import { listen } from "@tauri-apps/api/event";
 import { PinOff, Sparkles } from "lucide-react";
 import { api, errText, type AiStatus, type Home as HomeData, type HomeItem } from "../api";
 import { useStore } from "../store";
 import { mark } from "../motion";
 import { cx, shortDate } from "../util";
-import { Avatar } from "./Avatar";
+import { Avatar, hueFor } from "./Avatar";
 import { CalendarBody, CalendarHeader, settle } from "./Calendar";
 import { motionEase, motionMs, reduceMotion } from "../motionTokens";
 import { Empty, open } from "./HomeBits";
@@ -20,9 +21,26 @@ const cache: {
 
 /* ---------------- shared bits ---------------- */
 
-function ItemRow({ it, right, unread, className }: { it: HomeItem; right?: ReactNode; unread?: boolean; className?: string }) {
+function ItemRow({
+  it,
+  right,
+  unread,
+  className,
+  card,
+}: {
+  it: HomeItem;
+  right?: ReactNode;
+  unread?: boolean;
+  className?: string;
+  /** A small card: the sender's color down one edge and a line of the email under its subject. */
+  card?: boolean;
+}) {
   return (
-    <button className={cx("hitem", unread && "unread", className)} onClick={() => open(it.threadId)}>
+    <button
+      className={cx("hitem", card && "hcard", unread && "unread", className)}
+      style={card ? ({ "--h": hueFor((it.email || it.name).toLowerCase()) } as React.CSSProperties) : undefined}
+      onClick={() => open(it.threadId)}
+    >
       <Avatar email={it.email} name={it.name || it.email} size="sm" />
       <span className="htext">
         <span className="hl1">
@@ -30,6 +48,7 @@ function ItemRow({ it, right, unread, className }: { it: HomeItem; right?: React
           <span className="hdate">{shortDate(it.date)}</span>
         </span>
         <span className="hl2">{it.subject || "(no subject)"}</span>
+        {card && it.snippet && <span className="hl3">{it.snippet}</span>}
       </span>
       {right}
     </button>
@@ -108,10 +127,12 @@ const MODULES: ModuleDef[] = [
     title: "Pinned",
     render: (d) =>
       !d ? null : d.pinned.length ? (
-        d.pinned.map((it) => (
+        <div className="hcards">
+        {d.pinned.map((it) => (
           <ItemRow
             key={it.threadId}
             it={it}
+            card
             className={cx("pinned", useStore.getState().marks[`pin:${it.threadId}`] === "new" && "pin-new")}
             right={
               <span
@@ -135,7 +156,8 @@ const MODULES: ModuleDef[] = [
               </span>
             }
           />
-        ))
+        ))}
+        </div>
       ) : (
         <Empty>Nothing pinned. Drag an email here, or press P, to keep it here until it's done.</Empty>
       ),

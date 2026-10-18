@@ -232,15 +232,68 @@
     grid-column: 2;
   }
 }
-/* Pinned emails on Home sit on a soft tint, a little lighter than weekend days in the calendar. */
-.hitem.pinned {
-  background: color-mix(in srgb, var(--text) 2.5%, transparent);
+/* Pinned emails on Home are small cards side by side: the sender's color down the left edge, the
+   subject, then a line of the email. */
+.hcards {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+  gap: 8px;
 }
-.hitem.pinned + .hitem.pinned {
-  margin-top: 4px;
+.hitem.hcard {
+  position: relative;
+  align-items: flex-start;
+  padding: 10px 10px 11px 14px;
+  border-radius: var(--r-2);
+  overflow: hidden;
+  background: color-mix(in srgb, var(--surface) 70%, transparent);
+  border: 1px solid var(--border);
+  box-shadow: var(--shadow-1);
+  transition:
+    background var(--fast) var(--ease),
+    border-color var(--fast) var(--ease),
+    box-shadow var(--fast) var(--ease),
+    transform var(--fast) var(--ease);
 }
-.hitem.pinned:hover {
-  background: color-mix(in srgb, var(--text) 5%, transparent);
+.hitem.hcard::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 3px;
+  background: oklch(68% calc(var(--av-c) * 3.4) var(--h, 250));
+}
+.hitem.hcard:hover {
+  background: var(--surface);
+  border-color: var(--border-strong);
+  box-shadow: var(--shadow-2);
+  transform: translateY(-1px);
+}
+.hitem.hcard .hl2 {
+  font-weight: 550;
+  color: var(--text);
+}
+.hcard .hl3 {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  margin-top: 2px;
+  font-size: 12px;
+  line-height: 1.45;
+  color: var(--text-3);
+}
+.hitem.hcard > .icon-btn {
+  position: absolute;
+  right: 6px;
+  bottom: 6px;
+  background: var(--surface);
+  box-shadow: 0 0 0 1px var(--border);
+  opacity: 0;
+  transition: opacity var(--fast) var(--ease);
+}
+.hitem.hcard:is(:hover, :focus-visible) > .icon-btn {
+  opacity: 1;
 }
 /* ---------- calendar: join links, header buttons, month view ---------- */
 .cw-event {
