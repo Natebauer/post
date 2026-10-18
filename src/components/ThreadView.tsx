@@ -362,9 +362,12 @@ function ThreadDetailView() {
           {lead && <Avatar key={lead.from.email} email={lead.from.email} name={lead.from.name || lead.from.email} size="lg" />}
           <div className="rh-title">
             {shown && (
-              <h1 className="thread-subject" title={shown.subject}>
-                <Highlight text={shown.subject || "(no subject)"} />
-              </h1>
+              <div className="rh-subject">
+                <h1 className="thread-subject" title={shown.subject}>
+                  <Highlight text={shown.subject || "(no subject)"} />
+                </h1>
+                {selectedId && <StarToggle key={selectedId} threadId={selectedId} starred={starred} />}
+              </div>
             )}
             {shown && last && (
               <div className="rh-by">
@@ -654,5 +657,39 @@ function ThreadDetailView() {
         />
       )}
     </>
+  );
+}
+
+/**
+ * The conversation's star, beside its subject. Starring it pops the star in amber with a little
+ * burst of sparks; unstarring just lets it go quiet.
+ */
+function StarToggle({ threadId, starred }: { threadId: string; starred: boolean }) {
+  const [on, setOn] = useState(starred);
+  const [burst, setBurst] = useState(0);
+  useEffect(() => setOn(starred), [starred]);
+  return (
+    <button
+      type="button"
+      className={cx("rh-star", on && "on")}
+      aria-pressed={on}
+      title={on ? "Remove star" : "Star"}
+      aria-label={on ? "Remove star" : "Star"}
+      onClick={() => {
+        const next = !on;
+        setOn(next);
+        if (next) setBurst((b) => b + 1);
+        void A.star(threadId, next);
+      }}
+    >
+      <Star size={17} fill={on ? "currentColor" : "none"} key={on ? `on${burst}` : "off"} />
+      {burst > 0 && on && (
+        <span className="star-burst" key={burst} aria-hidden>
+          {Array.from({ length: 8 }, (_, i) => (
+            <i key={i} style={{ "--a": `${i * 45 + 22}deg` } as React.CSSProperties} />
+          ))}
+        </span>
+      )}
+    </button>
   );
 }
