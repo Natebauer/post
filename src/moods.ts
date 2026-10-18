@@ -52,6 +52,8 @@ const DARK_A: [number, number, number, number] = [0.08, 0.14, 0.05, 0.09];
 
 export const MOODS: Mood[] = [
   { id: "classic", name: "Classic", blurb: "Post's original: neutral and calm, with Post teal.", accent: "#2a737b" },
+  // Follows the time of day (autoMoodId); its colors and accent are whichever mood is current.
+  { id: "auto", name: "Auto", blurb: "Follows the day: cool in the morning, Classic by day, warm in the evening.", accent: "" },
   {
     id: "paper",
     name: "Paper",
@@ -245,7 +247,24 @@ export const MOODS: Mood[] = [
     },
   },
 ];
-export const moodById = (id: string | undefined) => MOODS.find((m) => m.id === id) ?? MOODS[0];
+/** Which mood Auto stands for at a given time: Slate 5–11, Classic 11–17, Sand from 17. */
+export function autoMoodId(d = new Date()): string {
+  const h = d.getHours();
+  return h >= 5 && h < 11 ? "slate" : h >= 11 && h < 17 ? "classic" : "sand";
+}
+
+/** When Auto next changes mood. */
+export function nextAutoChange(d = new Date()): Date {
+  const next = new Date(d);
+  const h = d.getHours();
+  const at = h < 5 ? 5 : h < 11 ? 11 : h < 17 ? 17 : 29; // 29 = 5 tomorrow
+  next.setHours(at, 0, 0, 0);
+  return next;
+}
+
+/** The mood to apply; Auto resolves to the mood for the current time. */
+export const moodById = (id: string | undefined) =>
+  MOODS.find((m) => m.id === (id === "auto" ? autoMoodId() : id)) ?? MOODS[0];
 
 const KEYS: (keyof MoodPalette)[] = [
   "chrome", "surface", "surface-2", "surface-3", "elevated", "text", "text-2", "text-3", "border", "border-strong",

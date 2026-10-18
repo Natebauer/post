@@ -1,6 +1,6 @@
 import { getCurrentWindow } from "@tauri-apps/api/window";
 import type { Settings } from "./api";
-import { applyMood, moodById } from "./moods";
+import { applyMood, moodById, nextAutoChange } from "./moods";
 import { reduceMotion } from "./motionTokens";
 
 /** Post's teal, the app icon's color. */
@@ -16,6 +16,7 @@ export function resolvedTheme(s: Settings | null): "light" | "dark" {
 }
 
 let lastLook = "";
+let autoTimer: number | undefined;
 
 /** Apply theme, mood and accent to the document and the native window (title bar colors). */
 export function applyTheme(s: Settings | null) {
@@ -23,7 +24,7 @@ export function applyTheme(s: Settings | null) {
   const root = document.documentElement;
   // When the look changes, every color switches together (no hover colors trailing behind; see
   // 01-base.css). Other settings re-apply the theme too, and leave motion alone.
-  const look = `${t}|${s?.mood ?? ""}|${s?.accent ?? ""}`;
+  const look = `${t}|${s?.mood ?? ""}|${moodById(s?.mood).id}|${s?.accent ?? ""}`;
   const changed = look !== lastLook && !!lastLook;
   if (look !== lastLook) {
     if (lastLook) {
@@ -42,7 +43,10 @@ function paint(s: Settings | null, t: "light" | "dark") {
   const root = document.documentElement;
   root.dataset.theme = t;
   applyMood(root, s?.mood, t);
-  const accent = s?.accent || DEFAULT_ACCENT;
+  const accent = s?.accent || moodById(s?.mood).accent || DEFAULT_ACCENT;
+  // Auto changes mood through the day: re-apply when it next turns over.
+  window.clearTimeout(autoTimer);
+  if (s?.mood === "auto") autoTimer = window.setTimeout(() => applyTheme(s), nextAutoChange().getTime() - Date.now() + 1000);
   root.style.setProperty("--accent", accent);
   // Text on the accent (buttons, badges) is dark when the accent is light, so it stays readable.
   root.style.setProperty("--accent-ink", isLight(accent) ? "#1b1c1f" : "#ffffff");

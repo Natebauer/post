@@ -1,6 +1,6 @@
 import { Check } from "lucide-react";
 import type { Settings } from "../api";
-import { MOODS, type MoodPalette } from "../moods";
+import { moodById, MOODS, type MoodPalette } from "../moods";
 import { resolvedTheme } from "../theme";
 import { cx } from "../util";
 
@@ -36,9 +36,11 @@ export function MoodPicker({ settings, onPick }: { settings: Settings; onPick: (
   const theme = resolvedTheme({ ...settings, mood: "classic" });
   const current = settings.mood || "classic";
   const card = (m: (typeof MOODS)[number]) => {
-    const p = (theme === "dark" || m.scheme === "dark" ? m.dark : m.light) ?? CLASSIC[theme];
+    // Auto previews whichever mood it stands for right now.
+    const r = m.id === "auto" ? moodById("auto") : m;
+    const p = (theme === "dark" || r.scheme === "dark" ? r.dark : r.light) ?? CLASSIC[theme];
     const on = current === m.id;
-    const accent = on ? settings.accent || m.accent : m.accent;
+    const accent = on ? settings.accent || r.accent : r.accent;
     return (
       <button
         key={m.id}
@@ -89,7 +91,7 @@ export function MoodPicker({ settings, onPick }: { settings: Settings; onPick: (
             </span>
           </span>
           <span className="mp-read" style={{ background: p.surface, borderColor: p.border }}>
-            <span className="mp-head" style={{ color: p.text, fontFamily: m.display ?? "var(--font)" }}>
+            <span className="mp-head" style={{ color: p.text, fontFamily: r.display ?? "var(--font)" }}>
               Aa
             </span>
             <b style={{ background: p["text-3"] }} />
@@ -102,7 +104,7 @@ export function MoodPicker({ settings, onPick }: { settings: Settings; onPick: (
           {m.name}
           {on && <Check size={13} />}
         </span>
-        <span className="mood-blurb">{m.blurb}</span>
+        <span className="mood-blurb">{m.id === "auto" ? `${m.blurb} Now: ${r.name}.` : m.blurb}</span>
       </button>
     );
   };
