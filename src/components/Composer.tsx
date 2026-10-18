@@ -28,6 +28,7 @@ import {
 import { api, errText, type SendAs } from "../api";
 import { announceSent, broadcastSent, liveDrafts, openCompose, toComposeData, type ComposeDraft } from "../compose";
 import { useStore } from "../store";
+import { Typography } from "../typography";
 import { motionMs, scrollBehavior } from "../motionTokens";
 import { checkBeforeSend, type SendIssue } from "../sendCheck";
 import { cx, escapeHtml, formatBytes, isValidEmail, sanitizeHtml } from "../util";
@@ -182,6 +183,7 @@ export function Composer({ draft: original, mode: initialMode }: { draft: Compos
       Link.configure({ openOnClick: false, autolink: true }),
       Image.configure({ inline: true, allowBase64: true }),
       Placeholder.configure({ placeholder: "Write your message…" }),
+      Typography,
     ],
     content: initial.bodyHtml,
     autofocus: initial.kind === "new" && initial.to.length === 0 ? false : "start",
