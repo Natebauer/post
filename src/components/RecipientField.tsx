@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { X } from "lucide-react";
 import { api, type Address, type Contact } from "../api";
 import { cx, isValidEmail, parseAddressList } from "../util";
-import { Avatar } from "./Avatar";
+import { Avatar, hueFor } from "./Avatar";
 
 export function RecipientField({
   label,
@@ -22,6 +22,18 @@ export function RecipientField({
   const [active, setActive] = useState(0);
   const input = useRef<HTMLInputElement>(null);
   const seq = useRef(0);
+  // Addresses you've written to or heard from before, so a new one can look different.
+  const [known, setKnown] = useState<Record<string, boolean>>({});
+  useEffect(() => {
+    for (const a of value) {
+      const e = a.email.toLowerCase();
+      if (!isValidEmail(e) || e in known) continue;
+      void api
+        .suggestContacts(e)
+        .then((r) => setKnown((k) => ({ ...k, [e]: r.some((c) => c.email.toLowerCase() === e) })))
+        .catch(() => {});
+    }
+  }, [value, known]);
 
   useEffect(() => {
     const q = text.trim();
@@ -65,7 +77,12 @@ export function RecipientField({
       <label>{label}</label>
       <div className="chips">
         {value.map((a, i) => (
-          <span key={a.email + i} className={cx("chip", !isValidEmail(a.email) && "bad")} title={a.email}>
+          <span
+            key={a.email + i}
+            className={cx("chip", !isValidEmail(a.email) && "bad", known[a.email.toLowerCase()] === false && "new")}
+            style={{ "--h": hueFor(a.email.toLowerCase()) } as React.CSSProperties}
+            title={known[a.email.toLowerCase()] === false ? `${a.email}\nNew: you haven't emailed this address before` : a.email}
+          >
             {isValidEmail(a.email) && <Avatar email={a.email} name={a.name || a.email} size="xs" />}
             <span>{a.name || a.email}</span>
             <button
