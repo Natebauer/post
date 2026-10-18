@@ -1,3 +1,4 @@
+import type React from "react";
 import { useEffect, useRef, useState } from "react";
 
 /**
@@ -63,7 +64,7 @@ export function Tooltips() {
         if (owner.current !== el || !el.isConnected) return;
         const r = el.getBoundingClientRect();
         const below = r.bottom + 40 < window.innerHeight;
-        setTip({ ...split(el.dataset.tip ?? ""), x: r.left + r.width / 2, y: below ? r.bottom + 6 : r.top - 6, below });
+        setTip({ ...split(el.dataset.tip ?? ""), x: r.left + r.width / 2, y: below ? r.bottom + 9 : r.top - 9, below });
       }, DELAY);
     };
     document.addEventListener("mouseover", over);
@@ -97,7 +98,8 @@ export function Tooltips() {
       ref={ref}
       className={tip.below ? "tooltip below" : "tooltip above"}
       role="tooltip"
-      style={{ left: tip.x + shift, top: tip.y }}
+      // The pointer stays on the thing described, even when the tip is nudged in from the edge.
+      style={{ left: tip.x + shift, top: tip.y, "--tip-shift": `${-shift}px` } as React.CSSProperties}
     >
       {tip.text && <span>{tip.text}</span>}
       {tip.keys.map((k, i) => (

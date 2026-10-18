@@ -1237,6 +1237,24 @@ div.ob-check {
 .tooltip.above {
   transform: translate(-50%, -100%);
 }
+/* A small pointer toward the thing it describes. */
+.tooltip::before {
+  content: "";
+  position: absolute;
+  left: calc(50% + var(--tip-shift, 0px));
+  width: 10px;
+  height: 10px;
+  margin-left: -5px;
+  border-radius: 2px;
+  background: inherit;
+  transform: rotate(45deg);
+}
+.tooltip.below::before {
+  top: -4px;
+}
+.tooltip.above::before {
+  bottom: -4px;
+}
 .tooltip span {
   overflow: hidden;
   text-overflow: ellipsis;
