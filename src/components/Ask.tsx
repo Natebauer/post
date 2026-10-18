@@ -68,11 +68,11 @@ const PLACEHOLDER = {
 };
 
 /**
- * The AI assistant. It works on one of two things, shown by the switch under the box:
- *  - This email (the default when an email is open): summarize it, draft a reply, answer its
- *    invitations, or answer questions about it.
+ * The AI assistant. It works on one of two things:
+ *  - The open email: summarize it, draft a reply, answer its invitations, or answer questions about it.
  *  - Your whole inbox: answer questions from your mail with sources, or act on many conversations
  *    ("archive the shipping notices", "accept these invites").
+ * With an email open, Claude decides from the request which one you mean, and asks when it can't tell.
  * Nothing that changes or sends mail happens without a confirming click (a reply opens in the
  * composer instead).
  */
@@ -89,9 +89,11 @@ export function AskPanel() {
   const input = useRef<HTMLInputElement>(null);
   // Focused on one email: a back-and-forth about it, and what to do with it.
   const focus = useStore((s) => s.askThread);
-  // The email open behind the assistant, so "This email" can be picked again after "Whole inbox".
-  const openId = useStore((s) => (s.thread && s.selectedId === s.thread.threadId ? s.thread.threadId : null));
-  const openSubject = useStore((s) => (s.thread && s.selectedId === s.thread.threadId ? s.thread.subject : ""));
+  // A request about the whole inbox, made with an email open (Claude decided, or you answered its question).
+  const [inbox, setInbox] = useState(false);
+  const scoped = inbox ? null : focus;
+  // A request Claude couldn't place: this email or the whole inbox? Kept with the chat from before it.
+  const [unsure, setUnsure] = useState<{ text: string; before: AskTurn[] } | null>(null);
   const [chat, setChat] = useState<AskTurn[]>([]);
   const [act, setAct] = useState<CommandResult | null>(null);
   const [pending, setPending] = useState<PendingInvite[]>([]);
@@ -131,6 +133,9 @@ export function AskPanel() {
     setAct(null);
     setErr(null);
     setPending([]);
+    setInbox(false);
+    setUnsure(null);
+    setRes(null);
     if (!open || !focus || !aiOn) return;
     let live = true;
     void api
@@ -151,16 +156,16 @@ export function AskPanel() {
 
   if (!mounted) return null;
   const close = () => useStore.setState({ askOpen: false, askThread: null });
-  const scopeEmail = () => openId && useStore.setState({ askThread: { threadId: openId, subject: openSubject } });
-  const scopeInbox = () => useStore.setState({ askThread: null });
 
-  /** Something typed while focused on an email: a reply, its invitations, or a question. */
-  const tell = async (text: string) => {
+  /** Something typed while focused on an email: a reply, its invitations, a question, or something for the whole inbox. */
+  const tell = async (text: string, opts: { thisEmailOnly?: boolean; before?: AskTurn[] } = {}) => {
     if (!focus) return;
     const mine = ++seq.current;
-    const history = [...chat, { role: "user" as const, text }];
+    const prior = opts.before ?? chat;
+    const history = [...prior, { role: "user" as const, text }];
     setQ("");
     setChat(history);
+    setUnsure(null);
     setAct(null);
     setBusy(true);
     setErr(null);
@@ -168,7 +173,7 @@ export function AskPanel() {
       const t = await api.getThread(focus.threadId, "INBOX");
       const invites = await pendingInvites(t, me);
       // Recent turns give follow-ups their context ("make it shorter", "and the second one?").
-      const earlier = chat
+      const earlier = prior
         .slice(-4)
         .map((c) => `${c.role === "user" ? "User" : "You"}: ${c.text}`)
         .join("\n");
@@ -176,8 +181,19 @@ export function AskPanel() {
         focus.threadId,
         earlier ? `Earlier in this chat:\n${earlier}\n\nNow: ${text}` : text,
         invites.map((p) => `- ${p.inv.summary}, ${whenText(p.inv)}`).join("\n"),
+        !!opts.thisEmailOnly,
       );
       if (seq.current !== mine) return;
+      if (plan.action === "inbox") {
+        setChat(prior);
+        setBusy(false);
+        void askInbox(text);
+        return;
+      }
+      if (plan.action === "clarify") {
+        setUnsure({ text, before: prior });
+        return;
+      }
       if (plan.action === "reply") {
         // Answer the latest message from someone else, not your own last reply (or an RSVP).
         const to = [...t.messages].reverse().find((m) => !m.isDraft && !sameAddr(m.from, me));
@@ -204,7 +220,14 @@ export function AskPanel() {
   const ask = async (question: string) => {
     const text = question.trim();
     if (!text || busy) return;
-    if (focus) return void tell(text);
+    if (scoped) return void tell(text);
+    await askInbox(text);
+  };
+
+  /** A question or command over all your mail. */
+  const askInbox = async (text: string) => {
+    setInbox(true);
+    setUnsure(null);
     setQ(text);
     setAsked(text);
     setBusy(true);
@@ -245,7 +268,7 @@ export function AskPanel() {
           <input
             ref={input}
             value={q}
-            placeholder={focus ? PLACEHOLDER.email : PLACEHOLDER.inbox}
+            placeholder={scoped ? PLACEHOLDER.email : PLACEHOLDER.inbox}
             disabled={!aiOn}
             onChange={(e) => setQ(e.target.value)}
             onKeyDown={(e) => {
@@ -265,32 +288,6 @@ export function AskPanel() {
           </button>
         </form>
 
-        {aiOn && (
-          <div className="ask-scope">
-            <div className="seg" role="radiogroup" aria-label="What the AI works on">
-              <button
-                type="button"
-                role="radio"
-                aria-checked={!!focus}
-                className={cx(focus && "on")}
-                disabled={!focus && !openId}
-                title={focus || openId ? "Work on the open email" : "Open an email to work on it"}
-                onClick={scopeEmail}
-              >
-                <Mail size={13} /> This email
-              </button>
-              <button type="button" role="radio" aria-checked={!focus} className={cx(!focus && "on")} onClick={scopeInbox}>
-                <Inbox size={13} /> Whole inbox
-              </button>
-            </div>
-            {focus && (
-              <span className="ask-scope-subject" title={focus.subject}>
-                {focus.subject || "(no subject)"}
-              </span>
-            )}
-          </div>
-        )}
-
         <div className="ask-body" ref={body}>
           {!aiOn ? (
             <div className="ask-empty">
@@ -299,7 +296,7 @@ export function AskPanel() {
                 Open Settings
               </button>
             </div>
-          ) : focus ? (
+          ) : scoped ? (
             <>
               {chat.map((t, i) =>
                 t.role === "user" ? (
@@ -317,7 +314,26 @@ export function AskPanel() {
               )}
               {err && <div className="ask-empty error">{err}</div>}
               {act && <AskAction key={act.response} r={act} onOpen={openThread} />}
-              {!busy && !act && (
+              {unsure && !busy && (
+                <div className="ask-examples">
+                  <p className="ask-answer">Do you mean this email, or your whole inbox?</p>
+                  <div className="ask-chips">
+                    <button className="ask-example" onClick={() => void tell(unsure.text, { thisEmailOnly: true, before: unsure.before })}>
+                      <Mail size={13} /> This email
+                    </button>
+                    <button
+                      className="ask-example"
+                      onClick={() => {
+                        setChat(unsure.before);
+                        void askInbox(unsure.text);
+                      }}
+                    >
+                      <Inbox size={13} /> Whole inbox
+                    </button>
+                  </div>
+                </div>
+              )}
+              {!busy && !act && !unsure && (
                 <div className="ask-examples">
                   {!chat.length && <div className="menu-label">With this email</div>}
                   <div className="ask-chips">
@@ -330,11 +346,11 @@ export function AskPanel() {
                       <PenLine size={13} /> Draft a reply
                     </button>
                     {pending.length > 0 && (
-                      <button className="ask-example" onClick={() => setAct(rsvpFor(focus, "yes"))}>
+                      <button className="ask-example" onClick={() => setAct(rsvpFor(scoped, "yes"))}>
                         <CalendarCheck size={13} /> Accept {pending.length > 1 ? `all ${pending.length} invitations` : "the invitation"}
                       </button>
                     )}
-                    <button className="ask-example" onClick={() => openThread(focus.threadId)}>
+                    <button className="ask-example" onClick={() => openThread(scoped.threadId)}>
                       <Mail size={13} /> Open it
                     </button>
                   </div>

@@ -97,8 +97,14 @@ pub async fn ask_inbox(st: St<'_>, question: String) -> R<crate::ai::AskAnswer> 
 
 /// Do something with one email: draft a reply, answer its invitations, or answer a question.
 #[tauri::command]
-pub async fn ai_assist(st: St<'_>, thread_id: String, instruction: String, invites: String) -> R<crate::ai::AssistPlan> {
-    Ok(crate::ai::assist(&st, &thread_id, &instruction, &invites).await?)
+pub async fn ai_assist(
+    st: St<'_>,
+    thread_id: String,
+    instruction: String,
+    invites: String,
+    this_email_only: Option<bool>,
+) -> R<crate::ai::AssistPlan> {
+    Ok(crate::ai::assist(&st, &thread_id, &instruction, &invites, this_email_only.unwrap_or(false)).await?)
 }
 
 #[tauri::command]

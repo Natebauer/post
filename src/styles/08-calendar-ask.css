@@ -705,31 +705,6 @@ label.ask-pick {
   font-weight: 500;
 }
 
-/* What the assistant works on: the open email or the whole inbox (Ask.tsx). */
-.ask-scope {
-  display: flex;
-  align-items: center;
-  gap: var(--s-3);
-  padding: var(--s-2) var(--s-4);
-  border-bottom: 1px solid var(--border);
-  min-width: 0;
-}
-.ask-scope .seg button {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-}
-.ask-scope .seg button:disabled {
-  opacity: 0.45;
-}
-.ask-scope-subject {
-  min-width: 0;
-  font-size: var(--fs-2);
-  color: var(--text-2);
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
 .ask-chips {
   display: flex;
   flex-wrap: wrap;

@@ -75,7 +75,8 @@ export interface CommandResult {
 
 /** What Claude decided to do with a request about one email (see AiAssist). */
 export interface AssistPlan {
-  action: "reply" | "rsvp" | "answer";
+  /** "inbox": the request is about mail beyond this email; "clarify": unclear which, so ask. */
+  action: "reply" | "rsvp" | "answer" | "inbox" | "clarify";
   text: string;
   replyAll: boolean;
   response: "yes" | "maybe" | "no";
@@ -398,8 +399,8 @@ export const api = {
   /** Ask Claude to do something with one email; `invites` lists invitations still to answer. */
   /** A question or an instruction for the AI assistant. */
   aiCommand: (request: string) => invoke<CommandResult>("ai_command", { request }),
-  aiAssist: (threadId: string, instruction: string, invites: string) =>
-    invoke<AssistPlan>("ai_assist", { threadId, instruction, invites }),
+  aiAssist: (threadId: string, instruction: string, invites: string, thisEmailOnly = false) =>
+    invoke<AssistPlan>("ai_assist", { threadId, instruction, invites, thisEmailOnly }),
   categoryMark: (sectionId: string, threadIds: string[], member: boolean) =>
     invoke<void>("category_mark", { sectionId, threadIds, member }),
   categoryClassify: (sectionId: string, reset = false) => invoke<void>("category_classify", { sectionId, reset }),
