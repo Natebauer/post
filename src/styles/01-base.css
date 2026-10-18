@@ -203,6 +203,16 @@ mark {
   outline: 2px solid var(--accent);
   outline-offset: 2px;
 }
+/* Buttons and links get two rings: a gap in the surface color, then the accent, so the ring
+   stays crisp over tinted rows and the window background. The transparent outline still shows
+   in Windows high-contrast mode. */
+button:focus-visible,
+a:focus-visible {
+  outline-color: transparent;
+  box-shadow:
+    0 0 0 2px var(--surface),
+    0 0 0 4px var(--accent);
+}
 ::-webkit-scrollbar {
   width: 10px;
   height: 10px;
