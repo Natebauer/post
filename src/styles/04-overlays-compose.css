@@ -93,6 +93,23 @@
 .menu-item.danger {
   color: var(--danger);
 }
+/* Pointing at a destructive action tints the whole row red, not just its words. */
+.menu-item.danger:is(:hover, :focus-visible, .active) {
+  color: color-mix(in srgb, var(--danger) 88%, var(--text));
+  background: color-mix(in srgb, var(--danger) 11%, transparent);
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--danger) 18%, transparent);
+}
+.menu-item.danger:hover svg {
+  animation: danger-nudge 360ms var(--ease);
+}
+@keyframes danger-nudge {
+  30% {
+    transform: rotate(-10deg);
+  }
+  60% {
+    transform: rotate(7deg);
+  }
+}
 .menu-item .hint {
   margin-left: auto;
   color: var(--text-3);
