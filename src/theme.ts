@@ -8,11 +8,21 @@ export const DEFAULT_ACCENT = "#2a737b";
 
 const media = window.matchMedia("(prefers-color-scheme: dark)");
 
+// Windows' own light or dark setting. Post pins the window's theme for a dark mood or a Light or
+// Dark Theme setting (paint below), and while it's pinned the page reports the pinned theme as
+// the system's. So the system's is remembered from when the window follows it, and only updated
+// then; otherwise, after a dark mood, light moods (and their previews) would briefly read as dark.
+let windowPinned = false;
+let systemDark = media.matches;
+media.addEventListener("change", () => {
+  if (!windowPinned) systemDark = media.matches;
+});
+
 export function resolvedTheme(s: Settings | null): "light" | "dark" {
   // Dark moods are dark whatever the Theme setting says.
   if (moodById(s?.mood).scheme === "dark") return "dark";
   if (s?.theme === "light" || s?.theme === "dark") return s.theme;
-  return media.matches ? "dark" : "light";
+  return systemDark ? "dark" : "light";
 }
 
 let lastLook = "";
@@ -68,7 +78,15 @@ function paint(s: Settings | null, t: "light" | "dark") {
   root.style.setProperty("--av-t", t === "dark" ? "82%" : "32%");
   try {
     const forced = moodById(s?.mood).scheme === "dark";
-    void getCurrentWindow().setTheme(forced ? "dark" : s?.theme === "system" || !s ? null : s.theme);
+    const pin = forced ? "dark" : s?.theme === "system" || !s ? null : s.theme;
+    // Unpinned, the window follows the system again, and any change after that is the system's.
+    const win = getCurrentWindow();
+    if (pin) windowPinned = true;
+    void win
+      .setTheme(pin)
+      .then(() => {
+        if (!pin) windowPinned = false;
+      });
   } catch {
     /* not in tauri */
   }
