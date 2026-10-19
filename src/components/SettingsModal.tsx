@@ -1,7 +1,7 @@
 import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import type React from "react";
-import { Bell, Keyboard, Monitor, Palette, PenLine, Plus, Sparkles, Trash2, UserRound, X } from "lucide-react";
+import { Bell, BookOpen, Keyboard, Monitor, Palette, PenLine, Plus, Sparkles, Trash2, UserRound, X } from "lucide-react";
 import { api, errText, type AiStatus, type ComposeMode, type Settings, type Template } from "../api";
 import { useStore } from "../store";
 import { ACCENTS, WINDOW_COLORS, WINDOW_GRADIENTS, blendWindow, windowStops } from "../theme";
@@ -14,11 +14,12 @@ import { usePresence } from "../hooks";
 import { setZoom } from "../actions";
 import { etaText } from "./TitleBar";
 
-type Tab = "appearance" | "compose" | "notifications" | "ai" | "shortcuts" | "system" | "account";
+type Tab = "appearance" | "reading" | "compose" | "notifications" | "ai" | "shortcuts" | "system" | "account";
 
 /** An icon for each section of Settings, shown beside its name. */
 const TAB_ICONS: Record<Tab, JSX.Element> = {
   appearance: <Palette size={16} />,
+  reading: <BookOpen size={16} />,
   compose: <PenLine size={16} />,
   notifications: <Bell size={16} />,
   ai: <Sparkles size={16} />,
@@ -513,6 +514,7 @@ export function SettingsModal() {
 
   const tabs: [Tab, string][] = [
     ["appearance", "Appearance"],
+    ["reading", "Reading"],
     ["compose", "Writing"],
     ["notifications", "Notifications"],
     ["ai", "AI"],
@@ -625,6 +627,11 @@ export function SettingsModal() {
                   onChange={(v) => void setZoom(Number(v))}
                 />
               </Row>
+            </>
+          )}
+          {tab === "reading" && (
+            <>
+              <h4>Reading</h4>
               <Row
                 title="Load images in emails"
                 sub="When off, pictures from the web stay hidden until you choose to show them, so senders can't tell when you open their email"
@@ -747,6 +754,22 @@ export function SettingsModal() {
                   </div>
                 </Row>
               )}
+            </>
+          )}
+          {tab === "ai" && <AiSettings settings={settings} set={set} />}
+          {tab === "shortcuts" && (
+            <div className="settings-shortcuts">
+              <h4>Keyboard shortcuts</h4>
+              <Row title="Compose from anywhere" sub="Ctrl+Alt+M opens a new message, even when Post is in the background. Takes effect after restart.">
+                <Switch label="Global compose shortcut" on={settings.globalShortcut} onChange={(v) => set({ globalShortcut: v })} />
+              </Row>
+              <ShortcutList />
+            </div>
+          )}
+          {tab === "system" && (
+            <>
+              <h4>System & sync</h4>
+              <SyncDetails />
               <Row title="Check for new mail every" sub="Post checks Gmail in the background">
                 <Seg
                   label="Check frequency"
@@ -760,24 +783,8 @@ export function SettingsModal() {
                   onChange={(v) => set({ pollSeconds: Number(v) })}
                 />
               </Row>
-            </>
-          )}
-          {tab === "ai" && <AiSettings settings={settings} set={set} />}
-          {tab === "shortcuts" && (
-            <div className="settings-shortcuts">
-              <h4>Keyboard shortcuts</h4>
-              <ShortcutList />
-            </div>
-          )}
-          {tab === "system" && (
-            <>
-              <h4>System & sync</h4>
-              <SyncDetails />
               <Row title="Start Post with Windows" sub="Runs quietly in the tray so mail and scheduled sends keep flowing">
                 <Switch label="Start with Windows" on={settings.launchAtStartup} onChange={(v) => set({ launchAtStartup: v })} />
-              </Row>
-              <Row title="Compose from anywhere" sub="Ctrl+Alt+M opens a new message, even when Post is in the background. Takes effect after restart.">
-                <Switch label="Global compose shortcut" on={settings.globalShortcut} onChange={(v) => set({ globalShortcut: v })} />
               </Row>
               <Row title="Default email app" sub="Open mailto: links in Post. Windows asks you to confirm in Settings.">
                 <button className="btn outline" onClick={() => void api.makeDefaultMailApp()}>
