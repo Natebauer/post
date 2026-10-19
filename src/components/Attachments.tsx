@@ -1,10 +1,10 @@
-import { useEffect, useState } from "react";
+import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import type React from "react";
 import { Download, ExternalLink, FileArchive, FileImage, FileSpreadsheet, FileText, File as FileIcon, X } from "lucide-react";
 import { api, errText, type Attachment } from "../api";
 import { useStore } from "../store";
-import { motionMs } from "../motionTokens";
-import { formatBytes } from "../util";
+import { motionMs, reduceMotion } from "../motionTokens";
+import { cx, formatBytes } from "../util";
 import { Thumb } from "./Thumb";
 
 const isImage = (a: Attachment) => /^image\/(png|jpe?g|gif|webp|bmp|svg\+xml)$/i.test(a.mimeType);
@@ -58,9 +58,40 @@ async function openExternal(messageId: string, a: Attachment) {
   }
 }
 
-function QuickLook({ messageId, a, onClose: done }: { messageId: string; a: Attachment; onClose: () => void }) {
+/** The transform that puts the preview `box` over the card it came from (`from`), for growing out of it. */
+function fromCard(box: DOMRect, from: DOMRect) {
+  const dx = from.left + from.width / 2 - (box.left + box.width / 2);
+  const dy = from.top + from.height / 2 - (box.top + box.height / 2);
+  return `translate(-50%, -50%) translate(${dx}px, ${dy}px) scale(${from.width / box.width}, ${from.height / box.height})`;
+}
+
+function QuickLook({ messageId, a, from, onClose: done }: { messageId: string; a: Attachment; from?: DOMRect | null; onClose: () => void }) {
   const [closing, setClosing] = useState(false);
+  const box = useRef<HTMLDivElement>(null);
+  // The preview grows out of the attachment card that was clicked, and shrinks back into it.
+  useLayoutEffect(() => {
+    const el = box.current;
+    if (!el || !from || reduceMotion()) return;
+    // (Measured without any earlier run of this, so the start is always the card.)
+    el.getAnimations().forEach((x) => x.cancel());
+    el.animate(
+      [
+        { transform: fromCard(el.getBoundingClientRect(), from), opacity: 0.3, borderRadius: "24px" },
+        { transform: "translate(-50%, -50%)", opacity: 1 },
+      ],
+      { duration: 340, easing: "cubic-bezier(0.2, 0.9, 0.25, 1)" },
+    );
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
   const onClose = () => {
+    const el = box.current;
+    if (el && from && !reduceMotion()) {
+      el.animate([{ transform: "translate(-50%, -50%)", opacity: 1 }, { transform: fromCard(el.getBoundingClientRect(), from), opacity: 0 }], {
+        duration: 240,
+        easing: "cubic-bezier(0.4, 0, 1, 1)",
+        fill: "forwards",
+      });
+    }
     setClosing(true);
     window.setTimeout(done, motionMs("med-out"));
   };
@@ -82,7 +113,7 @@ function QuickLook({ messageId, a, onClose: done }: { messageId: string; a: Atta
   return (
     <>
       <div className={closing ? "scrim closing" : "scrim"} onClick={onClose} />
-      <div className={closing ? "modal quicklook closing" : "modal quicklook"} role="dialog" aria-label={a.filename}>
+      <div ref={box} className={cx("modal quicklook", closing && "closing", from && "grown")} role="dialog" aria-label={a.filename}>
         <div className="ql-head">
           <strong style={{ flex: 1, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{a.filename}</strong>
           <span className="faint" style={{ marginRight: 8 }}>{formatBytes(a.size)}</span>
@@ -112,6 +143,7 @@ function QuickLook({ messageId, a, onClose: done }: { messageId: string; a: Atta
 
 export function Attachments({ messageId, attachments }: { messageId: string; attachments: Attachment[] }) {
   const [preview, setPreview] = useState<Attachment | null>(null);
+  const [from, setFrom] = useState<DOMRect | null>(null);
   const list = attachments.filter((a) => !a.inline);
   if (!list.length) return null;
   return (
@@ -125,7 +157,11 @@ export function Attachments({ messageId, attachments }: { messageId: string; att
             className="att"
             title={a.filename}
             style={{ "--k": kind.color } as React.CSSProperties}
-            onClick={() => (previewable ? setPreview(a) : void openExternal(messageId, a))}
+            onClick={(e) => {
+              if (!previewable) return void openExternal(messageId, a);
+              setFrom(e.currentTarget.getBoundingClientRect());
+              setPreview(a);
+            }}
           >
             <div className="att-thumb">
               <Thumb a={{ ...a, messageId }} fallback={iconFor(a)} />
@@ -148,7 +184,7 @@ export function Attachments({ messageId, attachments }: { messageId: string; att
           </div>
         );
       })}
-      {preview && <QuickLook messageId={messageId} a={preview} onClose={() => setPreview(null)} />}
+      {preview && <QuickLook messageId={messageId} a={preview} from={from} onClose={() => setPreview(null)} />}
     </div>
   );
 }

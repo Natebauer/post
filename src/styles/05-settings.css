@@ -213,6 +213,11 @@
   height: calc(100vh - 80px);
   overflow: hidden;
 }
+/* Growing out of its card (Attachments.tsx) takes the place of the usual fade. */
+.quicklook.grown,
+.quicklook.grown.closing {
+  animation: none;
+}
 .quicklook .ql-head {
   height: 48px;
   display: flex;
