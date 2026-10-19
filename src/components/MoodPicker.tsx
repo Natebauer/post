@@ -1,3 +1,4 @@
+import type React from "react";
 import { Check } from "lucide-react";
 import type { Settings } from "../api";
 import { moodById, MOODS, type MoodPalette } from "../moods";
@@ -47,6 +48,7 @@ export function MoodPicker({ settings, onPick }: { settings: Settings; onPick: (
         role="radio"
         aria-checked={on}
         className={cx("mood", on && "on")}
+        style={{ "--ma": accent } as React.CSSProperties}
         onClick={() => onPick(m.id, m.accent)}
         title={m.blurb}
       >

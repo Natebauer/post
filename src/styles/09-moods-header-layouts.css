@@ -57,8 +57,34 @@
   gap: 2px;
 }
 .mood.on {
-  border-color: var(--accent);
-  box-shadow: 0 0 0 1px var(--accent);
+  border-color: var(--ma, var(--accent));
+  box-shadow: 0 0 0 1px var(--ma, var(--accent));
+}
+/* The chosen mood wears a check badge in its own accent at its corner. */
+.mood {
+  position: relative;
+}
+.mood.on::after {
+  content: "";
+  position: absolute;
+  top: -7px;
+  right: -7px;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background:
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23fff' stroke-width='3.2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6.5 12.5 3.6 3.6 7.4-8'/%3E%3C/svg%3E") center / 13px no-repeat,
+    var(--ma, var(--accent));
+  box-shadow:
+    0 0 0 2px var(--surface),
+    0 2px 6px rgba(0, 0, 0, 0.2);
+  animation: mood-check 300ms cubic-bezier(0.3, 1.5, 0.5, 1);
+}
+@keyframes mood-check {
+  from {
+    transform: scale(0.3);
+    opacity: 0;
+  }
 }
 .mood-preview {
   display: grid;
