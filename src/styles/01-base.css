@@ -168,7 +168,8 @@ body,
    background shifted between gray and yellowish as focus moved to other apps. The mood's
    tint (--chrome) now sits on a fixed base instead. */
 html {
-  background: linear-gradient(var(--chrome), var(--chrome)), var(--window-base);
+  /* --window-bg: a gradient background, when one is chosen (theme.ts). */
+  background: linear-gradient(var(--chrome), var(--chrome)), var(--window-bg, var(--window-base));
 }
 /* Depth without Mica: a faint glow of the accent from the top left, a cooler shade at the bottom
    right and a whisper of grain. It's all fixed to the window, so it looks the same whether the

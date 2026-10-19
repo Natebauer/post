@@ -4,7 +4,7 @@ import type React from "react";
 import { Bell, Keyboard, Monitor, Palette, PenLine, Plus, Sparkles, Trash2, UserRound, X } from "lucide-react";
 import { api, errText, type AiStatus, type ComposeMode, type Settings, type Template } from "../api";
 import { useStore } from "../store";
-import { ACCENTS, WINDOW_COLORS } from "../theme";
+import { ACCENTS, WINDOW_COLORS, WINDOW_GRADIENTS, blendWindow, windowStops } from "../theme";
 import { MoodPicker } from "./MoodPicker";
 import { moodById } from "../moods";
 import { ShortcutList } from "./Shortcuts";
@@ -473,6 +473,11 @@ export function SettingsModal() {
                 </div>
               </Row>
               <Row title="Background" sub="The color behind the panes. Text on it turns light or dark to match" col look>
+                {(() => {
+                  const stops = windowStops(settings.windowColor);
+                  const preset = WINDOW_GRADIENTS.some((g) => g.value === settings.windowColor?.toLowerCase());
+                  return (
+                    <>
                 <div className="swatches">
                   <button
                     className={cx("swatch swatch-default", !settings.windowColor && "on")}
@@ -484,12 +489,12 @@ export function SettingsModal() {
                   {WINDOW_COLORS.map((c) => (
                     <button
                       key={c.value}
-                      className={cx("swatch", settings.windowColor?.toLowerCase() === c.value && "on")}
+                      className={cx("swatch", !preset && stops[0] === c.value && "on")}
                       style={{ background: c.value, "--sw": c.value } as React.CSSProperties}
                       title={c.name}
                       aria-label={c.name}
-                      aria-pressed={settings.windowColor?.toLowerCase() === c.value}
-                      onClick={() => look({ windowColor: c.value })}
+                      aria-pressed={!preset && stops[0] === c.value}
+                      onClick={() => look({ windowColor: stops.length > 1 && !preset ? blendWindow(c.value) : c.value })}
                     />
                   ))}
                   <input
@@ -497,11 +502,47 @@ export function SettingsModal() {
                     className="swatch-custom"
                     title="Custom background"
                     aria-label="Custom background color"
-                    value={settings.windowColor || "#e4e4e1"}
-                    onChange={(e) => look({ windowColor: e.target.value })}
+                    value={stops[0] || "#e4e4e1"}
+                    onChange={(e) =>
+                      look({ windowColor: stops.length > 1 && !preset ? blendWindow(e.target.value) : e.target.value })
+                    }
                   />
                 </div>
+                {/* Ready-made gradients, pale then deep. */}
+                <div className="swatches">
+                  {WINDOW_GRADIENTS.map((g) => (
+                    <button
+                      key={g.value}
+                      className={cx("swatch swatch-grad", settings.windowColor?.toLowerCase() === g.value && "on")}
+                      style={
+                        {
+                          background: `linear-gradient(150deg, ${g.value.split(">").join(", ")})`,
+                          "--sw": g.value.split(">")[1],
+                        } as React.CSSProperties
+                      }
+                      title={g.name}
+                      aria-label={`${g.name} gradient`}
+                      aria-pressed={settings.windowColor?.toLowerCase() === g.value}
+                      onClick={() => look({ windowColor: g.value })}
+                    />
+                  ))}
+                </div>
+                    </>
+                  );
+                })()}
               </Row>
+              {windowStops(settings.windowColor).length > 0 && (
+                <Row title="Blend into a gradient" sub="The background drifts softly into a neighboring shade across the window" look>
+                  <Switch
+                    label="Blend into a gradient"
+                    on={windowStops(settings.windowColor).length > 1}
+                    onChange={(v) => {
+                      const first = windowStops(settings.windowColor)[0];
+                      look({ windowColor: v ? blendWindow(first) : first });
+                    }}
+                  />
+                </Row>
+              )}
               <Row title="Seasonal touch" sub="A faint pattern behind the panes that follows the season: petals, sun, leaves or snow" look>
                 <Switch label="Seasonal touch" on={!!settings.seasonal} onChange={(v) => look({ seasonal: v })} />
               </Row>

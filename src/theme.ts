@@ -85,8 +85,12 @@ const ON_WINDOW = ":root[data-wscheme] :is(.titlebar, .sidebar, .read-pane.bare,
  */
 function paintWindow(s: Settings | null, t: "light" | "dark") {
   const root = document.documentElement;
-  const color = /^#[0-9a-f]{6}$/i.test(s?.windowColor ?? "") ? s!.windowColor : "";
+  const stops = windowStops(s?.windowColor);
+  // A gradient's middle stands in for it wherever one flat color is needed (rings, contrast).
+  const color = stops.length ? mixHex(stops) : "";
   let scheme = t;
+  if (stops.length > 1) root.style.setProperty("--window-bg", `linear-gradient(150deg, ${stops.join(", ")})`);
+  else root.style.removeProperty("--window-bg");
   if (color) {
     root.style.setProperty("--window-base", color);
     // The mood's tint would otherwise wash over the chosen color.
@@ -117,6 +121,44 @@ function paintWindow(s: Settings | null, t: "light" | "dark") {
   }
   // Text color is inherited as a value, not a variable, so these areas set their own.
   style.textContent = `${ON_WINDOW} { ${vars} ${extra} color: var(--text); }`;
+}
+
+/** A window background setting's colors: one for a flat color, two or three for a gradient
+    ("#d3e6ee>#d8eee0"). Anything else is the mood's own background (no colors). */
+export function windowStops(v: string | undefined | null): string[] {
+  const stops = (v ?? "").split(">").map((x) => x.trim().toLowerCase());
+  return stops.length <= 3 && stops.every((x) => /^#[0-9a-f]{6}$/.test(x)) ? stops : [];
+}
+
+/** The even mix of some #rrggbb colors. */
+function mixHex(hexes: string[]): string {
+  const ch = (i: number) =>
+    Math.round(hexes.reduce((n, h) => n + parseInt(h.slice(1 + i * 2, 3 + i * 2), 16), 0) / hexes.length);
+  return "#" + [0, 1, 2].map((i) => ch(i).toString(16).padStart(2, "0")).join("");
+}
+
+/** A flat background blended into a soft gradient: it drifts toward a neighboring hue, a touch
+    more colorful, at the same lightness, so text that reads on one end reads on the other. */
+export function blendWindow(hex: string): string {
+  const n = parseInt(hex.slice(1), 16);
+  const [r, g, b] = [(n >> 16) & 255, (n >> 8) & 255, n & 255].map((x) => x / 255);
+  const max = Math.max(r, g, b);
+  const min = Math.min(r, g, b);
+  const l = (max + min) / 2;
+  const d = max - min;
+  let h = 0;
+  if (d) h = max === r ? ((g - b) / d) % 6 : max === g ? (b - r) / d + 2 : (r - g) / d + 4;
+  const sat = d ? d / (1 - Math.abs(2 * l - 1)) : 0;
+  const s2 = Math.min(1, Math.max(sat * 1.6, 0.34));
+  // Warm colors lean toward rose, cool ones toward violet.
+  const h2 = ((h * 60 + (h * 60 < 90 || h * 60 > 300 ? -50 : 55)) % 360 + 360) % 360;
+  const c = (1 - Math.abs(2 * l - 1)) * s2;
+  const x = c * (1 - Math.abs(((h2 / 60) % 2) - 1));
+  const m = l - c / 2;
+  const [r2, g2, b2] =
+    h2 < 60 ? [c, x, 0] : h2 < 120 ? [x, c, 0] : h2 < 180 ? [0, c, x] : h2 < 240 ? [0, x, c] : h2 < 300 ? [x, 0, c] : [c, 0, x];
+  const to = "#" + [r2, g2, b2].map((v) => Math.round((v + m) * 255).toString(16).padStart(2, "0")).join("");
+  return `${hex.toLowerCase()}>${to}`;
 }
 
 /** Relative luminance of a #rrggbb color (0 black to 1 white). */
@@ -163,6 +205,20 @@ export const WINDOW_COLORS: { name: string; value: string }[] = [
   { name: "Pine", value: "#27372f" },
   { name: "Charcoal", value: "#232427" },
   { name: "Midnight", value: "#18203a" },
+];
+
+/** Gradient window backgrounds offered in Settings: soft pale ones, then deep ones. Each end
+    keeps about the same lightness, so the text on it reads the same all the way across. */
+export const WINDOW_GRADIENTS: { name: string; value: string }[] = [
+  { name: "Dawn", value: "#f2dfd3>#e2daf0" },
+  { name: "Lagoon", value: "#d2e4ee>#d6ede0" },
+  { name: "Meadow", value: "#e5e9d0>#d3e5dc" },
+  { name: "Orchid", value: "#e4daf1>#f0dbe3" },
+  { name: "Sorbet", value: "#f3e4c8>#f0d6d9" },
+  { name: "Dusk", value: "#373350>#56394b" },
+  { name: "Aurora", value: "#1c3a3a>#1f2a4a" },
+  { name: "Ember", value: "#2e2127>#47291f" },
+  { name: "Deep sea", value: "#13233a>#1c3b42" },
 ];
 
 /** The season now (northern hemisphere): spring from March, summer June, autumn September, winter December. */
