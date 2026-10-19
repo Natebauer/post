@@ -218,6 +218,20 @@
 .quicklook.grown.closing {
   animation: none;
 }
+/* Saved: the button turns into a check in the accent for a moment. */
+.ql-save.saved {
+  color: var(--accent-text);
+  background: var(--accent-soft);
+}
+.ql-save.saved svg {
+  animation: ql-saved 380ms cubic-bezier(0.3, 1.6, 0.5, 1);
+}
+@keyframes ql-saved {
+  from {
+    transform: scale(0.3) rotate(-30deg);
+    opacity: 0;
+  }
+}
 .quicklook .ql-head {
   height: 48px;
   display: flex;

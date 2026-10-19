@@ -1,6 +1,6 @@
 import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import type React from "react";
-import { Download, ExternalLink, FileArchive, FileImage, FileSpreadsheet, FileText, File as FileIcon, X } from "lucide-react";
+import { Check, Download, ExternalLink, FileArchive, FileImage, FileSpreadsheet, FileText, File as FileIcon, X } from "lucide-react";
 import { api, errText, type Attachment } from "../api";
 import { useStore } from "../store";
 import { motionMs, reduceMotion } from "../motionTokens";
@@ -36,12 +36,16 @@ export function fileKind(filename: string, mimeType = ""): { label: string; colo
   return { label: ext || "FILE", color: "#6c6f77" };
 }
 
-async function saveAs(messageId: string, a: Attachment) {
+async function saveAs(messageId: string, a: Attachment): Promise<boolean> {
   try {
-    if (await api.saveAttachment(messageId, a.partId)) useStore.getState().snack({ text: `Saved ${a.filename}` });
+    if (await api.saveAttachment(messageId, a.partId)) {
+      useStore.getState().snack({ text: `Saved ${a.filename}` });
+      return true;
+    }
   } catch (e) {
     useStore.getState().snack({ text: errText(e) });
   }
+  return false;
 }
 
 async function openExternal(messageId: string, a: Attachment) {
@@ -120,9 +124,7 @@ function QuickLook({ messageId, a, from, onClose: done }: { messageId: string; a
           <button className="btn ghost" onClick={() => void openExternal(messageId, a)}>
             <ExternalLink size={15} /> Open
           </button>
-          <button className="btn ghost" onClick={() => void saveAs(messageId, a)}>
-            <Download size={15} /> Save
-          </button>
+          <SaveButton messageId={messageId} a={a} />
           <button className="icon-btn" onClick={onClose} aria-label="Close">
             <X size={17} />
           </button>
@@ -138,6 +140,24 @@ function QuickLook({ messageId, a, from, onClose: done }: { messageId: string; a
         </div>
       </div>
     </>
+  );
+}
+
+/** Quick Look's Save: once the file is saved it turns into a check for a moment. */
+function SaveButton({ messageId, a }: { messageId: string; a: Attachment }) {
+  const [saved, setSaved] = useState(false);
+  useEffect(() => {
+    if (!saved) return;
+    const t = window.setTimeout(() => setSaved(false), 1800);
+    return () => window.clearTimeout(t);
+  }, [saved]);
+  return (
+    <button
+      className={cx("btn ghost ql-save", saved && "saved")}
+      onClick={() => void saveAs(messageId, a).then((ok) => ok && setSaved(true))}
+    >
+      {saved ? <Check size={15} key="c" /> : <Download size={15} key="d" />} {saved ? "Saved" : "Save"}
+    </button>
   );
 }
 
