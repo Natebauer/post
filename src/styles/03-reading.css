@@ -181,15 +181,20 @@
   text-wrap: pretty;
   color: color-mix(in srgb, var(--text) 92%, var(--surface));
 }
+/* Links: a faint underline at rest; pointing at one draws a full-strength line in from the left. */
 .msg-text a {
   color: var(--accent-text);
-  text-decoration-color: color-mix(in srgb, var(--accent) 40%, transparent);
-  text-decoration-thickness: 1px;
-  text-underline-offset: 3px;
-  transition: text-decoration-color var(--fast) var(--ease);
+  text-decoration: none;
+  background:
+    linear-gradient(currentColor, currentColor) left 0 bottom 0 / 0% 1.5px no-repeat,
+    linear-gradient(color-mix(in srgb, var(--accent) 40%, transparent), color-mix(in srgb, var(--accent) 40%, transparent)) left 0 bottom 0 / 100% 1px no-repeat;
+  padding-bottom: 1px;
+  transition: background-size 260ms var(--ease-move);
 }
 .msg-text a:hover {
-  text-decoration-color: currentColor;
+  background-size:
+    100% 1.5px,
+    100% 1px;
 }
 .msg-tools {
   display: flex;

@@ -292,13 +292,14 @@ const READING_CSS = (dark: boolean) => {
   }
   body:not(:has(table)) a {
     color: ${link};
-    text-decoration-line: underline;
-    text-decoration-thickness: 1px;
-    text-underline-offset: 3px;
-    text-decoration-color: color-mix(in srgb, ${accent} 40%, transparent);
-    transition: text-decoration-color .15s ease;
+    text-decoration: none;
+    background:
+      linear-gradient(currentColor, currentColor) left 0 bottom 0 / 0% 1.5px no-repeat,
+      linear-gradient(color-mix(in srgb, ${accent} 40%, transparent), color-mix(in srgb, ${accent} 40%, transparent)) left 0 bottom 0 / 100% 1px no-repeat;
+    padding-bottom: 1px;
+    transition: background-size .26s cubic-bezier(.2,.8,.2,1);
   }
-  body:not(:has(table)) a:hover { text-decoration-color: currentColor; }
+  body:not(:has(table)) a:hover { background-size: 100% 1.5px, 100% 1px; }
   body:not(:has(table)) :is(ul, ol) { padding-left: 1.5em; margin: .5em 0 .9em; }
   body:not(:has(table)) li { margin: .2em 0; padding-left: .15em; }
   body:not(:has(table)) li::marker { color: color-mix(in srgb, ${accent} 70%, ${muted}); }
