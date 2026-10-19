@@ -19,6 +19,7 @@ import {
   RotateCcw,
   Sparkles,
   Trash2,
+  MailCheck,
 } from "lucide-react";
 import type { MailFolder, ThreadSummary } from "../api";
 import { useStore } from "../store";
@@ -725,6 +726,13 @@ export function ThreadList() {
               );
             })}
           </div>
+          {/* The bottom of the folder: a small stamp says there's nothing further down. */}
+          {!search && items.length > 6 && threads.length >= total && (
+            <div className="list-end" aria-hidden>
+              <MailCheck size={14} />
+              That's everything
+            </div>
+          )}
           </>
         )}
       </div>

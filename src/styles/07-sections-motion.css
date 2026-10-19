@@ -418,6 +418,28 @@ body.dragging-mail .sidebar-inner {
 
 /* The date group you're scrolled into stays at the top of the list on a frosted strip
    (ThreadList.tsx); the next group's label pushes it up and out. */
+/* The end of the list: a quiet stamp between two hairlines. */
+.list-end {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  padding: var(--s-4) var(--s-5) 64px; /* clears the Back to top pill */
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--text-3);
+}
+.list-end::before,
+.list-end::after {
+  content: "";
+  flex: 0 1 48px;
+  height: 1px;
+  margin: 0 6px;
+  background: var(--border);
+}
+.list-end svg {
+  opacity: 0.8;
+}
 .list-sticky {
   position: sticky;
   top: 0;
