@@ -145,7 +145,7 @@ function tintCard(s: Settings | null, t: "light" | "dark", color: string, scheme
     style.id = "post-card-tint";
     document.head.appendChild(style);
   }
-  style.textContent = `.list-pane { ${mix("surface")} ${mix("surface-2")} ${mix("surface-3")} ${mix("elevated")} ${mix("tint-base")} }`;
+  style.textContent = `:is(.list-pane, .bgp-card) { ${mix("surface")} ${mix("surface-2")} ${mix("surface-3")} ${mix("elevated")} ${mix("tint-base")} }`;
 }
 
 /** A window background setting's colors: one for a flat color, two or three for a gradient
@@ -234,16 +234,16 @@ export const WINDOW_COLORS: { name: string; value: string }[] = [
 
 /** Gradient window backgrounds offered in Settings: soft pale ones, then deep ones. Each end
     keeps about the same lightness, so the text on it reads the same all the way across. */
-export const WINDOW_GRADIENTS: { name: string; value: string }[] = [
+export const WINDOW_GRADIENTS: { name: string; value: string; deep?: boolean }[] = [
   { name: "Dawn", value: "#f2dfd3>#e2daf0" },
   { name: "Lagoon", value: "#d2e4ee>#d6ede0" },
   { name: "Meadow", value: "#e5e9d0>#d3e5dc" },
   { name: "Orchid", value: "#e4daf1>#f0dbe3" },
   { name: "Sorbet", value: "#f3e4c8>#f0d6d9" },
-  { name: "Dusk", value: "#373350>#56394b" },
-  { name: "Aurora", value: "#1c3a3a>#1f2a4a" },
-  { name: "Ember", value: "#2e2127>#47291f" },
-  { name: "Deep sea", value: "#13233a>#1c3b42" },
+  { name: "Dusk", value: "#373350>#56394b", deep: true },
+  { name: "Aurora", value: "#1c3a3a>#1f2a4a", deep: true },
+  { name: "Ember", value: "#2e2127>#47291f", deep: true },
+  { name: "Deep sea", value: "#13233a>#1c3b42", deep: true },
 ];
 
 /** The season now (northern hemisphere): spring from March, summer June, autumn September, winter December. */

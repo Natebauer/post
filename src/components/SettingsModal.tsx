@@ -189,6 +189,145 @@ function Seg<T extends string>({ value, options, onChange, label }: { value: T; 
   );
 }
 
+/** Everything behind the panes, in three short decisions: what kind of background (the mood's
+    own, a color or a gradient) with a live preview beside it, what the inbox card does on it, and
+    whether a seasonal pattern sits on top. */
+function BackgroundSettings({ settings, look }: { settings: Settings; look: (p: Partial<Settings>) => void }) {
+  const value = settings.windowColor?.toLowerCase() ?? "";
+  const stops = windowStops(value);
+  const preset = WINDOW_GRADIENTS.some((g) => g.value === value);
+  const kind: "mood" | "color" | "gradient" = !stops.length ? "mood" : preset ? "gradient" : "color";
+  const blended = kind === "color" && stops.length > 1;
+  // Switching kinds comes back to what you last had of that kind.
+  const last = useRef({ color: kind === "color" ? value : WINDOW_COLORS[0].value, gradient: preset ? value : WINDOW_GRADIENTS[0].value });
+  useEffect(() => {
+    if (kind === "color") last.current.color = value;
+    if (kind === "gradient") last.current.gradient = value;
+  }, [kind, value]);
+  const pickColor = (hex: string) => look({ windowColor: blended ? blendWindow(hex) : hex });
+  const grads = (deep: boolean) => (
+    <div className="swatches">
+      {WINDOW_GRADIENTS.filter((g) => !!g.deep === deep).map((g) => (
+        <button
+          key={g.value}
+          className={cx("swatch swatch-grad", value === g.value && "on")}
+          style={{ background: `linear-gradient(150deg, ${g.value.split(">").join(", ")})`, "--sw": g.value.split(">")[1] } as React.CSSProperties}
+          title={g.name}
+          aria-label={`${g.name} gradient`}
+          aria-pressed={value === g.value}
+          onClick={() => look({ windowColor: g.value })}
+        />
+      ))}
+    </div>
+  );
+  return (
+    <>
+      <Row title="Background" sub="What sits behind the panes. Text on it turns light or dark to match" col look>
+        <div className="bg-pick">
+          <div className="bg-controls">
+            <Seg
+              label="Background"
+              value={kind}
+              options={[
+                ["mood", "Mood's own"],
+                ["color", "Color"],
+                ["gradient", "Gradient"],
+              ]}
+              onChange={(k) => look({ windowColor: k === "mood" ? "" : last.current[k] })}
+            />
+            {kind === "mood" && <p className="bg-note">The current mood's own backdrop, which changes with it.</p>}
+            {kind === "color" && (
+              <>
+                <div className="swatches">
+                  {WINDOW_COLORS.map((c) => (
+                    <button
+                      key={c.value}
+                      className={cx("swatch", stops[0] === c.value && "on")}
+                      style={{ background: c.value, "--sw": c.value } as React.CSSProperties}
+                      title={c.name}
+                      aria-label={c.name}
+                      aria-pressed={stops[0] === c.value}
+                      onClick={() => pickColor(c.value)}
+                    />
+                  ))}
+                  <input
+                    type="color"
+                    className="swatch-custom"
+                    title="Custom background"
+                    aria-label="Custom background color"
+                    value={stops[0] || "#e4e4e1"}
+                    onChange={(e) => pickColor(e.target.value)}
+                  />
+                </div>
+                <button
+                  type="button"
+                  className={cx("bg-chip", blended && "on")}
+                  aria-pressed={blended}
+                  title="Let the color drift softly into a neighboring shade across the window"
+                  onClick={() => look({ windowColor: blended ? stops[0] : blendWindow(stops[0]) })}
+                >
+                  <span className="bg-chip-dot" aria-hidden />
+                  Soft gradient
+                </button>
+              </>
+            )}
+            {kind === "gradient" && (
+              <>
+                <span className="bg-sub">Pale</span>
+                {grads(false)}
+                <span className="bg-sub">Deep</span>
+                {grads(true)}
+              </>
+            )}
+          </div>
+          {/* A little window showing the result: the background, the sidebar and the inbox card. */}
+          <div className="bg-preview" aria-hidden>
+            <span className="bgp-side">
+              <i />
+              <i />
+              <i />
+            </span>
+            <span className="bgp-card">
+              <i />
+              <i />
+              <i />
+              <i />
+            </span>
+            <span className="bgp-home">
+              <i />
+              <i />
+            </span>
+          </div>
+        </div>
+      </Row>
+      {kind !== "mood" && (
+        <Row title="Inbox card" sub="Plain white, or with a little of the background's color" look>
+          <Seg
+            label="Inbox card"
+            value={settings.cardTint ? "tinted" : "white"}
+            options={[
+              ["white", "White"],
+              ["tinted", "Tinted"],
+            ]}
+            onChange={(v) => look({ cardTint: v === "tinted" })}
+          />
+        </Row>
+      )}
+      <Row title="Pattern" sub="A faint pattern behind the panes that follows the season: petals, sun, leaves or snow" look>
+        <Seg
+          label="Pattern"
+          value={settings.seasonal ? "seasonal" : "none"}
+          options={[
+            ["none", "None"],
+            ["seasonal", "Seasonal"],
+          ]}
+          onChange={(v) => look({ seasonal: v === "seasonal" })}
+        />
+      </Row>
+    </>
+  );
+}
+
 function Row({
   title,
   sub,
@@ -472,85 +611,7 @@ export function SettingsModal() {
                   />
                 </div>
               </Row>
-              <Row title="Background" sub="The color behind the panes. Text on it turns light or dark to match" col look>
-                {(() => {
-                  const stops = windowStops(settings.windowColor);
-                  const preset = WINDOW_GRADIENTS.some((g) => g.value === settings.windowColor?.toLowerCase());
-                  return (
-                    <>
-                <div className="swatches">
-                  <button
-                    className={cx("swatch swatch-default", !settings.windowColor && "on")}
-                    title="The mood's own"
-                    aria-label="The mood's own background"
-                    aria-pressed={!settings.windowColor}
-                    onClick={() => look({ windowColor: "" })}
-                  />
-                  {WINDOW_COLORS.map((c) => (
-                    <button
-                      key={c.value}
-                      className={cx("swatch", !preset && stops[0] === c.value && "on")}
-                      style={{ background: c.value, "--sw": c.value } as React.CSSProperties}
-                      title={c.name}
-                      aria-label={c.name}
-                      aria-pressed={!preset && stops[0] === c.value}
-                      onClick={() => look({ windowColor: stops.length > 1 && !preset ? blendWindow(c.value) : c.value })}
-                    />
-                  ))}
-                  <input
-                    type="color"
-                    className="swatch-custom"
-                    title="Custom background"
-                    aria-label="Custom background color"
-                    value={stops[0] || "#e4e4e1"}
-                    onChange={(e) =>
-                      look({ windowColor: stops.length > 1 && !preset ? blendWindow(e.target.value) : e.target.value })
-                    }
-                  />
-                </div>
-                {/* Ready-made gradients, pale then deep. */}
-                <div className="swatches">
-                  {WINDOW_GRADIENTS.map((g) => (
-                    <button
-                      key={g.value}
-                      className={cx("swatch swatch-grad", settings.windowColor?.toLowerCase() === g.value && "on")}
-                      style={
-                        {
-                          background: `linear-gradient(150deg, ${g.value.split(">").join(", ")})`,
-                          "--sw": g.value.split(">")[1],
-                        } as React.CSSProperties
-                      }
-                      title={g.name}
-                      aria-label={`${g.name} gradient`}
-                      aria-pressed={settings.windowColor?.toLowerCase() === g.value}
-                      onClick={() => look({ windowColor: g.value })}
-                    />
-                  ))}
-                </div>
-                    </>
-                  );
-                })()}
-              </Row>
-              {windowStops(settings.windowColor).length > 0 && (
-                <Row title="Tint the inbox card" sub="The inbox takes on a little of the background's color instead of plain white" look>
-                  <Switch label="Tint the inbox card" on={!!settings.cardTint} onChange={(v) => look({ cardTint: v })} />
-                </Row>
-              )}
-              {windowStops(settings.windowColor).length > 0 && (
-                <Row title="Blend into a gradient" sub="The background drifts softly into a neighboring shade across the window" look>
-                  <Switch
-                    label="Blend into a gradient"
-                    on={windowStops(settings.windowColor).length > 1}
-                    onChange={(v) => {
-                      const first = windowStops(settings.windowColor)[0];
-                      look({ windowColor: v ? blendWindow(first) : first });
-                    }}
-                  />
-                </Row>
-              )}
-              <Row title="Seasonal touch" sub="A faint pattern behind the panes that follows the season: petals, sun, leaves or snow" look>
-                <Switch label="Seasonal touch" on={!!settings.seasonal} onChange={(v) => look({ seasonal: v })} />
-              </Row>
+              <BackgroundSettings settings={settings} look={look} />
               <Row title="Text size" sub="Also Ctrl + and Ctrl −">
                 <Seg
                   label="Text size"
