@@ -40,7 +40,8 @@
         "base-uri": "'none'",
         "form-action": "'none'"
       },
-      "devCsp": null
+      "devCsp": null,
+      "dangerousDisableAssetCspModification": ["style-src"]
     }
   },
   "bundle": {
