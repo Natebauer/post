@@ -435,6 +435,23 @@ function ThreadDetailView() {
               </div>
             )}
           </div>
+          {unsub && (
+            // Mailing lists: leaving is one quiet pill away, not only in the More menu.
+            <button
+              type="button"
+              className="unsub-pill"
+              title="Stop getting these emails"
+              onClick={() => {
+                if (unsub.header) void A.unsubscribe(unsub.messageId);
+                else if (unsub.link) {
+                  void openUrl(unsub.link);
+                  useStore.getState().snack({ text: "Opened the unsubscribe page in your browser" });
+                }
+              }}
+            >
+              <MailX size={13} /> Unsubscribe
+            </button>
+          )}
           <div className="rh-actions" role="toolbar" aria-label="Conversation actions">
             {shown && shown.messages.some((m) => !m.isDraft) && (
               <>
