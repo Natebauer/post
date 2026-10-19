@@ -273,8 +273,22 @@
   pointer-events: none;
 }
 /* A newly arrived email: the one soft tint, settling away. */
+/* A newly arrived email slides down into its place as it fades in, wearing the soft tint. */
 .row.fresh {
-  animation: fresh var(--highlight) var(--ease);
+  animation:
+    fresh var(--highlight) var(--ease),
+    fresh-in 460ms var(--ease-move);
+}
+@keyframes fresh-in {
+  from {
+    opacity: 0;
+    translate: 0 -16px;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .row.fresh {
+    animation: fresh var(--highlight) var(--ease);
+  }
 }
 @keyframes fresh {
   from {
