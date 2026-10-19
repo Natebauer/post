@@ -227,6 +227,8 @@ pub struct Settings {
     pub auto_dark_end: i64,
     /// A faint pattern for the season (leaves, snowflakes, petals, sun) behind the panes.
     pub seasonal: bool,
+    /// With a custom window background, the inbox card takes on a little of its color.
+    pub card_tint: bool,
 }
 
 /// A section in the sidebar: one sender, a group (senders, domains or subject words), or an AI
@@ -331,6 +333,7 @@ impl Default for Settings {
             auto_dark_start: 21 * 60,
             auto_dark_end: 5 * 60,
             seasonal: false,
+            card_tint: false,
         }
     }
 }

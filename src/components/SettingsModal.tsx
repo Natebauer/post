@@ -532,6 +532,11 @@ export function SettingsModal() {
                 })()}
               </Row>
               {windowStops(settings.windowColor).length > 0 && (
+                <Row title="Tint the inbox card" sub="The inbox takes on a little of the background's color instead of plain white" look>
+                  <Switch label="Tint the inbox card" on={!!settings.cardTint} onChange={(v) => look({ cardTint: v })} />
+                </Row>
+              )}
+              {windowStops(settings.windowColor).length > 0 && (
                 <Row title="Blend into a gradient" sub="The background drifts softly into a neighboring shade across the window" look>
                   <Switch
                     label="Blend into a gradient"

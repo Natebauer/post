@@ -191,6 +191,8 @@ export interface Settings {
   autoDarkEnd: number;
   /** A faint pattern for the season behind the panes. */
   seasonal: boolean;
+  /** With a custom window background, the inbox card takes on a little of its color. */
+  cardTint: boolean;
 }
 
 export interface AskSource {

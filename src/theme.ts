@@ -29,7 +29,7 @@ export function applyTheme(s: Settings | null, { slow = false }: { slow?: boolea
   const root = document.documentElement;
   // When the look changes, every color switches together (no hover colors trailing behind; see
   // 01-base.css). Other settings re-apply the theme too, and leave motion alone.
-  const look = `${t}|${s?.mood ?? ""}|${moodById(s?.mood).id}|${s?.accent ?? ""}|${s?.windowColor ?? ""}`;
+  const look = `${t}|${s?.mood ?? ""}|${moodById(s?.mood).id}|${s?.accent ?? ""}|${s?.windowColor ?? ""}|${!!s?.cardTint}`;
   // (A new dark time that changes Auto's mood right now changes `look` too, so it fades.)
   const changed = look !== lastLook && !!lastLook;
   if (look !== lastLook) {
@@ -99,6 +99,7 @@ function paintWindow(s: Settings | null, t: "light" | "dark") {
     scheme = luminance(color) < 0.179 ? "dark" : "light";
   } else root.style.removeProperty("--window-base");
   root.dataset.wscheme = scheme;
+  tintCard(s, t, color, scheme);
 
   let style = document.getElementById("post-window-scope") as HTMLStyleElement | null;
   if (scheme === t) {
@@ -121,6 +122,30 @@ function paintWindow(s: Settings | null, t: "light" | "dark") {
   }
   // Text color is inherited as a value, not a variable, so these areas set their own.
   style.textContent = `${ON_WINDOW} { ${vars} ${extra} color: var(--text); }`;
+}
+
+/**
+ * "Tint the inbox card": the card's surfaces take on a little of the window background, so a
+ * colored or gradient window doesn't leave the card stark white. The surfaces stay solid, so the
+ * text keeps its contrast. A pale background on a light card (or a dark one on a dark card) mixes
+ * in more, since it's close to the card already; the opposite mixes in just a whisper.
+ */
+function tintCard(s: Settings | null, t: "light" | "dark", color: string, scheme: "light" | "dark") {
+  let style = document.getElementById("post-card-tint") as HTMLStyleElement | null;
+  if (!color || !s?.cardTint) {
+    style?.remove();
+    return;
+  }
+  const p = paletteFor(s?.mood, t);
+  const pct = scheme === t ? 40 : 9;
+  const mix = (k: "surface" | "surface-2" | "surface-3" | "elevated" | "tint-base") =>
+    `--${k}: color-mix(in srgb, ${color} ${pct}%, ${p[k]});`;
+  if (!style) {
+    style = document.createElement("style");
+    style.id = "post-card-tint";
+    document.head.appendChild(style);
+  }
+  style.textContent = `.list-pane { ${mix("surface")} ${mix("surface-2")} ${mix("surface-3")} ${mix("elevated")} ${mix("tint-base")} }`;
 }
 
 /** A window background setting's colors: one for a flat color, two or three for a gradient
