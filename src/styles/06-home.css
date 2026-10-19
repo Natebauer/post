@@ -464,3 +464,31 @@ body.dragging .read-pane.bare {
     0 0 0 2px color-mix(in srgb, var(--accent) 55%, transparent),
     0 0 32px color-mix(in srgb, var(--accent) 30%, transparent);
 }
+
+/* ---------- the label over pinned emails ---------- */
+.hlabel {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin: 0 0 8px 2px;
+  font-size: 11px;
+  font-weight: 650;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--text-3);
+}
+.hlabel svg {
+  color: var(--accent-text);
+}
+.hlabel-n {
+  min-width: 18px;
+  height: 16px;
+  padding: 0 5px;
+  border-radius: 8px;
+  display: inline-grid;
+  place-items: center;
+  font-size: 10px;
+  letter-spacing: 0;
+  color: var(--accent-text);
+  background: var(--accent-soft);
+}

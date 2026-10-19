@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useState, type ReactNode } from "react";
 import type React from "react";
 import { listen } from "@tauri-apps/api/event";
-import { PinOff, Sparkles } from "lucide-react";
+import { Pin, PinOff, Sparkles } from "lucide-react";
 import { api, errText, type AiStatus, type Home as HomeData, type HomeItem } from "../api";
 import { useStore } from "../store";
 import { mark } from "../motion";
@@ -127,6 +127,11 @@ const MODULES: ModuleDef[] = [
     title: "Pinned",
     render: (d) =>
       !d ? null : d.pinned.length ? (
+        <>
+        {/* A quiet label over the pinned emails, with how many there are. */}
+        <div className="hlabel">
+          <Pin size={13} /> Pinned <span className="hlabel-n">{d.pinned.length}</span>
+        </div>
         <div className="hcards">
         {d.pinned.map((it) => (
           <ItemRow
@@ -158,6 +163,7 @@ const MODULES: ModuleDef[] = [
           />
         ))}
         </div>
+        </>
       ) : (
         <Empty>Nothing pinned. Drag an email here, or press P, to keep it here until it's done.</Empty>
       ),
