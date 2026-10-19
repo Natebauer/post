@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState, type ReactNode } from "react";
+import { useCallback, useEffect, useLayoutEffect, useState, type ReactNode } from "react";
 import type React from "react";
 import { listen } from "@tauri-apps/api/event";
 import { Pin, PinOff, Sparkles } from "lucide-react";
@@ -17,6 +17,23 @@ const cache: {
   home: HomeData | null;
   ai: AiStatus | null;
 } = { home: null, ai: null };
+
+/* ---------------- pinned cards gliding into their new places ---------------- */
+
+/** Where each pinned card sat just before a pin change, so the ones that move can glide there. */
+let flipFrom: { at: number; rects: Map<string, DOMRect> } | null = null;
+
+const pinnedCards = () => document.querySelectorAll<HTMLElement>(".hcards > .hitem[data-thread]");
+
+/** Reload Home after a pin change, remembering where the cards were first. */
+function refreshHome() {
+  if (!reduceMotion()) {
+    const rects = new Map<string, DOMRect>();
+    pinnedCards().forEach((el) => rects.set(el.dataset.thread!, el.getBoundingClientRect()));
+    flipFrom = { at: performance.now(), rects };
+  }
+  window.dispatchEvent(new Event("post:home-refresh"));
+}
 
 
 /* ---------------- shared bits ---------------- */
@@ -37,6 +54,7 @@ function ItemRow({
 }) {
   return (
     <button
+      data-thread={it.threadId}
       className={cx("hitem", card && "hcard", unread && "unread", className)}
       style={card ? ({ "--h": hueFor((it.email || it.name).toLowerCase()) } as React.CSSProperties) : undefined}
       onClick={() => open(it.threadId)}
@@ -207,6 +225,26 @@ export function Home() {
     };
   }, [load]);
 
+  // After a pin change, the cards that stay slide over into their new places instead of jumping.
+  useLayoutEffect(() => {
+    const f = flipFrom;
+    if (!f) return;
+    flipFrom = null;
+    if (performance.now() - f.at > 3000) return;
+    pinnedCards().forEach((el) => {
+      const was = f.rects.get(el.dataset.thread!);
+      if (!was) return;
+      const now = el.getBoundingClientRect();
+      const dx = was.left - now.left;
+      const dy = was.top - now.top;
+      if (Math.abs(dx) < 1 && Math.abs(dy) < 1) return;
+      el.animate([{ transform: `translate(${dx}px, ${dy}px)` }, { transform: "none" }], {
+        duration: motionMs("emphasis"),
+        easing: motionEase("ease-move"),
+      });
+    });
+  }, [data]);
+
   // Pinned emails sit quietly on Home; with none pinned they take no space.
   const shown = MODULES.filter((m) => m.id !== "pinned" || !!data?.pinned.length);
 
@@ -241,22 +279,18 @@ export async function togglePin(threadId: string): Promise<boolean> {
   return now;
 }
 
-/** Unpin from Home: the row fades and closes up (so what's below glides up), then goes. */
+/** Unpin from Home: the card fades and shrinks away, then the cards after it slide over into its place. */
 async function unpinAnimated(threadId: string, from: HTMLElement) {
-  const row = from.closest<HTMLElement>(".hitem");
-  if (row && !reduceMotion()) {
-    const cs = getComputedStyle(row);
-    const h = row.offsetHeight;
+  const card = from.closest<HTMLElement>(".hitem");
+  if (card && !reduceMotion()) {
+    const ms = Math.round(motionMs("med") * 1.4);
     await settle(
-      row.animate(
-        [
-          { opacity: 1, height: `${h}px`, paddingTop: cs.paddingTop, paddingBottom: cs.paddingBottom, marginTop: cs.marginTop },
-          { opacity: 0, offset: 0.4 },
-          { opacity: 0, height: "0px", paddingTop: "0px", paddingBottom: "0px", marginTop: "0px" },
-        ],
-        { duration: motionMs("emphasis"), easing: motionEase("ease-move"), fill: "forwards" },
-      ).finished,
-      motionMs("emphasis") + 60,
+      card.animate([{ opacity: 1, transform: "none" }, { opacity: 0, transform: "scale(0.94)" }], {
+        duration: ms,
+        easing: motionEase("ease-in"),
+        fill: "forwards",
+      }).finished,
+      ms + 60,
     );
   }
   await setPin(threadId, false);
@@ -266,7 +300,7 @@ async function unpinAnimated(threadId: string, from: HTMLElement) {
 export async function setPin(threadId: string, pinned: boolean) {
   await api.pinThread(threadId, pinned);
   if (pinned) mark(`pin:${threadId}`, "new");
-  window.dispatchEvent(new Event("post:home-refresh"));
+  refreshHome();
   useStore.getState().snack({
     text: pinned ? "Pinned to home" : "Unpinned",
     action: {
@@ -274,7 +308,7 @@ export async function setPin(threadId: string, pinned: boolean) {
       run: () =>
         void api.pinThread(threadId, !pinned).then(() => {
           if (!pinned) mark(`pin:${threadId}`, "new");
-          window.dispatchEvent(new Event("post:home-refresh"));
+          refreshHome();
         }),
     },
   });
