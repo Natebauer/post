@@ -580,6 +580,35 @@
 .switch.on:active::after {
   transform: translateX(11px);
 }
+/* On, the knob wears a small check in the accent, popping in as it lands. */
+.switch::before {
+  content: "";
+  position: absolute;
+  z-index: 1;
+  left: 18px;
+  top: 2px;
+  width: 20px;
+  height: 20px;
+  background: var(--accent);
+  -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20'%3E%3Cpath d='m6 10.4 2.7 2.7L14 7.6' fill='none' stroke='black' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") center / 20px 20px no-repeat;
+  mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20'%3E%3Cpath d='m6 10.4 2.7 2.7L14 7.6' fill='none' stroke='black' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") center / 20px 20px no-repeat;
+  opacity: 0;
+  scale: 0.4;
+  pointer-events: none;
+  transition:
+    opacity var(--fast) var(--ease),
+    scale var(--fast) var(--ease);
+}
+.switch.on::before {
+  opacity: 1;
+  scale: 1;
+  transition:
+    opacity var(--med) var(--ease) 140ms,
+    scale 320ms cubic-bezier(0.3, 1.6, 0.5, 1) 140ms;
+}
+.switch.on:active::before {
+  opacity: 0;
+}
 /* The chosen option's highlight slides between options (Settings' Seg). */
 .seg-slide {
   position: relative;
