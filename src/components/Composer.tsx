@@ -415,6 +415,11 @@ export function Composer({ draft: original, mode: initialMode }: { draft: Compos
             {aliases.length > 1 && (
               <div className="c-field">
                 <label htmlFor={`from-${d.key}`}>From</label>
+                {/* You, as the recipients will see you: your avatar beside the address. */}
+                {(() => {
+                  const me = d.from ?? aliases.find((a) => a.isDefault) ?? aliases[0];
+                  return me ? <Avatar email={me.email} name={me.name || me.email} size="xs" /> : null;
+                })()}
                 <select
                   id={`from-${d.key}`}
                   className="plain"

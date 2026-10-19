@@ -402,6 +402,11 @@ body:has(.composer.floating:not(.min)) .snacks {
   font-size: var(--fs-2);
 }
 .c-field input.plain,
+.c-field label + .avatar {
+  align-self: center;
+  margin-right: 2px;
+  box-shadow: 0 0 0 2px var(--surface), 0 0 0 3px color-mix(in srgb, var(--accent) 40%, transparent);
+}
 .c-field select.plain {
   flex: 1;
   border: 0;
