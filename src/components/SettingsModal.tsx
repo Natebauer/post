@@ -4,7 +4,7 @@ import type React from "react";
 import { Bell, BookOpen, Keyboard, Monitor, Palette, PenLine, Plus, Sparkles, Trash2, UserRound, X } from "lucide-react";
 import { api, errText, type AiStatus, type ComposeMode, type Settings, type Template } from "../api";
 import { useStore } from "../store";
-import { ACCENTS, WINDOW_COLORS, WINDOW_GRADIENTS, blendWindow, windowStops } from "../theme";
+import { ACCENTS, DEFAULT_ACCENT, WINDOW_COLORS, WINDOW_GRADIENTS, blendWindow, windowStops } from "../theme";
 import { MoodPicker } from "./MoodPicker";
 import { moodById } from "../moods";
 import { ShortcutList } from "./Shortcuts";
@@ -626,6 +626,40 @@ export function SettingsModal() {
                   ]}
                   onChange={(v) => void setZoom(Number(v))}
                 />
+              </Row>
+              <Row title="Default look" sub="Back to Windows' theme, the Classic mood, Post teal, the mood's own background and the default text size">
+                <button
+                  className="btn outline"
+                  onClick={() => {
+                    // Everything on this page, put back, with an Undo in case it was a slip.
+                    const keys = ["theme", "mood", "accent", "windowColor", "cardTint", "seasonal", "autoDarkStart", "autoDarkEnd"] as const;
+                    const was = Object.fromEntries(keys.map((k) => [k, settings[k]])) as Partial<Settings>;
+                    const wasZoom = settings.zoom ?? 1;
+                    look({
+                      theme: "system",
+                      mood: "classic",
+                      accent: DEFAULT_ACCENT,
+                      windowColor: "",
+                      cardTint: false,
+                      seasonal: false,
+                      autoDarkStart: 21 * 60,
+                      autoDarkEnd: 5 * 60,
+                    });
+                    if (wasZoom !== 1) void setZoom(1);
+                    useStore.getState().snack({
+                      text: "Appearance reset to the defaults",
+                      action: {
+                        label: "Undo",
+                        run: () => {
+                          set(was);
+                          if (wasZoom !== 1) void setZoom(wasZoom);
+                        },
+                      },
+                    });
+                  }}
+                >
+                  Reset to defaults
+                </button>
               </Row>
             </>
           )}
