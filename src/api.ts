@@ -197,6 +197,18 @@ export interface Settings {
   cardClear: boolean;
   /** With a custom window background, the inbox card is a thin white veil over it (wins over cardTint). */
   cardFrost: boolean;
+  /** Looks saved as moods of your own. */
+  savedLooks: SavedLook[];
+}
+
+/** A look saved as a mood of your own: a mood's colors plus what was chosen with it. */
+export interface SavedLook {
+  name: string;
+  mood: string;
+  accent: string;
+  windowColor: string;
+  card: "white" | "tinted" | "frost" | "clear";
+  seasonal: boolean;
 }
 
 export interface AskSource {

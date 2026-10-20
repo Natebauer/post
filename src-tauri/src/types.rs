@@ -235,6 +235,22 @@ pub struct Settings {
     /// With a custom window background, the inbox card is a thin white veil that brightens it a
     /// little (wins over card_tint; card_clear wins over it).
     pub card_frost: bool,
+    /// Looks saved from Settings as moods of your own ("Save as a mood").
+    pub saved_looks: Vec<SavedLook>,
+}
+
+/// A look saved as a mood of your own: a mood's colors plus the accent, background, inbox card
+/// and pattern chosen with it.
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase", default)]
+pub struct SavedLook {
+    pub name: String,
+    pub mood: String,
+    pub accent: String,
+    pub window_color: String,
+    /// "white", "tinted", "frost" or "clear".
+    pub card: String,
+    pub seasonal: bool,
 }
 
 /// A section in the sidebar: one sender, a group (senders, domains or subject words), or an AI
@@ -342,6 +358,7 @@ impl Default for Settings {
             card_tint: false,
             card_clear: false,
             card_frost: false,
+            saved_looks: Vec::new(),
         }
     }
 }

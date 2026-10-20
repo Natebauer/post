@@ -568,8 +568,8 @@ export function SettingsModal() {
                   onChange={(theme) => look({ theme })}
                 />
               </Row>
-              <Row title="Mood" sub="The feel of the whole app: colors, tints and headings. Each mood works in light and dark." col look>
-                <MoodPicker settings={settings} onPick={(mood, accent) => look({ mood, accent })} />
+              <Row title="Mood" sub="The feel of the whole app: its colors, background and inbox card. Each mood works in light and dark." col look>
+                <MoodPicker settings={settings} onApply={look} />
               </Row>
               {settings.mood === "auto" && (
                 <Row title="Auto goes dark" sub="Ember, Auto's dark mood, between these times" look>
@@ -590,6 +590,8 @@ export function SettingsModal() {
                   </div>
                 </Row>
               )}
+              {/* Everything below adjusts the mood picked above. */}
+              <h5 className="set-sub">Make it yours</h5>
               <Row title="Accent color" sub="Used for unread markers, selection and buttons" col look>
                 <div className="swatches">
                   {ACCENTS.map((a) => (

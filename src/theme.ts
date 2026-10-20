@@ -1,6 +1,6 @@
 import { getCurrentWindow } from "@tauri-apps/api/window";
 import type { Settings } from "./api";
-import { applyMood, KEYS, moodById, nextAutoChange, paletteFor, setAutoSchedule } from "./moods";
+import { applyMood, KEYS, moodById, nextAutoChange, paletteFor, setAutoSchedule, type CardStyle } from "./moods";
 import { reduceMotion } from "./motionTokens";
 
 /** Post's teal, the app icon's color. */
@@ -212,8 +212,18 @@ function moodBackdrop(s: Settings | null, t: "light" | "dark"): string {
   return "#" + base.map((v, i) => Math.round(Number(m[i + 1]) * a + v * (1 - a)).toString(16).padStart(2, "0")).join("");
 }
 
+/** The inbox card style a Settings holds (its three switches, as one choice). */
+export function cardOf(s: Settings | null): CardStyle {
+  return s?.cardClear ? "clear" : s?.cardFrost ? "frost" : s?.cardTint ? "tinted" : "white";
+}
+
+/** The Settings fields for an inbox card style. */
+export function cardPatch(c: CardStyle): Pick<Settings, "cardTint" | "cardFrost" | "cardClear"> {
+  return { cardTint: c === "tinted", cardFrost: c === "frost", cardClear: c === "clear" };
+}
+
 /** The even mix of some #rrggbb colors. */
-function mixHex(hexes: string[]): string {
+export function mixHex(hexes: string[]): string {
   const ch = (i: number) =>
     Math.round(hexes.reduce((n, h) => n + parseInt(h.slice(1 + i * 2, 3 + i * 2), 16), 0) / hexes.length);
   return "#" + [0, 1, 2].map((i) => ch(i).toString(16).padStart(2, "0")).join("");
@@ -244,7 +254,7 @@ export function blendWindow(hex: string): string {
 }
 
 /** Relative luminance of a #rrggbb color (0 black to 1 white). */
-function luminance(hex: string): number {
+export function luminance(hex: string): number {
   const m = /^#?([0-9a-f]{6})$/i.exec(hex.trim());
   if (!m) return 1;
   const n = parseInt(m[1], 16);

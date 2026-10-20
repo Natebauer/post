@@ -1,8 +1,9 @@
 import type React from "react";
-import { Check } from "lucide-react";
-import type { Settings } from "../api";
-import { moodById, MOODS, type MoodPalette } from "../moods";
-import { resolvedTheme } from "../theme";
+import { useState } from "react";
+import { Check, X } from "lucide-react";
+import type { SavedLook, Settings } from "../api";
+import { lookFor, looksOf, moodById, MOODS, type CardStyle, type MoodLook, type MoodPalette } from "../moods";
+import { cardOf, cardPatch, luminance, mixHex, resolvedTheme, windowStops } from "../theme";
 import { cx } from "../util";
 
 /** Classic's own colors (from styles/01-base.css), so its preview matches the other moods'. */
@@ -31,16 +32,109 @@ const CLASSIC: Record<
 /** Opaque version of a window tint for the preview. */
 const solid = (c: string) => c.replace(/rgba\(([^,]+),([^,]+),([^,]+),[^)]+\)/, "rgb($1,$2,$3)");
 
-/** A miniature Post in each mood: window, inbox card with a selected row, reading pane and a heading. */
-export function MoodPicker({ settings, onPick }: { settings: Settings; onPick: (id: string, accent: string) => void }) {
+/** What a card in the picker shows and applies: a mood's colors with a look on top. */
+interface Choice {
+  mood: string;
+  accent: string;
+  look: MoodLook;
+  seasonal?: boolean;
+}
+
+const sameLook = (a: MoodLook, b: MoodLook) => a.bg.toLowerCase() === b.bg.toLowerCase() && a.card === b.card;
+
+/**
+ * The moods, each previewed with the look it brings (its background and inbox card), then the looks
+ * you've saved as moods of your own. Picking one applies the whole look. Once you change the
+ * accent, background or card, the mood's card says so and offers its own look back.
+ */
+export function MoodPicker({ settings, onApply }: { settings: Settings; onApply: (p: Partial<Settings>) => void }) {
   // Moods for both themes preview in your Theme setting; dark moods always preview dark.
   const theme = resolvedTheme({ ...settings, mood: "classic" });
   const current = settings.mood || "classic";
+  const now: MoodLook = { bg: settings.windowColor ?? "", card: cardOf(settings) };
+  const saved = settings.savedLooks ?? [];
+  const savedOn = saved.findIndex(
+    (l) => l.mood === current && l.accent === settings.accent && sameLook({ bg: l.windowColor, card: l.card }, now) && l.seasonal === !!settings.seasonal,
+  );
+  const [naming, setNaming] = useState<string | null>(null);
+
+  const apply = (c: Choice) =>
+    onApply({
+      mood: c.mood,
+      accent: c.accent,
+      windowColor: c.look.bg,
+      ...cardPatch(c.look.card),
+      ...(c.seasonal !== undefined && { seasonal: c.seasonal }),
+    });
+
+  /** A miniature Post: the window in its background, the inbox card as it sits there, the reading pane. */
+  const preview = (moodId: string, accent: string, look: MoodLook) => {
+    const r = moodId === "auto" ? moodById("auto") : moodById(moodId);
+    const scheme = theme === "dark" || r.scheme === "dark" ? "dark" : "light";
+    const p = (scheme === "dark" ? r.dark : r.light) ?? CLASSIC[scheme];
+    const stops = windowStops(look.bg);
+    const mid = stops.length ? mixHex(stops) : solid(p.chrome);
+    // What sits on the background takes light or dark colors to suit it, like the app does.
+    const bgDark = stops.length ? luminance(mid) < 0.179 : scheme === "dark";
+    const onBg = (bgDark ? r.dark : r.scheme === "dark" ? undefined : r.light) ?? CLASSIC[bgDark ? "dark" : "light"];
+    const see = look.card === "frost" || look.card === "clear";
+    const cp = see ? onBg : p;
+    const card: Record<CardStyle, string> = {
+      white: p.surface,
+      tinted: `color-mix(in srgb, ${mid} ${bgDark === (scheme === "dark") ? 40 : 9}%, ${p.surface})`,
+      frost: `rgba(255, 255, 255, ${bgDark ? 0.07 : 0.4})`,
+      clear: `color-mix(in srgb, ${onBg.surface} 14%, transparent)`,
+    };
+    const background = stops.length
+      ? stops.length > 1
+        ? `linear-gradient(150deg, ${stops.join(", ")})`
+        : stops[0]
+      : `radial-gradient(120% 90% at 0% 0%, color-mix(in srgb, ${accent} 14%, transparent), transparent 70%), ${solid(p.chrome)}`;
+    return (
+      <span className="mood-preview" style={{ background }} aria-hidden>
+        <span className="mp-rail">
+          <i style={{ background: accent }} />
+          <i style={{ background: onBg["text-3"] }} />
+          <i style={{ background: onBg["text-3"] }} />
+        </span>
+        <span className="mp-list" style={{ background: card[look.card], borderColor: cp.border }}>
+          <span className="mp-row sel" style={{ background: `color-mix(in srgb, ${accent} ${see ? 30 : 16}%, ${see ? "transparent" : p.surface})` }}>
+            <i style={{ background: accent }} />
+            <span className="mp-lines">
+              <b style={{ background: cp.text }} />
+              <b style={{ background: cp["text-3"], width: "55%" }} />
+            </span>
+          </span>
+          {[0, 1].map((k) => (
+            <span className="mp-row" key={k}>
+              <i style={{ background: cp["surface-3"] }} />
+              <span className="mp-lines">
+                <b style={{ background: cp.text, opacity: 0.45 }} />
+                <b style={{ background: cp["text-3"], width: "55%" }} />
+              </span>
+            </span>
+          ))}
+        </span>
+        <span className="mp-read" style={{ background: p.surface, borderColor: p.border }}>
+          <span className="mp-head" style={{ color: p.text, fontFamily: r.display ?? "var(--font)" }}>
+            Aa
+          </span>
+          <b style={{ background: p["text-3"] }} />
+          <b style={{ background: p["text-3"], width: "86%" }} />
+          <b style={{ background: p["text-3"], width: "60%" }} />
+          <span className="mp-btn" style={{ background: accent }} />
+        </span>
+      </span>
+    );
+  };
+
   const card = (m: (typeof MOODS)[number]) => {
     // Auto previews whichever mood it stands for right now.
     const r = m.id === "auto" ? moodById("auto") : m;
-    const p = (theme === "dark" || r.scheme === "dark" ? r.dark : r.light) ?? CLASSIC[theme];
-    const on = current === m.id;
+    const on = savedOn < 0 && current === m.id;
+    const look = lookFor(m.id, theme);
+    // Changed since it was picked: a different accent, background or card than any it suggests.
+    const changed = on && ((settings.accent || "").toLowerCase() !== (m.accent || "").toLowerCase() || !looksOf(m.id).some((l) => sameLook(l, now)));
     const accent = on ? settings.accent || r.accent : r.accent;
     return (
       <button
@@ -49,73 +143,130 @@ export function MoodPicker({ settings, onPick }: { settings: Settings; onPick: (
         aria-checked={on}
         className={cx("mood", on && "on")}
         style={{ "--ma": accent } as React.CSSProperties}
-        onClick={() => onPick(m.id, m.accent)}
+        onClick={() => apply({ mood: m.id, accent: m.accent, look })}
         title={m.blurb}
       >
-        <span
-          className="mood-preview"
-          style={{
-            background: `radial-gradient(120% 90% at 0% 0%, color-mix(in srgb, ${accent} 14%, transparent), transparent 70%), ${solid(p.chrome)}`,
-          }}
-          aria-hidden
-        >
-          <span className="mp-rail">
-            <i style={{ background: accent }} />
-            <i style={{ background: p["text-3"] }} />
-            <i style={{ background: p["text-3"] }} />
-          </span>
-          <span className="mp-list" style={{ background: p.surface, borderColor: p.border }}>
-            <span
-              className="mp-row sel"
-              style={{
-                background: `color-mix(in srgb, ${accent} 16%, ${p.surface})`,
-              }}
-            >
-              <i style={{ background: accent }} />
-              <span className="mp-lines">
-                <b style={{ background: p.text }} />
-                <b style={{ background: p["text-3"], width: "55%" }} />
-              </span>
-            </span>
-            <span className="mp-row">
-              <i style={{ background: p["surface-3"] }} />
-              <span className="mp-lines">
-                <b style={{ background: p.text, opacity: 0.45 }} />
-                <b style={{ background: p["text-3"], width: "55%" }} />
-              </span>
-            </span>
-            <span className="mp-row">
-              <i style={{ background: p["surface-3"] }} />
-              <span className="mp-lines">
-                <b style={{ background: p.text, opacity: 0.45 }} />
-                <b style={{ background: p["text-3"], width: "55%" }} />
-              </span>
-            </span>
-          </span>
-          <span className="mp-read" style={{ background: p.surface, borderColor: p.border }}>
-            <span className="mp-head" style={{ color: p.text, fontFamily: r.display ?? "var(--font)" }}>
-              Aa
-            </span>
-            <b style={{ background: p["text-3"] }} />
-            <b style={{ background: p["text-3"], width: "86%" }} />
-            <b style={{ background: p["text-3"], width: "60%" }} />
-            <span className="mp-btn" style={{ background: accent }} />
-          </span>
-        </span>
+        {preview(m.id, r.accent, on ? now : look)}
         <span className="mood-name">
           {m.name}
-          {on && <Check size={13} />}
+          {on && !changed && <Check size={13} />}
+          {changed && <span className="mood-tag">Customized</span>}
         </span>
         <span className="mood-blurb">{m.id === "auto" ? `${m.blurb} Now: ${r.name}.` : m.blurb}</span>
       </button>
     );
   };
+
+  const savedCard = (l: SavedLook, i: number) => {
+    const on = i === savedOn;
+    const look = { bg: l.windowColor, card: l.card };
+    const accent = l.accent || moodById(l.mood).accent || "#2a737b";
+    return (
+      <button
+        key={`${l.name}-${i}`}
+        role="radio"
+        aria-checked={on}
+        className={cx("mood mood-saved", on && "on")}
+        style={{ "--ma": accent } as React.CSSProperties}
+        onClick={() => apply({ mood: l.mood, accent: l.accent, look, seasonal: l.seasonal })}
+        title={`${l.name}: ${moodById(l.mood).name} with your own touches`}
+      >
+        {preview(l.mood, accent, look)}
+        <span className="mood-name">
+          {l.name}
+          {on && <Check size={13} />}
+        </span>
+        <span className="mood-blurb">{moodById(l.mood).name}, your way</span>
+        <span
+          role="button"
+          tabIndex={0}
+          className="mood-del"
+          title="Remove this mood"
+          aria-label={`Remove ${l.name}`}
+          onClick={(e) => {
+            e.stopPropagation();
+            onApply({ savedLooks: saved.filter((_, k) => k !== i) });
+          }}
+          onKeyDown={(e) => {
+            if (e.key === "Enter") {
+              e.stopPropagation();
+              onApply({ savedLooks: saved.filter((_, k) => k !== i) });
+            }
+          }}
+        >
+          <X size={12} />
+        </span>
+      </button>
+    );
+  };
+
+  const base = moodById(current);
+  const customized =
+    savedOn < 0 &&
+    ((settings.accent || "").toLowerCase() !== (base.accent || "").toLowerCase() || !looksOf(current).some((l) => sameLook(l, now)));
+  const saveLook = () => {
+    const name = (naming ?? "").trim() || "My mood";
+    const entry: SavedLook = {
+      name,
+      mood: current,
+      accent: settings.accent,
+      windowColor: settings.windowColor ?? "",
+      card: cardOf(settings),
+      seasonal: !!settings.seasonal,
+    };
+    onApply({ savedLooks: [...saved.filter((l) => l.name !== name), entry] });
+    setNaming(null);
+  };
+
   return (
     <div className="mood-groups" role="radiogroup" aria-label="Mood">
+      {saved.length > 0 && (
+        <>
+          <div className="mood-group-label">Yours</div>
+          <div className="moods">{saved.map(savedCard)}</div>
+        </>
+      )}
       <div className="mood-group-label">Light and dark</div>
       <div className="moods">{MOODS.filter((m) => m.scheme !== "dark").map(card)}</div>
       <div className="mood-group-label">Always dark</div>
       <div className="moods">{MOODS.filter((m) => m.scheme === "dark").map(card)}</div>
+      <div className="mood-actions">
+        {customized && (
+          <button type="button" className="btn ghost" onClick={() => apply({ mood: current, accent: base.accent, look: lookFor(current, theme) })}>
+            Back to {base.name}'s look
+          </button>
+        )}
+        {naming === null ? (
+          <button type="button" className="btn outline" onClick={() => setNaming("")}>
+            Save as a mood
+          </button>
+        ) : (
+          <form
+            className="mood-save"
+            onSubmit={(e) => {
+              e.preventDefault();
+              saveLook();
+            }}
+          >
+            <input
+              className="input"
+              autoFocus
+              maxLength={24}
+              placeholder="Name it, like Evening"
+              aria-label="Name for this mood"
+              value={naming}
+              onChange={(e) => setNaming(e.target.value)}
+              onKeyDown={(e) => e.key === "Escape" && (e.stopPropagation(), setNaming(null))}
+            />
+            <button type="submit" className="btn primary">
+              Save
+            </button>
+            <button type="button" className="btn ghost" onClick={() => setNaming(null)}>
+              Cancel
+            </button>
+          </form>
+        )}
+      </div>
     </div>
   );
 }

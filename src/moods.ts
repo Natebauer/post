@@ -50,6 +50,47 @@ const tint = (rgb: string, a: [number, number, number, number]) => ({
 const LIGHT_A: [number, number, number, number] = [0.1, 0.17, 0.045, 0.085];
 const DARK_A: [number, number, number, number] = [0.08, 0.14, 0.05, 0.09];
 
+/** How the inbox card sits on the window (Settings, Appearance). */
+export type CardStyle = "white" | "tinted" | "frost" | "clear";
+
+/** A mood's suggested background ("" = its own backdrop, else as in Settings.windowColor) and card. */
+export interface MoodLook {
+  bg: string;
+  card: CardStyle;
+}
+
+/** Each mood's suggested look, for light and for dark (dark-only moods only have dark). Picking a
+    mood applies the one for the theme Post is in right then. Moods not listed keep their own
+    backdrop and a white card. */
+const LOOKS: Record<string, { light?: MoodLook; dark?: MoodLook }> = {
+  paper: { light: { bg: "#ece4d6", card: "tinted" } },
+  slate: { light: { bg: "#d6e1ec", card: "white" } },
+  forest: { light: { bg: "#e5e9d0>#d3e5dc", card: "tinted" }, dark: { bg: "#27372f", card: "tinted" } },
+  sand: { light: { bg: "#f3e4c8>#f0d6d9", card: "tinted" }, dark: { bg: "#2e2127>#47291f", card: "frost" } },
+  dusk: { light: { bg: "#e4daf1>#f0dbe3", card: "frost" }, dark: { bg: "#373350>#56394b", card: "frost" } },
+  rose: { light: { bg: "#eedcdf", card: "tinted" } },
+  midnight: { light: { bg: "#d2e4ee>#d6ede0", card: "white" }, dark: { bg: "#13233a>#1c3b42", card: "clear" } },
+  graphite: { dark: { bg: "#232427", card: "frost" } },
+  abyss: { dark: { bg: "#13233a>#1c3b42", card: "clear" } },
+  ember: { dark: { bg: "#2e2127>#47291f", card: "frost" } },
+  aurora: { dark: { bg: "#1c3a3a>#1f2a4a", card: "clear" } },
+};
+
+const PLAIN: MoodLook = { bg: "", card: "white" };
+
+/** The look a mood suggests in a theme (a dark-only mood always uses its dark one). */
+export function lookFor(id: string | undefined, theme: "light" | "dark"): MoodLook {
+  const l = LOOKS[id ?? ""];
+  if (!l) return PLAIN;
+  return (moodById(id).scheme === "dark" || theme === "dark" ? l.dark : l.light) ?? PLAIN;
+}
+
+/** Every look a mood suggests (light and dark), to tell whether the current one is its own. */
+export function looksOf(id: string | undefined): MoodLook[] {
+  const l = LOOKS[id ?? ""];
+  return l ? [l.light ?? PLAIN, l.dark ?? PLAIN] : [PLAIN];
+}
+
 export const MOODS: Mood[] = [
   { id: "classic", name: "Classic", blurb: "Post's original: neutral and calm, with Post teal.", accent: "#2a737b" },
   // Follows the time of day (autoMoodId); its colors and accent are whichever mood is current.

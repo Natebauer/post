@@ -181,6 +181,7 @@ const settings: Settings = {
   cardTint: false,
   cardClear: false,
   cardFrost: false,
+  savedLooks: [],
 };
 
 const mockMembers = new Set<string>();

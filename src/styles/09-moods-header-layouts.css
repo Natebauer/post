@@ -154,6 +154,71 @@
   color: var(--text-3);
   padding: 0 2px;
 }
+/* "Customized": the chosen mood, changed since it was picked. */
+.mood-tag {
+  margin-left: auto;
+  padding: 1px 6px;
+  border-radius: 999px;
+  font-size: 10px;
+  font-weight: 650;
+  letter-spacing: 0.02em;
+  color: var(--accent-text);
+  background: var(--accent-soft);
+}
+/* A mood of your own: a small remove button shows on hover. */
+.mood-saved {
+  position: relative;
+}
+.mood-del {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  display: grid;
+  place-items: center;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  color: var(--text-2);
+  background: var(--elevated);
+  box-shadow: var(--shadow-1);
+  opacity: 0;
+  transition: opacity var(--fast) var(--ease);
+}
+.mood-saved:hover .mood-del,
+.mood-del:focus-visible {
+  opacity: 1;
+}
+.mood-del:hover {
+  color: var(--danger);
+}
+/* Under the moods: back to the mood's own look, and saving this one as a mood. */
+.mood-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: flex-end;
+  gap: var(--s-2);
+  margin-top: var(--s-2);
+}
+.mood-save {
+  display: flex;
+  gap: var(--s-2);
+  align-items: center;
+}
+.mood-save .input {
+  width: 200px;
+}
+/* A quiet heading inside a settings page ("Make it yours"). */
+.settings .set-sub {
+  margin: var(--s-5) 0 0;
+  padding-top: var(--s-4);
+  font-size: var(--fs-1);
+  font-weight: 650;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--text-3);
+  border-top: 1px solid var(--border);
+}
 /* ---------- settings: the scrim steps aside while the look is being adjusted ---------- */
 .scrim {
   transition:
