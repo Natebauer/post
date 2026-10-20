@@ -195,6 +195,8 @@ export interface Settings {
   cardTint: boolean;
   /** With a custom window background, the inbox card is mostly see-through (wins over cardTint). */
   cardClear: boolean;
+  /** With a custom window background, the inbox card is a thin white veil over it (wins over cardTint). */
+  cardFrost: boolean;
 }
 
 export interface AskSource {

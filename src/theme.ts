@@ -39,7 +39,7 @@ export function applyTheme(s: Settings | null, { slow = false }: { slow?: boolea
   const root = document.documentElement;
   // When the look changes, every color switches together (no hover colors trailing behind; see
   // 01-base.css). Other settings re-apply the theme too, and leave motion alone.
-  const look = `${t}|${s?.mood ?? ""}|${moodById(s?.mood).id}|${s?.accent ?? ""}|${s?.windowColor ?? ""}|${!!s?.cardTint}|${!!s?.cardClear}`;
+  const look = `${t}|${s?.mood ?? ""}|${moodById(s?.mood).id}|${s?.accent ?? ""}|${s?.windowColor ?? ""}|${!!s?.cardTint}|${!!s?.cardClear}|${!!s?.cardFrost}`;
   // (A new dark time that changes Auto's mood right now changes `look` too, so it fades.)
   const changed = look !== lastLook && !!lastLook;
   if (look !== lastLook) {
@@ -155,16 +155,22 @@ function schemeVars(s: Settings | null, scheme: "light" | "dark"): string {
  */
 function tintCard(s: Settings | null, t: "light" | "dark", color: string, scheme: "light" | "dark") {
   let style = document.getElementById("post-card-tint") as HTMLStyleElement | null;
-  if (!color || !(s?.cardTint || s?.cardClear)) {
+  if (!color || !(s?.cardTint || s?.cardClear || s?.cardFrost)) {
     style?.remove();
     return;
   }
-  if (s.cardClear) {
-    // "Clear": the card is mostly see-through, a faint veil of its surface over the background,
-    // in the background's own light or dark colors so its text reads on it.
+  if (s.cardClear || s.cardFrost) {
+    // "Clear": the card is mostly see-through, a faint veil of its surface over the background.
+    // "Frost": a thin white veil instead, so the card just brightens what's behind it (a whisper
+    // on a deep background, more on a pale one, where a little white wouldn't show). Either way
+    // it takes the background's own light or dark colors, so its text reads on it.
     const p = paletteFor(s.mood, scheme);
+    const frost = !s.cardClear;
+    const white = scheme === "dark" ? 6 : 35;
     const veil = (k: "surface" | "surface-2" | "surface-3" | "tint-base", pct: number) =>
-      `--${k}: color-mix(in srgb, ${p[k]} ${pct}%, transparent);`;
+      frost
+        ? `--${k}: color-mix(in srgb, #fff ${Math.round(white * (pct / 14))}%, transparent);`
+        : `--${k}: color-mix(in srgb, ${p[k]} ${pct}%, transparent);`;
     if (!style) {
       style = document.createElement("style");
       style.id = "post-card-tint";

@@ -232,6 +232,9 @@ pub struct Settings {
     /// With a custom window background, the inbox card is mostly see-through instead (wins over
     /// card_tint), in the background's light or dark colors.
     pub card_clear: bool,
+    /// With a custom window background, the inbox card is a thin white veil that brightens it a
+    /// little (wins over card_tint; card_clear wins over it).
+    pub card_frost: bool,
 }
 
 /// A section in the sidebar: one sender, a group (senders, domains or subject words), or an AI
@@ -338,6 +341,7 @@ impl Default for Settings {
             seasonal: false,
             card_tint: false,
             card_clear: false,
+            card_frost: false,
         }
     }
 }

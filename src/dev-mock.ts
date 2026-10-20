@@ -180,6 +180,7 @@ const settings: Settings = {
   seasonal: false,
   cardTint: false,
   cardClear: false,
+  cardFrost: false,
 };
 
 const mockMembers = new Set<string>();
