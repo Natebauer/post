@@ -57,10 +57,8 @@ export const MOODS: Mood[] = [
   {
     id: "paper",
     name: "Paper",
-    blurb: "Warm off-white paper, ink-blue accents and serif headings.",
+    blurb: "Warm off-white paper with ink-blue accents.",
     accent: "#33598a",
-    display: `Georgia, "Times New Roman", serif`,
-    read: `Charter, "Iowan Old Style", "Sitka Text", Georgia, serif`,
     light: {
       chrome: "rgba(244, 239, 228, 0.72)", surface: "#fffdf8", "surface-2": "#f7f2e8", "surface-3": "#ece5d7", elevated: "#fffdf8",
       text: "#2a2621", "text-2": "#5e564b", "text-3": "#766c5f", ...tint("60, 45, 20", [0.1, 0.18, 0.05, 0.09]),

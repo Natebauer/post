@@ -105,7 +105,7 @@
   --font: "Inter Variable", "Inter", "Segoe UI Variable Text", "Segoe UI", system-ui, sans-serif;
   /* Headings follow the mood (see moods.ts); by default they use the UI face. */
   --font-display: var(--font);
-  /* Plain-text email bodies follow the mood too (Paper reads in a serif). */
+  /* Plain-text email bodies can follow the mood too (see moods.ts). */
   --font-read: var(--font);
   --read-width: 760px;
   color-scheme: light;
