@@ -57,6 +57,8 @@ export function MoodPicker({ settings, onApply }: { settings: Settings; onApply:
     (l) => l.mood === current && l.accent === settings.accent && sameLook({ bg: l.windowColor, card: l.card }, now) && l.seasonal === !!settings.seasonal,
   );
   const [naming, setNaming] = useState<string | null>(null);
+  // Opens on the tab the current look comes from.
+  const [tab, setTab] = useState<"moods" | "yours">(savedOn >= 0 ? "yours" : "moods");
 
   const apply = (c: Choice) =>
     onApply({
@@ -216,57 +218,98 @@ export function MoodPicker({ settings, onApply }: { settings: Settings; onApply:
     };
     onApply({ savedLooks: [...saved.filter((l) => l.name !== name), entry] });
     setNaming(null);
+    setTab("yours");
   };
 
+  const nameForm = (
+    <form
+      className="mood-save"
+      onSubmit={(e) => {
+        e.preventDefault();
+        saveLook();
+      }}
+    >
+      <input
+        className="input"
+        autoFocus
+        maxLength={24}
+        placeholder="Name it, like Evening"
+        aria-label="Name for this mood"
+        value={naming ?? ""}
+        onChange={(e) => setNaming(e.target.value)}
+      />
+      <button type="submit" className="btn primary">
+        Save
+      </button>
+      <button type="button" className="btn ghost" onClick={() => setNaming(null)}>
+        Cancel
+      </button>
+    </form>
+  );
+
   return (
-    <div className="mood-groups" role="radiogroup" aria-label="Mood">
-      {saved.length > 0 && (
-        <>
-          <div className="mood-group-label">Yours</div>
-          <div className="moods">{saved.map(savedCard)}</div>
-        </>
-      )}
-      <div className="mood-group-label">Light and dark</div>
-      <div className="moods">{MOODS.filter((m) => m.scheme !== "dark").map(card)}</div>
-      <div className="mood-group-label">Always dark</div>
-      <div className="moods">{MOODS.filter((m) => m.scheme === "dark").map(card)}</div>
-      <div className="mood-actions">
-        {customized && (
-          <button type="button" className="btn ghost" onClick={() => apply({ mood: current, accent: base.accent, look: lookFor(current, theme) })}>
-            Back to {base.name}'s look
+    <div className="mood-groups">
+      {/* Post's moods, and the ones you've saved, each on its own tab. */}
+      <div className="seg mood-tabs" role="tablist" aria-label="Moods">
+        {(
+          [
+            ["moods", "Moods"],
+            ["yours", saved.length ? `Yours · ${saved.length}` : "Yours"],
+          ] as const
+        ).map(([k, l]) => (
+          <button key={k} role="tab" aria-selected={tab === k} className={cx(tab === k && "on")} onClick={() => setTab(k)}>
+            {l}
           </button>
-        )}
-        {naming === null ? (
-          <button type="button" className="btn outline" onClick={() => setNaming("")}>
-            Save as a mood
-          </button>
-        ) : (
-          <form
-            className="mood-save"
-            onSubmit={(e) => {
-              e.preventDefault();
-              saveLook();
-            }}
-          >
-            <input
-              className="input"
-              autoFocus
-              maxLength={24}
-              placeholder="Name it, like Evening"
-              aria-label="Name for this mood"
-              value={naming}
-              onChange={(e) => setNaming(e.target.value)}
-              onKeyDown={(e) => e.key === "Escape" && (e.stopPropagation(), setNaming(null))}
-            />
-            <button type="submit" className="btn primary">
-              Save
-            </button>
-            <button type="button" className="btn ghost" onClick={() => setNaming(null)}>
-              Cancel
-            </button>
-          </form>
-        )}
+        ))}
       </div>
+      {tab === "moods" ? (
+        <>
+          {customized && (
+            <div className="mood-note">
+              <span>
+                <b>{base.name}</b>, customized
+              </span>
+              <span className="spacer" />
+              {naming === null ? (
+                <>
+                  <button type="button" className="btn ghost" onClick={() => apply({ mood: current, accent: base.accent, look: lookFor(current, theme) })}>
+                    Back to {base.name}'s look
+                  </button>
+                  <button type="button" className="btn outline" onClick={() => setNaming("")}>
+                    Save as a mood
+                  </button>
+                </>
+              ) : (
+                nameForm
+              )}
+            </div>
+          )}
+          <div role="radiogroup" aria-label="Mood" className="mood-groups">
+            <div className="mood-group-label">Light and dark</div>
+            <div className="moods">{MOODS.filter((m) => m.scheme !== "dark").map(card)}</div>
+            <div className="mood-group-label">Always dark</div>
+            <div className="moods">{MOODS.filter((m) => m.scheme === "dark").map(card)}</div>
+          </div>
+        </>
+      ) : (
+        <div role="radiogroup" aria-label="Your moods" className="moods">
+          {saved.map(savedCard)}
+          {/* Keeping the current look: its accent, background, inbox card and pattern, together. */}
+          <div className="mood mood-add">
+            {naming === null ? (
+              <button type="button" className="mood-add-btn" onClick={() => setNaming("")}>
+                <span className="mood-add-plus" aria-hidden>
+                  +
+                </span>
+                Save current look
+                <small>Its colors, accent, background, inbox card and pattern, kept together</small>
+              </button>
+            ) : (
+              nameForm
+            )}
+          </div>
+        </div>
+      )}
     </div>
   );
 }
