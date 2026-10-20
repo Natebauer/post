@@ -301,21 +301,19 @@ function BackgroundSettings({ settings, look }: { settings: Settings; look: (p: 
           </div>
         </div>
       </Row>
-      {kind !== "mood" && (
-        <Row title="Inbox card" sub="Plain white, a little of the background's color, a thin white frost over it, or mostly see-through" look>
-          <Seg
-            label="Inbox card"
-            value={settings.cardClear ? "clear" : settings.cardFrost ? "frost" : settings.cardTint ? "tinted" : "white"}
-            options={[
-              ["white", "White"],
-              ["tinted", "Tinted"],
-              ["frost", "Frost"],
-              ["clear", "Clear"],
-            ]}
-            onChange={(v) => look({ cardTint: v === "tinted", cardFrost: v === "frost", cardClear: v === "clear" })}
-          />
-        </Row>
-      )}
+      <Row title="Inbox card" sub="Plain white, a little of the background's color, a thin white frost over it, or mostly see-through" look>
+        <Seg
+          label="Inbox card"
+          value={settings.cardClear ? "clear" : settings.cardFrost ? "frost" : settings.cardTint ? "tinted" : "white"}
+          options={[
+            ["white", "White"],
+            ["tinted", "Tinted"],
+            ["frost", "Frost"],
+            ["clear", "Clear"],
+          ]}
+          onChange={(v) => look({ cardTint: v === "tinted", cardFrost: v === "frost", cardClear: v === "clear" })}
+        />
+      </Row>
       <Row title="Pattern" sub="A faint pattern behind the panes that follows the season: petals, sun, leaves or snow" look>
         <Seg
           label="Pattern"

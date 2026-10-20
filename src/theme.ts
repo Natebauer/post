@@ -117,7 +117,8 @@ function paintWindow(s: Settings | null, t: "light" | "dark") {
     scheme = luminance(color) < 0.179 ? "dark" : "light";
   } else root.style.removeProperty("--window-base");
   root.dataset.wscheme = scheme;
-  tintCard(s, t, color, scheme);
+  // With the mood's own background, the card styles work from the mood's backdrop instead.
+  tintCard(s, t, color || moodBackdrop(s, t), scheme);
 
   let style = document.getElementById("post-window-scope") as HTMLStyleElement | null;
   if (scheme === t) {
@@ -200,6 +201,15 @@ function tintCard(s: Settings | null, t: "light" | "dark", color: string, scheme
 export function windowStops(v: string | undefined | null): string[] {
   const stops = (v ?? "").split(">").map((x) => x.trim().toLowerCase());
   return stops.length <= 3 && stops.every((x) => /^#[0-9a-f]{6}$/.test(x)) ? stops : [];
+}
+
+/** The mood's own window color as one #rrggbb: its tint laid over the base (01-base.css). */
+function moodBackdrop(s: Settings | null, t: "light" | "dark"): string {
+  const base = t === "dark" ? [0x20, 0x20, 0x23] : [0xe4, 0xe4, 0xe1];
+  const m = /rgba?\(\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d+)\s*(?:,\s*([\d.]+))?\)/.exec(paletteFor(s?.mood, t).chrome);
+  if (!m) return "#" + base.map((v) => v.toString(16).padStart(2, "0")).join("");
+  const a = m[4] === undefined ? 1 : Number(m[4]);
+  return "#" + base.map((v, i) => Math.round(Number(m[i + 1]) * a + v * (1 - a)).toString(16).padStart(2, "0")).join("");
 }
 
 /** The even mix of some #rrggbb colors. */
