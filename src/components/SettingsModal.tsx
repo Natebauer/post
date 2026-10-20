@@ -302,15 +302,16 @@ function BackgroundSettings({ settings, look }: { settings: Settings; look: (p: 
         </div>
       </Row>
       {kind !== "mood" && (
-        <Row title="Inbox card" sub="Plain white, or with a little of the background's color" look>
+        <Row title="Inbox card" sub="Plain white, a little of the background's color, or mostly see-through" look>
           <Seg
             label="Inbox card"
-            value={settings.cardTint ? "tinted" : "white"}
+            value={settings.cardClear ? "clear" : settings.cardTint ? "tinted" : "white"}
             options={[
               ["white", "White"],
               ["tinted", "Tinted"],
+              ["clear", "Clear"],
             ]}
-            onChange={(v) => look({ cardTint: v === "tinted" })}
+            onChange={(v) => look({ cardTint: v === "tinted", cardClear: v === "clear" })}
           />
         </Row>
       )}
@@ -632,7 +633,7 @@ export function SettingsModal() {
                   className="btn outline"
                   onClick={() => {
                     // Everything on this page, put back, with an Undo in case it was a slip.
-                    const keys = ["theme", "mood", "accent", "windowColor", "cardTint", "seasonal", "autoDarkStart", "autoDarkEnd"] as const;
+                    const keys = ["theme", "mood", "accent", "windowColor", "cardTint", "cardClear", "seasonal", "autoDarkStart", "autoDarkEnd"] as const;
                     const was = Object.fromEntries(keys.map((k) => [k, settings[k]])) as Partial<Settings>;
                     const wasZoom = settings.zoom ?? 1;
                     look({
@@ -641,6 +642,7 @@ export function SettingsModal() {
                       accent: DEFAULT_ACCENT,
                       windowColor: "",
                       cardTint: false,
+                      cardClear: false,
                       seasonal: false,
                       autoDarkStart: 21 * 60,
                       autoDarkEnd: 5 * 60,

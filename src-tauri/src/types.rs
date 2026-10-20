@@ -229,6 +229,9 @@ pub struct Settings {
     pub seasonal: bool,
     /// With a custom window background, the inbox card takes on a little of its color.
     pub card_tint: bool,
+    /// With a custom window background, the inbox card is mostly see-through instead (wins over
+    /// card_tint), in the background's light or dark colors.
+    pub card_clear: bool,
 }
 
 /// A section in the sidebar: one sender, a group (senders, domains or subject words), or an AI
@@ -334,6 +337,7 @@ impl Default for Settings {
             auto_dark_end: 5 * 60,
             seasonal: false,
             card_tint: false,
+            card_clear: false,
         }
     }
 }

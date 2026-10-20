@@ -193,6 +193,8 @@ export interface Settings {
   seasonal: boolean;
   /** With a custom window background, the inbox card takes on a little of its color. */
   cardTint: boolean;
+  /** With a custom window background, the inbox card is mostly see-through (wins over cardTint). */
+  cardClear: boolean;
 }
 
 export interface AskSource {

@@ -39,7 +39,7 @@ export function applyTheme(s: Settings | null, { slow = false }: { slow?: boolea
   const root = document.documentElement;
   // When the look changes, every color switches together (no hover colors trailing behind; see
   // 01-base.css). Other settings re-apply the theme too, and leave motion alone.
-  const look = `${t}|${s?.mood ?? ""}|${moodById(s?.mood).id}|${s?.accent ?? ""}|${s?.windowColor ?? ""}|${!!s?.cardTint}`;
+  const look = `${t}|${s?.mood ?? ""}|${moodById(s?.mood).id}|${s?.accent ?? ""}|${s?.windowColor ?? ""}|${!!s?.cardTint}|${!!s?.cardClear}`;
   // (A new dark time that changes Auto's mood right now changes `look` too, so it fades.)
   const changed = look !== lastLook && !!lastLook;
   if (look !== lastLook) {
@@ -124,6 +124,17 @@ function paintWindow(s: Settings | null, t: "light" | "dark") {
     style?.remove();
     return;
   }
+  if (!style) {
+    style = document.createElement("style");
+    style.id = "post-window-scope";
+    document.head.appendChild(style);
+  }
+  // Text color is inherited as a value, not a variable, so these areas set their own.
+  style.textContent = `${ON_WINDOW} { ${schemeVars(s, scheme)} color: var(--text); }`;
+}
+
+/** The mood's colors for one scheme, as CSS variables, for an area that differs from the rest. */
+function schemeVars(s: Settings | null, scheme: "light" | "dark"): string {
   const p = paletteFor(s?.mood, scheme);
   const vars = KEYS.filter((k) => k !== "chrome")
     .map((k) => `--${k}: ${p[k]};`)
@@ -133,13 +144,7 @@ function paintWindow(s: Settings | null, t: "light" | "dark") {
     scheme === "dark"
       ? `--accent-text: color-mix(in srgb, var(--accent) 68%, white); --av-bg-l: 33%; --av-ink-l: 86%; --av-c: ${avC}; color-scheme: dark;`
       : `--accent-text: color-mix(in srgb, var(--accent) 82%, black); --av-bg-l: 91%; --av-ink-l: 42%; --av-c: ${avC}; color-scheme: light;`;
-  if (!style) {
-    style = document.createElement("style");
-    style.id = "post-window-scope";
-    document.head.appendChild(style);
-  }
-  // Text color is inherited as a value, not a variable, so these areas set their own.
-  style.textContent = `${ON_WINDOW} { ${vars} ${extra} color: var(--text); }`;
+  return `${vars} ${extra}`;
 }
 
 /**
@@ -150,8 +155,26 @@ function paintWindow(s: Settings | null, t: "light" | "dark") {
  */
 function tintCard(s: Settings | null, t: "light" | "dark", color: string, scheme: "light" | "dark") {
   let style = document.getElementById("post-card-tint") as HTMLStyleElement | null;
-  if (!color || !s?.cardTint) {
+  if (!color || !(s?.cardTint || s?.cardClear)) {
     style?.remove();
+    return;
+  }
+  if (s.cardClear) {
+    // "Clear": the card is mostly see-through, a faint veil of its surface over the background,
+    // in the background's own light or dark colors so its text reads on it.
+    const p = paletteFor(s.mood, scheme);
+    const veil = (k: "surface" | "surface-2" | "surface-3" | "tint-base", pct: number) =>
+      `--${k}: color-mix(in srgb, ${p[k]} ${pct}%, transparent);`;
+    if (!style) {
+      style = document.createElement("style");
+      style.id = "post-card-tint";
+      document.head.appendChild(style);
+    }
+    style.textContent =
+      `:is(.list-pane, .bgp-card) { ${scheme === t ? "" : schemeVars(s, scheme)} ` +
+      `${veil("surface", 14)} ${veil("surface-2", 22)} ${veil("surface-3", 30)} ${veil("tint-base", 18)} ` +
+      // The open email's row: a see-through wash of the accent (the usual one is mixed with white).
+      `--selected-bg: color-mix(in srgb, var(--accent) ${scheme === "dark" ? 30 : 16}%, transparent); color: var(--text); }`;
     return;
   }
   const p = paletteFor(s?.mood, t);

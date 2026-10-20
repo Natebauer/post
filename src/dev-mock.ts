@@ -179,6 +179,7 @@ const settings: Settings = {
   autoDarkEnd: 5 * 60,
   seasonal: false,
   cardTint: false,
+  cardClear: false,
 };
 
 const mockMembers = new Set<string>();
