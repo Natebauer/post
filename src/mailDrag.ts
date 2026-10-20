@@ -1,7 +1,7 @@
 import { api } from "./api";
 import { useStore } from "./store";
 import { motionMs, reduceMotion } from "./motionTokens";
-import { setPin } from "./components/Home";
+import { setPin, unpinAnimated } from "./components/Home";
 import { addSender, addToCategory, findSection } from "./senders";
 import { hueFor } from "./components/Avatar";
 import { initials } from "./util";
@@ -10,6 +10,7 @@ import { initials } from "./util";
  * Drag and drop with the pointer (HTML5 drag events don't reach the page in Post's window):
  * - an email onto Home pins it, onto the sidebar adds a section for its sender, and onto a
  *   section groups them (or teaches an AI category);
+ * - a pinned email from Home back onto the inbox unpins it;
  * - a sidebar section onto Home adds it there as a module.
  */
 let suppressClickUntil = 0;
@@ -104,6 +105,17 @@ function pointerDrag(
   window.addEventListener("pointermove", move);
   window.addEventListener("pointerup", up);
   window.addEventListener("pointercancel", cancel);
+}
+
+/** A pinned card on Home, dragged back onto the inbox, comes unpinned. */
+export function startPinDrag(
+  e: React.PointerEvent<HTMLElement>,
+  threadId: string,
+  from: { email: string; name: string },
+  subject: string,
+) {
+  const card = e.currentTarget;
+  pointerDrag(e, [from.name || from.email, subject || "(no subject)"], ".list-pane", "dragging-pin", () => void unpinAnimated(threadId, card), from);
 }
 
 export function startMailDrag(

@@ -10,6 +10,7 @@ import { Avatar, hueFor } from "./Avatar";
 import { CalendarBody, CalendarHeader, settle } from "./Calendar";
 import { motionEase, motionMs, reduceMotion } from "../motionTokens";
 import { Empty, open } from "./HomeBits";
+import { dragJustEnded, startPinDrag } from "../mailDrag";
 
 /* ---------------- cache (survives leaving and returning to Home) ---------------- */
 
@@ -44,11 +45,13 @@ function ItemRow({
   unread,
   className,
   card,
+  onPointerDown,
 }: {
   it: HomeItem;
   right?: ReactNode;
   unread?: boolean;
   className?: string;
+  onPointerDown?: (e: React.PointerEvent<HTMLButtonElement>) => void;
   /** A small card: the sender's color down one edge and a line of the email under its subject. */
   card?: boolean;
 }) {
@@ -57,7 +60,8 @@ function ItemRow({
       data-thread={it.threadId}
       className={cx("hitem", card && "hcard", unread && "unread", className)}
       style={card ? ({ "--h": hueFor((it.email || it.name).toLowerCase()) } as React.CSSProperties) : undefined}
-      onClick={() => open(it.threadId)}
+      onClick={() => !dragJustEnded() && open(it.threadId)}
+      onPointerDown={onPointerDown}
     >
       <Avatar email={it.email} name={it.name || it.email} size="sm" />
       <span className="htext">
@@ -157,6 +161,10 @@ const MODULES: ModuleDef[] = [
             it={it}
             card
             className={cx("pinned", useStore.getState().marks[`pin:${it.threadId}`] === "new" && "pin-new")}
+            // Dragged back onto the inbox, it comes unpinned.
+            onPointerDown={(e) => {
+              if (!(e.target as HTMLElement).closest(".icon-btn")) startPinDrag(e, it.threadId, { email: it.email, name: it.name }, it.subject);
+            }}
             right={
               <span
                 role="button"
@@ -280,7 +288,7 @@ export async function togglePin(threadId: string): Promise<boolean> {
 }
 
 /** Unpin from Home: the card fades and shrinks away, then the cards after it slide over into its place. */
-async function unpinAnimated(threadId: string, from: HTMLElement) {
+export async function unpinAnimated(threadId: string, from: HTMLElement) {
   const card = from.closest<HTMLElement>(".hitem");
   if (card && !reduceMotion()) {
     const ms = Math.round(motionMs("med") * 1.4);

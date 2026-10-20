@@ -357,14 +357,22 @@ body.dragging * {
 .mail-ghost span {
   color: var(--text-2);
 }
-body.dragging .read-pane.bare {
+body.dragging:not(.dragging-pin) .read-pane.bare {
   border: 1px dashed var(--border-strong);
+}
+/* A pinned email on its way back: the inbox is where it can go, and the card it came from waits. */
+body.dragging-pin .list-pane {
+  border: 1px dashed var(--border-strong);
+}
+body.dragging-pin .hcards > .hitem:active {
+  opacity: 0.45;
 }
 .read-pane.bare.drop-over {
   border: 1px dashed var(--accent);
   background: color-mix(in srgb, var(--accent) 6%, transparent);
 }
 .read-pane.bare.drop-over::after,
+.list-pane.drop-over::after,
 .sidebar.drop-over::after {
   content: "Drop to pin";
   position: absolute;
@@ -457,7 +465,12 @@ body.dragging .read-pane.bare {
   white-space: nowrap;
   text-overflow: ellipsis;
 }
+.list-pane.drop-over::after {
+  content: "Drop to unpin";
+  z-index: 5;
+}
 /* Where it can land glows in the accent. */
+.list-pane.drop-over,
 .read-pane.bare.drop-over,
 .sidebar.drop-over .sidebar-inner {
   box-shadow:
