@@ -408,12 +408,6 @@ function ThreadDetailView() {
                       <SenderCard m={last}>{last.from.name || last.from.email}</SenderCard>
                     </span>
                     {!last.from.name && <CopyAddress email={last.from.email} iconOnly />}
-                    {last.from.name && (
-                      <span>
-                        {" · "}
-                        <CopyAddress email={last.from.email} />
-                      </span>
-                    )}
                     <span> · to {recipientsOf(last, me)}</span>
                   </>
                 ) : (
@@ -426,6 +420,13 @@ function ThreadDetailView() {
                   {" "}
                   · {longDate(last.date)} <span className="faint">{relativeAgo(last.date)}</span>
                 </span>
+                {/* The address last: when the line runs out of room, it's what fades, not the date. */}
+                {single && last.from.name && (
+                  <span>
+                    {" · "}
+                    <CopyAddress email={last.from.email} />
+                  </span>
+                )}
                 {shown.snoozedUntil && (
                   <span className="rh-snoozed">
                     {" "}
