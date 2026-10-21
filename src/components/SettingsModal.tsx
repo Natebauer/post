@@ -14,6 +14,7 @@ import { Avatar } from "./Avatar";
 import { usePresence } from "../hooks";
 import { setZoom } from "../actions";
 import { season } from "../theme";
+import { Shuffle } from "lucide-react";
 import { etaText } from "./TitleBar";
 
 type Tab = "appearance" | "reading" | "compose" | "notifications" | "ai" | "shortcuts" | "system" | "account";
@@ -355,7 +356,19 @@ function BackgroundSettings({ settings, look }: { settings: Settings; look: (p: 
             </label>
             {grad && (
               <>
-                <span className="bg-sub">Fades into</span>
+                <span className="bg-sub bg-sub-row">
+                  Fades into
+                  {/* Another color that goes: the first turned a different way round the wheel. */}
+                  <button
+                    type="button"
+                    className="bg-dice"
+                    title="Another color that goes"
+                    aria-label="Pick another color that goes"
+                    onClick={() => look({ windowColor: `${base}>${hueShift(base, (Math.random() < 0.5 ? -1 : 1) * (25 + Math.random() * 55))}` })}
+                  >
+                    <Shuffle size={11} />
+                  </button>
+                </span>
                 <div className="swatches">
                   {/* Only colors as light or as deep as the first, so text reads all the way across. */}
                   {solids

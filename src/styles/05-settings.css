@@ -196,6 +196,24 @@
 .bg-controls .swatch-custom::-webkit-color-swatch {
   border-radius: 4px;
 }
+/* A label with a small button beside it. */
+.bg-sub-row {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+.bg-dice {
+  display: inline-grid;
+  place-items: center;
+  width: 20px;
+  height: 18px;
+  border-radius: 5px;
+  color: var(--text-3);
+}
+.bg-dice:hover {
+  background: var(--surface-3);
+  color: var(--text);
+}
 /* The gradient switch, between the first color and the one it fades into. */
 .bg-grad {
   display: inline-flex;
