@@ -643,8 +643,9 @@ export function SettingsModal() {
                   ))}
                   <input
                     type="color"
-                    className="swatch-custom"
-                    title="Custom color"
+                    // A color of your own is the chosen one too: it wears the ring, and says its value.
+                    className={cx("swatch-custom", !!settings.accent && !ACCENTS.some((a) => a.value === settings.accent.toLowerCase()) && "on")}
+                    title={settings.accent && !ACCENTS.some((a) => a.value === settings.accent.toLowerCase()) ? `Custom color ${settings.accent}` : "Custom color"}
                     aria-label="Custom accent color"
                     value={settings.accent || moodById(settings.mood).accent || "#2a737b"}
                     onChange={(e) => look({ accent: e.target.value })}

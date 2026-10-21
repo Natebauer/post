@@ -299,6 +299,11 @@
   overflow: hidden;
 }
 /* The custom picker: a rainbow ring around the chosen color, so it never looks like a duplicate. */
+.swatch-custom.on {
+  box-shadow:
+    0 0 0 2px var(--surface),
+    0 0 0 4px var(--accent);
+}
 .swatch-custom {
   background: conic-gradient(#e5484d, #f5a524, #46a758, #12a594, #3e63dd, #8e4ec6, #e5484d) !important;
 }
