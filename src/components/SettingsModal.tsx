@@ -226,7 +226,8 @@ function BackgroundSettings({ settings, look }: { settings: Settings; look: (p: 
   const solids = WINDOW_COLORS.map((c) => ({ ...c, deep: isDeep(c.value) }));
   const nameOf = (hex: string) => solids.find((c) => c.value === hex)?.name ?? hex;
   const ownBase = !!base && !solids.some((c) => c.value === base);
-  const ownSecond = grad && !solids.some((c) => c.value === second);
+  const suggested = base ? hueShift(base, 40) : "";
+  const ownSecond = grad && second !== suggested && !solids.some((c) => c.value === second);
   // What picking a color does: with the gradient on, it keeps the second color if that still
   // goes (as light or as deep as the new one), and otherwise finds it a partner.
   const withBase = (b: string) => {
@@ -359,6 +360,19 @@ function BackgroundSettings({ settings, look }: { settings: Settings; look: (p: 
                   {solids
                     .filter((c) => c.deep === isDeep(base) && c.value !== base)
                     .map((c) => tile(c, second === c.value, `${base}>${c.value}`))}
+                  {/* The partner Post would pick: the same color turned a little round the wheel. */}
+                  <button
+                    className={cx("swatch has-dot swatch-suggest", second === suggested && "on")}
+                    style={{ background: suggested, "--sw": suggested, "--dot": accentFor({ mood: settings.mood, accent: AUTO_ACCENT, windowColor: `${base}>${suggested}` }).value } as React.CSSProperties}
+                    title={`Suggested: ${suggested}, a near neighbor of the first color`}
+                    aria-label="Suggested second color"
+                    aria-pressed={second === suggested}
+                    onClick={() => look({ windowColor: `${base}>${suggested}` })}
+                    onMouseEnter={() => setPeek(`${base}>${suggested}`)}
+                    onMouseLeave={() => setPeek(null)}
+                  >
+                    <span className="sw-star">✦</span>
+                  </button>
                   <input
                     type="color"
                     className={cx("swatch-custom", ownSecond && "on")}

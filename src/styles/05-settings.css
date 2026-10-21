@@ -225,6 +225,16 @@
   text-transform: uppercase;
   color: var(--text-3);
 }
+/* The suggested second color, marked with a small star. */
+.sw-star {
+  position: absolute;
+  left: 4px;
+  top: 1px;
+  font-size: 10px;
+  line-height: 1;
+  color: #fff;
+  text-shadow: 0 0 2px rgba(0, 0, 0, 0.6);
+}
 /* "The mood's own": a plain swatch crossed through. */
 .swatch-mood {
   background:
