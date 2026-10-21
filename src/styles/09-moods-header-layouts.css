@@ -17,6 +17,8 @@
 }
 .mood {
   display: grid;
+  /* Cards in a row stretch to the tallest; their names stay right under the picture. */
+  align-content: start;
   gap: 4px;
   padding: 6px 6px 8px;
   border-radius: var(--r-2);
@@ -153,6 +155,11 @@
   line-height: 1.35;
   color: var(--text-3);
   padding: 0 2px;
+  /* At most three lines, so one long description doesn't make its whole row tall. */
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 3;
+  overflow: hidden;
 }
 /* "Customized": the chosen mood, changed since it was picked. */
 .mood-tag {
