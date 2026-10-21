@@ -264,15 +264,13 @@ function derivedAccent(bg: string): string {
 }
 
 /**
- * The accent in use, and its name when Post picked it. A chosen accent is used as it is. Auto
- * follows the background: a ready-made one brings its own accent, one of your own lends its hue,
+ * The accent in use, and its name. It always follows the background (an accent chosen in an
+ * older version is ignored): a ready-made one brings its own accent, one of your own lends its hue,
  * and a mood's own backdrop (or its own suggested background) keeps the mood's accent.
  */
 export function accentFor(
   s: Pick<Settings, "accent" | "mood" | "windowColor"> | null,
 ): { value: string; auto: boolean; name: string | null } {
-  const a = s?.accent ?? "";
-  if (a && a !== AUTO_ACCENT) return { value: a, auto: false, name: null };
   const mood = moodById(s?.mood);
   const bg = (s?.windowColor ?? "").toLowerCase();
   if (!windowStops(bg).length || looksOf(s?.mood).some((l) => l.bg.toLowerCase() === bg)) {

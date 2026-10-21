@@ -5,7 +5,7 @@ import { Bell, BookOpen, Moon, Sun, Keyboard, Monitor, Palette, PenLine, Plus, S
 import { ArrowLeftRight } from "lucide-react";
 import { api, errText, type AiStatus, type ComposeMode, type Settings, type Template } from "../api";
 import { useStore } from "../store";
-import { accentFor, ACCENTS, AUTO_ACCENT, DEFAULT_ACCENT, resolvedTheme, WINDOW_COLORS, WINDOW_GRADIENTS, luminance } from "../theme";
+import { accentFor, AUTO_ACCENT, resolvedTheme, WINDOW_COLORS, WINDOW_GRADIENTS, luminance } from "../theme";
 import { MoodPicker } from "./MoodPicker";
 import { moodById } from "../moods";
 import { ShortcutList } from "./Shortcuts";
@@ -292,7 +292,7 @@ function BackgroundSettings({ settings, look }: { settings: Settings; look: (p: 
           background: to === `${base}>${c.value}` ? css(to) : c.value,
           // Its ring when chosen, in its own color (a grey one for white, which wouldn't show).
           "--sw": luminance(c.value) > 0.9 ? "var(--text-3)" : c.value,
-          // The accent Auto would bring with it, as a small dot in the corner.
+          // The accent it brings with it, as a small dot in the corner.
           "--dot": accentFor({ mood: settings.mood, accent: AUTO_ACCENT, windowColor: to }).value,
         } as React.CSSProperties
       }
@@ -319,7 +319,7 @@ function BackgroundSettings({ settings, look }: { settings: Settings; look: (p: 
                   ? `${preset.name} · ${preset.deep ? "deep" : "pale"} gradient`
                   : `${ownBase ? `Your color ${base}` : nameOf(base)}${grad ? ` into ${nameOf(second)}` : ""} · ${isDeep(base) ? "deep" : "pale"}`}
             </b>
-            {" · what sits behind the panes. Text on it turns light or dark to match"}
+            {" · what sits behind the panes. Text on it turns light or dark to match, and each brings the accent shown in its dot"}
           </>
         }
         col
@@ -759,63 +759,9 @@ export function SettingsModal() {
                 <MoodPicker
                   settings={settings}
                   onApply={look}
-                  // The Custom tab: your saved moods, then the accent, background, card and pattern.
+                  // The Custom tab: your saved moods, then the background, card and pattern (the accent follows the background).
                   custom={
                     <>
-                  <Row
-                    title="Accent color"
-                    sub={
-                      // The chosen one by name, ahead of what it's for.
-                      <>
-                        <b className="sub-name">
-                          {(() => {
-                            const a = accentFor(settings);
-                            return a.auto ? `Auto · ${a.name}` : (ACCENTS.find((x) => x.value === a.value.toLowerCase())?.name ?? "Custom");
-                          })()}
-                        </b>
-                        {" · used for unread markers, selection and buttons"}
-                      </>
-                    }
-                    col
-                    look
-                  >
-                    <div className="swatches">
-                      {/* Auto: the accent follows the background (theme.ts, accentFor). */}
-                      <button
-                        className={cx("swatch swatch-auto", accentFor(settings).auto && "on")}
-                        style={
-                          {
-                            background: accentFor({ ...settings, accent: AUTO_ACCENT }).value,
-                            "--sw": accentFor({ ...settings, accent: AUTO_ACCENT }).value,
-                          } as React.CSSProperties
-                        }
-                        title="Auto: follows the background"
-                        aria-label="Auto accent, following the background"
-                        aria-pressed={accentFor(settings).auto}
-                        onClick={() => look({ accent: AUTO_ACCENT })}
-                      />
-                      {ACCENTS.map((a) => (
-                        <button
-                          key={a.value}
-                          className={cx("swatch", settings.accent.toLowerCase() === a.value && "on")}
-                          style={{ background: a.value, "--sw": a.value } as React.CSSProperties}
-                          title={a.name}
-                          aria-label={a.name}
-                          aria-pressed={settings.accent.toLowerCase() === a.value}
-                          onClick={() => look({ accent: a.value })}
-                        />
-                      ))}
-                      <input
-                        type="color"
-                        // A color of your own is the chosen one too: it wears the ring, and says its value.
-                        className={cx("swatch-custom", !accentFor(settings).auto && !ACCENTS.some((a) => a.value === settings.accent.toLowerCase()) && "on")}
-                        title={!accentFor(settings).auto && !ACCENTS.some((a) => a.value === settings.accent.toLowerCase()) ? `Custom color ${settings.accent}` : "Custom color"}
-                        aria-label="Custom accent color"
-                        value={accentFor(settings).value}
-                        onChange={(e) => look({ accent: e.target.value })}
-                      />
-                    </div>
-                  </Row>
                   <BackgroundSettings settings={settings} look={look} />
                     </>
                   }
@@ -860,7 +806,6 @@ export function SettingsModal() {
                   const off = [
                     settings.theme !== "system" && "theme",
                     settings.mood !== "classic" && "mood",
-                    !accentFor(settings).auto && settings.accent.toLowerCase() !== DEFAULT_ACCENT && "accent",
                     !!settings.windowColor && "background",
                     (settings.cardTint || settings.cardFrost || settings.cardClear) && "inbox card",
                     settings.seasonal && "pattern",

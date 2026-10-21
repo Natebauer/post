@@ -70,9 +70,6 @@ interface Choice {
   seasonal?: boolean;
 }
 
-/** A mood's own accent: Auto (or none set), or the very accent it brings. */
-const ownAccent = (accent: string | undefined, moodAccent: string) =>
-  !accent || accent === AUTO_ACCENT || accent.toLowerCase() === (moodAccent || "").toLowerCase();
 
 const sameLook = (a: MoodLook, b: MoodLook) => a.bg.toLowerCase() === b.bg.toLowerCase() && a.card === b.card;
 
@@ -97,7 +94,7 @@ export function MoodPicker({
   const now: MoodLook = { bg: settings.windowColor ?? "", card: cardOf(settings) };
   const saved = settings.savedLooks ?? [];
   const savedOn = saved.findIndex(
-    (l) => l.mood === current && l.accent === settings.accent && sameLook({ bg: l.windowColor, card: l.card }, now) && l.seasonal === !!settings.seasonal,
+    (l) => l.mood === current && sameLook({ bg: l.windowColor, card: l.card }, now) && l.seasonal === !!settings.seasonal,
   );
   const [naming, setNaming] = useState<string | null>(null);
   // Renaming a saved look: double-click its name.
@@ -110,8 +107,7 @@ export function MoodPicker({
   };
   // Opens on the tab the current look comes from: Custom for a saved look or one you've changed.
   const [tab, setTab] = useState<"moods" | "custom">(() => {
-    const m = moodById(current);
-    const own = ownAccent(settings.accent, m.accent) && looksOf(current).some((l) => sameLook(l, now));
+    const own = looksOf(current).some((l) => sameLook(l, now));
     return savedOn >= 0 || !own ? "custom" : "moods";
   });
 
@@ -191,7 +187,7 @@ export function MoodPicker({
     const on = savedOn < 0 && current === m.id;
     const look = lookFor(m.id, theme);
     // Changed since it was picked: a different accent, background or card than any it suggests.
-    const changed = on && (!ownAccent(settings.accent, m.accent) || !looksOf(m.id).some((l) => sameLook(l, now)));
+    const changed = on && !looksOf(m.id).some((l) => sameLook(l, now));
     const accent = on ? accentFor(settings).value : r.accent;
     return (
       <button
@@ -308,13 +304,13 @@ export function MoodPicker({
   const base = moodById(current);
   const customized =
     savedOn < 0 &&
-    (!ownAccent(settings.accent, base.accent) || !looksOf(current).some((l) => sameLook(l, now)));
+    !looksOf(current).some((l) => sameLook(l, now));
   const saveLook = () => {
     const name = (naming ?? "").trim() || "My mood";
     const entry: SavedLook = {
       name,
       mood: current,
-      accent: settings.accent,
+      accent: AUTO_ACCENT,
       windowColor: settings.windowColor ?? "",
       card: cardOf(settings),
       seasonal: !!settings.seasonal,
@@ -409,7 +405,7 @@ export function MoodPicker({
         <div className="mood-group-label">Saved looks</div>
         <div role="radiogroup" aria-label="Your moods" className="moods">
           {saved.map(savedCard)}
-          {/* Keeping the current look: its accent, background, inbox card and pattern, together. */}
+          {/* Keeping the current look: its background, inbox card and pattern, together. */}
           <div className="mood mood-add">
             {naming === null ? (
               <button type="button" className="mood-add-btn" onClick={() => setNaming("")}>
@@ -417,7 +413,7 @@ export function MoodPicker({
                   +
                 </span>
                 Save current look
-                <small>Its colors, accent, background, inbox card and pattern, kept together</small>
+                <small>Its colors, background, inbox card and pattern, kept together</small>
               </button>
             ) : (
               nameForm

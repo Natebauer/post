@@ -3,7 +3,6 @@ import { openUrl } from "@tauri-apps/plugin-opener";
 import { ArrowLeft, Check, ChevronDown, Copy, ExternalLink, FileJson, Loader2, ShieldAlert } from "lucide-react";
 import { api, errText } from "../api";
 import { useStore } from "../store";
-import { ACCENTS } from "../theme";
 import { cx } from "../util";
 import { StampMark, WindowControls } from "./TitleBar";
 
@@ -599,20 +598,6 @@ export function Welcome() {
                 <button key={v} role="radio" aria-checked={settings?.theme === v} className={cx(settings?.theme === v && "on")} onClick={() => void saveSettings({ theme: v })}>
                   {label}
                 </button>
-              ))}
-            </div>
-            <div className="swatches" role="radiogroup" aria-label="Accent color">
-              {ACCENTS.map((a) => (
-                <button
-                  key={a.value}
-                  role="radio"
-                  className={cx("swatch", settings?.accent.toLowerCase() === a.value && "on")}
-                  style={{ background: a.value }}
-                  title={a.name}
-                  aria-label={a.name}
-                  aria-checked={settings?.accent.toLowerCase() === a.value}
-                  onClick={() => void saveSettings({ accent: a.value })}
-                />
               ))}
             </div>
           </div>
