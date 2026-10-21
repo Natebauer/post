@@ -1,7 +1,7 @@
 import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import type React from "react";
-import { Bell, BookOpen, Keyboard, Monitor, Palette, PenLine, Plus, Sparkles, Trash2, UserRound, X } from "lucide-react";
+import { Bell, BookOpen, Moon, Sun, Keyboard, Monitor, Palette, PenLine, Plus, Sparkles, Trash2, UserRound, X } from "lucide-react";
 import { api, errText, type AiStatus, type ComposeMode, type Settings, type Template } from "../api";
 import { useStore } from "../store";
 import { ACCENTS, DEFAULT_ACCENT, WINDOW_COLORS, WINDOW_GRADIENTS, blendWindow, windowStops } from "../theme";
@@ -170,7 +170,7 @@ function Switch({ on, onChange, label }: { on: boolean; onChange: (v: boolean) =
   return <button role="switch" aria-checked={on} aria-label={label} className={cx("switch", on && "on")} onClick={() => onChange(!on)} />;
 }
 
-function Seg<T extends string>({ value, options, onChange, label }: { value: T; options: [T, string][]; onChange: (v: T) => void; label?: string }) {
+function Seg<T extends string>({ value, options, onChange, label }: { value: T; options: [T, React.ReactNode][]; onChange: (v: T) => void; label?: string }) {
   // A highlight that slides to the chosen option (the options can be different widths).
   const ref = useRef<HTMLDivElement>(null);
   const [pill, setPill] = useState<{ x: number; w: number } | null>(null);
@@ -561,9 +561,24 @@ export function SettingsModal() {
                   label="Theme"
                   value={settings.theme}
                   options={[
-                    ["system", "Windows"],
-                    ["light", "Light"],
-                    ["dark", "Dark"],
+                    [
+                      "system",
+                      <>
+                        <Monitor size={13} /> Windows
+                      </>,
+                    ],
+                    [
+                      "light",
+                      <>
+                        <Sun size={13} /> Light
+                      </>,
+                    ],
+                    [
+                      "dark",
+                      <>
+                        <Moon size={13} /> Dark
+                      </>,
+                    ],
                   ]}
                   onChange={(theme) => look({ theme })}
                 />
