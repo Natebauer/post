@@ -489,6 +489,14 @@
     opacity: 0;
   }
 }
+/* Stepping through the email's files: ‹ 1 of 2 ›. */
+.ql-step {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  margin-right: var(--s-3);
+  font-size: var(--fs-2);
+}
 .quicklook .ql-head {
   height: 48px;
   display: flex;

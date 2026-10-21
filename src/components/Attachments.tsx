@@ -1,6 +1,6 @@
 import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import type React from "react";
-import { Check, Download, ExternalLink, FileArchive, FileImage, FileSpreadsheet, FileText, File as FileIcon, X } from "lucide-react";
+import { Check, ChevronLeft, ChevronRight, Download, ExternalLink, FileArchive, FileImage, FileSpreadsheet, FileText, File as FileIcon, X } from "lucide-react";
 import { api, errText, type Attachment } from "../api";
 import { useStore } from "../store";
 import { motionMs, reduceMotion } from "../motionTokens";
@@ -69,7 +69,27 @@ function fromCard(box: DOMRect, from: DOMRect) {
   return `translate(-50%, -50%) translate(${dx}px, ${dy}px) scale(${from.width / box.width}, ${from.height / box.height})`;
 }
 
-function QuickLook({ messageId, a, from, onClose: done }: { messageId: string; a: Attachment; from?: DOMRect | null; onClose: () => void }) {
+function QuickLook({
+  messageId,
+  a,
+  from,
+  onClose: done,
+  all = [a],
+  onStep,
+}: {
+  messageId: string;
+  a: Attachment;
+  from?: DOMRect | null;
+  onClose: () => void;
+  /** The email's other files you can look at, to step through with ← and →. */
+  all?: Attachment[];
+  onStep?: (a: Attachment) => void;
+}) {
+  const at = all.indexOf(a);
+  const step = (d: number) => {
+    const next = all[(at + d + all.length) % all.length];
+    if (next && next !== a) onStep?.(next);
+  };
   const [closing, setClosing] = useState(false);
   const box = useRef<HTMLDivElement>(null);
   // The preview grows out of the attachment card that was clicked, and shrinks back into it.
@@ -109,17 +129,35 @@ function QuickLook({ messageId, a, from, onClose: done }: { messageId: string; a
         e.preventDefault();
         e.stopPropagation();
         onClose();
+      } else if ((e.key === "ArrowRight" || e.key === "ArrowLeft") && all.length > 1) {
+        e.preventDefault();
+        e.stopPropagation();
+        step(e.key === "ArrowRight" ? 1 : -1);
       }
     };
     window.addEventListener("keydown", k, true);
     return () => window.removeEventListener("keydown", k, true);
-  }, [onClose]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [onClose, a, all]);
   return (
     <>
       <div className={closing ? "scrim closing" : "scrim"} onClick={onClose} />
       <div ref={box} className={cx("modal quicklook", closing && "closing", from && "grown")} role="dialog" aria-label={a.filename}>
         <div className="ql-head">
           <strong style={{ flex: 1, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{a.filename}</strong>
+          {all.length > 1 && (
+            <span className="ql-step">
+              <button className="icon-btn sm" onClick={() => step(-1)} aria-label="Previous file" title="Previous file (←)">
+                <ChevronLeft size={16} />
+              </button>
+              <span className="faint tnum">
+                {at + 1} of {all.length}
+              </span>
+              <button className="icon-btn sm" onClick={() => step(1)} aria-label="Next file" title="Next file (→)">
+                <ChevronRight size={16} />
+              </button>
+            </span>
+          )}
           <span className="faint" style={{ marginRight: 8 }}>{formatBytes(a.size)}</span>
           <button className="btn ghost" onClick={() => void openExternal(messageId, a)}>
             <ExternalLink size={15} /> Open
@@ -204,7 +242,16 @@ export function Attachments({ messageId, attachments }: { messageId: string; att
           </div>
         );
       })}
-      {preview && <QuickLook messageId={messageId} a={preview} from={from} onClose={() => setPreview(null)} />}
+      {preview && (
+        <QuickLook
+          messageId={messageId}
+          a={preview}
+          from={from}
+          onClose={() => setPreview(null)}
+          all={list.filter((x) => isImage(x) || isPdf(x) || isText(x))}
+          onStep={setPreview}
+        />
+      )}
     </div>
   );
 }
