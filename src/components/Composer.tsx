@@ -186,7 +186,8 @@ export function Composer({ draft: original, mode: initialMode }: { draft: Compos
       StarterKit.configure({ heading: false, codeBlock: false, code: false, horizontalRule: false }),
       Link.configure({ openOnClick: false, autolink: true }),
       Image.configure({ inline: true, allowBase64: true }),
-      Placeholder.configure({ placeholder: "Write your message…" }),
+      // On the first line whenever it's empty, even with a signature below it.
+      Placeholder.configure({ placeholder: ({ pos }) => (pos === 0 ? "Write your message…" : ""), showOnlyCurrent: false }),
       Typography,
     ],
     content: initial.bodyHtml,
