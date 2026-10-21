@@ -100,6 +100,8 @@ export function RecipientField({
         <input
           ref={input}
           value={text}
+          // A hint while there's no one in it yet.
+          placeholder={label === "To" && !value.length ? "Name or email" : undefined}
           autoFocus={autoFocus}
           spellCheck={false}
           onChange={(e) => {
