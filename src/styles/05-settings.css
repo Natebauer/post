@@ -241,6 +241,13 @@
   font-family: var(--font-mono, ui-monospace, monospace);
   font-size: var(--fs-1);
 }
+/* "Surprise me", tucked in at the top right of the background choices. */
+.bg-shuffle {
+  align-self: flex-end;
+  margin-bottom: calc(-1 * var(--s-5));
+  height: 26px;
+  font-size: var(--fs-1);
+}
 .bg-sub {
   margin-bottom: -4px;
   font-size: 10.5px;

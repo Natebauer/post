@@ -1,7 +1,7 @@
 import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import type React from "react";
-import { Bell, BookOpen, Moon, Sun, Keyboard, Monitor, Palette, PenLine, Plus, Sparkles, Trash2, UserRound, X } from "lucide-react";
+import { Bell, BookOpen, Shuffle, Moon, Sun, Keyboard, Monitor, Palette, PenLine, Plus, Sparkles, Trash2, UserRound, X } from "lucide-react";
 import { api, errText, type AiStatus, type ComposeMode, type Settings, type Template } from "../api";
 import { useStore } from "../store";
 import { accentFor, ACCENTS, AUTO_ACCENT, DEFAULT_ACCENT, resolvedTheme, WINDOW_COLORS, WINDOW_GRADIENTS, luminance } from "../theme";
@@ -194,6 +194,24 @@ function Seg<T extends string>({ value, options, onChange, label }: { value: T; 
 /** Everything behind the panes, in three short decisions: what kind of background (the mood's
     own, a color or a gradient) with a live preview beside it, what the inbox card does on it, and
     whether a seasonal pattern sits on top. */
+/** A random two-color gradient that goes together: neighboring hues, both pale or both deep, so
+    text reads across all of it. */
+function surpriseGradient(): string {
+  const hsl = (h: number, s: number, l: number) => {
+    const c = (1 - Math.abs(2 * l - 1)) * s;
+    const x = c * (1 - Math.abs(((h / 60) % 2) - 1));
+    const m = l - c / 2;
+    const [r, g, b] = h < 60 ? [c, x, 0] : h < 120 ? [x, c, 0] : h < 180 ? [0, c, x] : h < 240 ? [0, x, c] : h < 300 ? [x, 0, c] : [c, 0, x];
+    return "#" + [r, g, b].map((v) => Math.round((v + m) * 255).toString(16).padStart(2, "0")).join("");
+  };
+  const h = Math.random() * 360;
+  const h2 = (h + 40 + Math.random() * 35) % 360;
+  const deep = Math.random() < 0.4;
+  const s = deep ? 0.3 + Math.random() * 0.15 : 0.38 + Math.random() * 0.2;
+  const l = deep ? 0.17 + Math.random() * 0.05 : 0.86 + Math.random() * 0.04;
+  return `${hsl(h, s, l)}>${hsl(h2, s, l)}`;
+}
+
 function BackgroundSettings({ settings, look }: { settings: Settings; look: (p: Partial<Settings>) => void }) {
   const value = settings.windowColor?.toLowerCase() ?? "";
   // Flat colors and gradients together, sorted by how light they are (which decides whether the
@@ -252,6 +270,9 @@ function BackgroundSettings({ settings, look }: { settings: Settings; look: (p: 
       >
         <div className="bg-pick">
           <div className="bg-controls">
+            <button type="button" className="btn ghost bg-shuffle" onClick={() => look({ windowColor: surpriseGradient() })} title="A random gradient that goes together">
+              <Shuffle size={14} /> Surprise me
+            </button>
             <span className="bg-sub">Pale</span>
             <div className="swatches">
               {/* The mood's own backdrop, crossed through: no background of your own. */}
