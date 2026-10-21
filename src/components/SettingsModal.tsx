@@ -403,6 +403,8 @@ function BackgroundSettings({ settings, look }: { settings: Settings; look: (p: 
               <i />
               <i />
             </span>
+            {/* Its title bar: the search box across the top, as in Post. */}
+            <span className="bgp-bar" />
           </div>
         </div>
       </Row>
