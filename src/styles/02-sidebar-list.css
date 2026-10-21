@@ -753,11 +753,15 @@
   -webkit-mask-image: linear-gradient(to right, #000 calc(100% - 36px), transparent);
   mask-image: linear-gradient(to right, #000 calc(100% - 36px), transparent);
 }
+/* Unread: a slim accent bar down the row's left edge, like a bookmark, rather than a dot. */
 .row .dot {
-  width: 7px;
-  height: 7px;
-  margin-top: -3.5px;
-  box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 16%, transparent);
+  left: 2px;
+  top: 14px;
+  bottom: 14px;
+  width: 3px;
+  height: auto;
+  margin-top: 0;
+  border-radius: 2px;
 }
 
 /* ---------- row actions slide in over the row ---------- */
