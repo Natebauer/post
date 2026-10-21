@@ -139,6 +139,24 @@
   height: 7px;
   border-radius: 3px;
 }
+/* Auto's day under its picture: its moods in their accents, and a mark at now. */
+.mp-day {
+  position: relative;
+  height: 4px;
+  margin: 2px 2px 0;
+  border-radius: 2px;
+  opacity: 0.85;
+}
+.mp-day i {
+  position: absolute;
+  top: -3px;
+  width: 2px;
+  height: 10px;
+  margin-left: -1px;
+  border-radius: 1px;
+  background: var(--text);
+  box-shadow: 0 0 0 1.5px var(--surface);
+}
 .mood-name {
   display: flex;
   align-items: center;

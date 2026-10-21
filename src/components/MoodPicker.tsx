@@ -2,7 +2,7 @@ import type React from "react";
 import { useState } from "react";
 import { Check, X } from "lucide-react";
 import type { SavedLook, Settings } from "../api";
-import { lookFor, looksOf, moodById, MOODS, type CardStyle, type MoodLook, type MoodPalette } from "../moods";
+import { autoMoodId, lookFor, looksOf, moodById, MOODS, type CardStyle, type MoodLook, type MoodPalette } from "../moods";
 import { cardOf, cardPatch, luminance, mixHex, resolvedTheme, windowStops } from "../theme";
 import { cx } from "../util";
 
@@ -31,6 +31,36 @@ const CLASSIC: Record<
 
 /** Opaque version of a window tint for the preview. */
 const solid = (c: string) => c.replace(/rgba\(([^,]+),([^,]+),([^,]+),[^)]+\)/, "rgb($1,$2,$3)");
+
+/** Auto's day as a thin strip: each mood it wears, in that mood's accent, from midnight to midnight,
+    with a mark at the time now. */
+function AutoDay() {
+  const at = (min: number) => {
+    const d = new Date();
+    d.setHours(0, min, 0, 0);
+    return moodById(autoMoodId(d));
+  };
+  const stops: string[] = [];
+  let from = 0;
+  let cur = at(0);
+  for (let min = 15; min <= 1440; min += 15) {
+    const next = min < 1440 ? at(min) : null;
+    if (!next || next.id !== cur.id) {
+      stops.push(`${cur.accent} ${(from / 1440) * 100}% ${(min / 1440) * 100}%`);
+      if (next) {
+        cur = next;
+        from = min;
+      }
+    }
+  }
+  const now = new Date();
+  const pos = ((now.getHours() * 60 + now.getMinutes()) / 1440) * 100;
+  return (
+    <span className="mp-day" style={{ background: `linear-gradient(90deg, ${stops.join(", ")})` }} title="Auto's moods through the day" aria-hidden>
+      <i style={{ left: `${pos}%` }} />
+    </span>
+  );
+}
 
 /** What a card in the picker shows and applies: a mood's colors with a look on top. */
 interface Choice {
@@ -149,6 +179,7 @@ export function MoodPicker({ settings, onApply }: { settings: Settings; onApply:
         title={m.blurb}
       >
         {preview(m.id, r.accent, on ? now : look)}
+        {m.id === "auto" && <AutoDay />}
         <span className="mood-name">
           {m.name}
           {on && !changed && <Check size={13} />}
