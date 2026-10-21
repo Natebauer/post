@@ -216,9 +216,20 @@
 .mood-del:hover {
   color: var(--danger);
 }
-/* Moods and Yours, as two tabs. */
+/* Moods and Yours, as two tabs, up beside the Mood heading so the cards start higher. */
 .mood-tabs {
   justify-self: start;
+}
+.set-row.col:has(> .mood-groups > .mood-tabs) {
+  position: relative;
+}
+.set-row.col:has(> .mood-groups > .mood-tabs) > .lbl {
+  padding-right: 160px;
+}
+.set-row.col > .mood-groups > .mood-tabs {
+  position: absolute;
+  top: var(--s-4);
+  right: 0;
 }
 /* The chosen mood, changed since it was picked: one line with the way back and the way to keep it. */
 .mood-note {
