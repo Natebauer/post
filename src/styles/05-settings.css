@@ -50,6 +50,11 @@
   margin-top: 2px;
   line-height: 1.45;
 }
+/* A choice named in its row's description ("Post teal · used for …"). */
+.set-row .lbl small .sub-name {
+  font-weight: 600;
+  color: var(--text-2);
+}
 .set-row.col {
   flex-direction: column;
   align-items: stretch;

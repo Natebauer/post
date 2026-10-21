@@ -614,7 +614,21 @@ export function SettingsModal() {
               )}
               {/* Everything below adjusts the mood picked above. */}
               <h5 className="set-sub">Make it yours</h5>
-              <Row title="Accent color" sub="Used for unread markers, selection and buttons" col look>
+              <Row
+                title="Accent color"
+                sub={
+                  // The chosen one by name, ahead of what it's for.
+                  <>
+                    <b className="sub-name">
+                      {ACCENTS.find((a) => a.value === (settings.accent || moodById(settings.mood).accent).toLowerCase())?.name ??
+                        (settings.accent ? "Custom" : "The mood's own")}
+                    </b>
+                    {" · used for unread markers, selection and buttons"}
+                  </>
+                }
+                col
+                look
+              >
                 <div className="swatches">
                   {ACCENTS.map((a) => (
                     <button
