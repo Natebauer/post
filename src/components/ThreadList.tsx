@@ -454,9 +454,32 @@ export function ThreadList() {
     window.addEventListener("post:focus-search", open);
     return () => window.removeEventListener("post:focus-search", open);
   }, []);
+  // Folding back: the field shrinks into the search button, then the folder's name fades in.
+  const [unfolding, setUnfolding] = useState(false);
+  const closing = useRef(false);
+  const closeSearch = () => {
+    if (closing.current) return;
+    const done = () => {
+      closing.current = false;
+      setSearchOpen(false);
+      setUnfolding(true);
+      window.setTimeout(() => setUnfolding(false), 400);
+    };
+    const w = document.querySelector<HTMLElement>(".list-head .search-wrap");
+    if (!w || reduceMotion()) return done();
+    closing.current = true;
+    w.animate(
+      [
+        { clipPath: "inset(0 0 0 0 round 8px)", opacity: 1 },
+        { clipPath: "inset(0 0 0 calc(100% - 64px) round 8px)", opacity: 0 },
+      ],
+      { duration: 200, easing: "cubic-bezier(0.4, 0, 1, 1)", fill: "forwards" },
+    ).finished.then(done, done);
+  };
   useEffect(() => {
     // Cleared from elsewhere (Esc in the list): fold back unless you're still typing in it.
-    if (!search && !document.activeElement?.closest(".list-head")) setSearchOpen(false);
+    if (!search && !document.activeElement?.closest(".list-head")) closeSearch();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [search]);
   const threads = useStore((s) => s.threads);
   const total = useStore((s) => s.total);
@@ -620,7 +643,7 @@ export function ThreadList() {
 
   return (
     <section className={cx("list-pane", `size-${listSize}`)} ref={paneRef} aria-label={title}>
-      <div className={cx("list-head", (search || searchOpen) && "searching")}>
+      <div className={cx("list-head", (search || searchOpen) && "searching", unfolding && "unfolding")}>
         {search || searchOpen ? (
           // Searching: the field itself is the heading, with how many were found inside it.
           <SearchBox
@@ -631,7 +654,7 @@ export function ThreadList() {
                 </span>
               )
             }
-            onDone={() => setSearchOpen(false)}
+            onDone={closeSearch}
           />
         ) : (
           <>
