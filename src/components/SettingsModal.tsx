@@ -261,6 +261,22 @@ function BackgroundSettings({ settings, look }: { settings: Settings; look: (p: 
     });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [value]);
+  // Switching the gradient on opens its row with a little slide, rather than a jump.
+  const wasGrad = useRef(grad);
+  useEffect(() => {
+    if (grad && !wasGrad.current) {
+      const l = document.querySelector(".bg-grad");
+      [l?.nextElementSibling, l?.nextElementSibling?.nextElementSibling].forEach((el, i) =>
+        el?.animate([{ opacity: 0, transform: "translateY(-6px)" }, { opacity: 1, transform: "none" }], {
+          duration: 280,
+          delay: i * 60,
+          easing: "cubic-bezier(0.2, 0.8, 0.2, 1)",
+          fill: "backwards",
+        }),
+      );
+    }
+    wasGrad.current = grad;
+  }, [grad]);
   // Pointing at a tile tries it in the little window beside, before you pick it.
   const [peek, setPeek] = useState<string | null>(null);
   const css = (v: string) => (v.includes(">") ? `linear-gradient(150deg, ${v.split(">").join(", ")})` : v);
