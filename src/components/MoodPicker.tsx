@@ -1,6 +1,6 @@
 import type React from "react";
 import { useState } from "react";
-import { Check, Moon, SunMoon, X } from "lucide-react";
+import { Check, Moon, Pencil, SunMoon, X } from "lucide-react";
 import type { SavedLook, Settings } from "../api";
 import { autoMoodId, lookFor, looksOf, moodById, MOODS, type CardStyle, type MoodLook, type MoodPalette } from "../moods";
 import { accentFor, AUTO_ACCENT, cardOf, cardPatch, luminance, mixHex, resolvedTheme, windowStops } from "../theme";
@@ -100,6 +100,14 @@ export function MoodPicker({
     (l) => l.mood === current && l.accent === settings.accent && sameLook({ bg: l.windowColor, card: l.card }, now) && l.seasonal === !!settings.seasonal,
   );
   const [naming, setNaming] = useState<string | null>(null);
+  // Renaming a saved look: double-click its name.
+  const [renaming, setRenaming] = useState<{ i: number; text: string } | null>(null);
+  const rename = () => {
+    if (!renaming) return;
+    const name = renaming.text.trim();
+    if (name) onApply({ savedLooks: saved.map((l, k) => (k === renaming.i ? { ...l, name } : l)) });
+    setRenaming(null);
+  };
   // Opens on the tab the current look comes from: Custom for a saved look or one you've changed.
   const [tab, setTab] = useState<"moods" | "custom">(() => {
     const m = moodById(current);
@@ -222,10 +230,37 @@ export function MoodPicker({
         title={`${l.name}: ${moodById(l.mood).name} with your own touches`}
       >
         {preview(l.mood, accent, look)}
-        <span className="mood-name">
-          {l.name}
-          {on && <Check size={13} />}
-        </span>
+        {renaming?.i === i ? (
+          <input
+            className="input mood-rename"
+            autoFocus
+            maxLength={24}
+            aria-label="New name for this look"
+            value={renaming.text}
+            onClick={(e) => e.stopPropagation()}
+            onChange={(e) => setRenaming({ i, text: e.target.value })}
+            onKeyDown={(e) => {
+              e.stopPropagation();
+              if (e.key === "Enter") {
+                e.preventDefault();
+                rename();
+              } else if (e.key === "Escape") setRenaming(null);
+            }}
+            onBlur={rename}
+          />
+        ) : (
+          <span
+            className="mood-name"
+            title="Double-click to rename"
+            onDoubleClick={(e) => {
+              e.stopPropagation();
+              setRenaming({ i, text: l.name });
+            }}
+          >
+            {l.name}
+            {on && <Check size={13} />}
+          </span>
+        )}
         <span className="mood-blurb">{moodById(l.mood).name}, your way</span>
         <span
           role="button"
@@ -245,6 +280,26 @@ export function MoodPicker({
           }}
         >
           <X size={12} />
+        </span>
+        {/* Rename without applying the look (a double-click on the name works once it's applied). */}
+        <span
+          role="button"
+          tabIndex={0}
+          className="mood-del mood-ren"
+          title="Rename"
+          aria-label={`Rename ${l.name}`}
+          onClick={(e) => {
+            e.stopPropagation();
+            setRenaming({ i, text: l.name });
+          }}
+          onKeyDown={(e) => {
+            if (e.key === "Enter") {
+              e.stopPropagation();
+              setRenaming({ i, text: l.name });
+            }
+          }}
+        >
+          <Pencil size={11} />
         </span>
       </button>
     );

@@ -190,6 +190,20 @@
   color: var(--accent-text);
   background: var(--accent-soft);
 }
+/* Its rename button sits just left of the remove one. */
+.mood-del.mood-ren {
+  right: 34px;
+}
+.mood-del.mood-ren:hover {
+  color: var(--accent-text);
+}
+/* Renaming a saved look, in place of its name. */
+.mood-rename {
+  height: 24px;
+  padding: 0 6px;
+  font-size: var(--fs-2);
+  font-weight: 600;
+}
 /* A mood of your own: a small remove button shows on hover. */
 .mood-saved {
   position: relative;
