@@ -409,6 +409,15 @@ function BackgroundSettings({ settings, look }: { settings: Settings; look: (p: 
         </div>
       </Row>
       <Row title="Inbox card" sub="Plain white, a little of the background's color, a thin white frost over it, or mostly see-through" look>
+        {/* Pointing at a card style tries it on the preview's little inbox card. */}
+        <div
+          className="card-peek"
+          onMouseOver={(e) => {
+            const b = (e.target as HTMLElement).closest("button");
+            document.querySelector(".bg-preview")?.setAttribute("data-card", b?.textContent?.trim().toLowerCase() ?? "");
+          }}
+          onMouseLeave={() => document.querySelector(".bg-preview")?.removeAttribute("data-card")}
+        >
         <Seg
           label="Inbox card"
           value={settings.cardClear ? "clear" : settings.cardFrost ? "frost" : settings.cardTint ? "tinted" : "white"}
@@ -420,6 +429,7 @@ function BackgroundSettings({ settings, look }: { settings: Settings; look: (p: 
           ]}
           onChange={(v) => look({ cardTint: v === "tinted", cardFrost: v === "frost", cardClear: v === "clear" })}
         />
+        </div>
       </Row>
       <Row title="Pattern" sub="A faint pattern behind the panes that follows the season: petals, sun, leaves or snow" look>
         <Seg

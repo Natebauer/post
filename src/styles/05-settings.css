@@ -335,6 +335,19 @@
   box-shadow: 0 0 0 0.5px var(--border), var(--shadow-1);
   transition: background var(--med) var(--ease);
 }
+/* A card style being tried (pointing at Inbox card's choices). */
+.bg-preview[data-card="white"] .bgp-card {
+  background: #fff;
+}
+.bg-preview[data-card="tinted"] .bgp-card {
+  background: color-mix(in srgb, var(--window-base) 40%, #fff);
+}
+.bg-preview[data-card="frost"] .bgp-card {
+  background: rgba(255, 255, 255, 0.4);
+}
+.bg-preview[data-card="clear"] .bgp-card {
+  background: rgba(255, 255, 255, 0.08);
+}
 .bgp-card i {
   background: var(--border-strong);
 }
