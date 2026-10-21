@@ -171,10 +171,14 @@ function openEvent(e: CalEvent) {
   if (target) void openUrl(target);
 }
 const GOOGLE_CALENDAR = "https://calendar.google.com/calendar/r";
-/** "2:00 – 3:00 PM", or "11:30 AM – 12:15 PM" when it crosses noon. */
+/** "2 – 3 PM", "2:30 – 3:15 PM", or "11:30 AM – 12:15 PM" when it crosses noon: on the hour, no ":00",
+    so times fit the narrow day columns. */
 function timeRange(s: Date, e: Date) {
   const f = (d: Date, ampm: boolean) =>
-    d.toLocaleTimeString(undefined, { hour: "numeric", minute: "2-digit", hour12: true }).replace(ampm ? "" : /\s?[AP]M$/i, "");
+    d
+      .toLocaleTimeString(undefined, { hour: "numeric", minute: "2-digit", hour12: true })
+      .replace(/:00(?=\D|$)/, "")
+      .replace(ampm ? "" : /\s?[AP]M$/i, "");
   const sameHalf = s.getHours() < 12 === e.getHours() < 12;
   return `${f(s, !sameHalf)} – ${f(e, true)}`;
 }
