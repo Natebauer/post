@@ -384,6 +384,14 @@
   align-items: center;
   flex-wrap: wrap;
 }
+/* An invitation for something that's over: its calendar page fades, and there's nothing to answer. */
+.invite.past .cal {
+  opacity: 0.6;
+  filter: saturate(0.4);
+}
+.invite .rsvp.faint {
+  font-size: var(--fs-1);
+}
 
 /* hover card */
 .hovercard {

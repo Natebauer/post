@@ -92,6 +92,9 @@ export function InviteCard({ m }: { m: Message }) {
   const inv = parseInvite(ics);
   if (!inv) return null;
   const canRsvp = inv.method.toUpperCase() === "REQUEST" && !m.isDraft;
+  // Over already: no point asking whether you're going.
+  const ends = inv.end ?? inv.start;
+  const over = !!ends && ends.getTime() < Date.now();
 
   const respond = async (r: "yes" | "maybe" | "no") => {
     setBusy(true);
@@ -108,7 +111,7 @@ export function InviteCard({ m }: { m: Message }) {
 
   return (
     <div
-      className="invite"
+      className={cx("invite", over && "past")}
       role="group"
       aria-label={`Invitation: ${inv.summary}`}
       style={{ "--cal": calendarColorFor(inv.summary, inv.start) ?? undefined } as React.CSSProperties}
@@ -126,7 +129,12 @@ export function InviteCard({ m }: { m: Message }) {
           </div>
         )}
         {inv.organizer && <div className="when faint">Organized by {inv.organizer}</div>}
-        {canRsvp && (
+        {canRsvp && over && (
+          <div className="rsvp faint">
+            This has already happened{answer ? ` · you said ${answer === "yes" ? "yes" : answer === "maybe" ? "maybe" : "no"}` : ""}
+          </div>
+        )}
+        {canRsvp && !over && (
           <div className="rsvp">
             <span className="faint" style={{ fontSize: 12, marginRight: 4 }}>
               Going?
