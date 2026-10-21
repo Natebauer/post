@@ -66,6 +66,9 @@ function dateGroup(ms: number, now = new Date()): string {
   return d.toLocaleDateString(undefined, d.getFullYear() === now.getFullYear() ? { month: "long" } : { month: "long", year: "numeric" });
 }
 
+/** "Tomorrow at 3:55 AM" rather than "tomorrow at …", for a label that starts a chip. */
+const capitalize = (s: string) => s.charAt(0).toUpperCase() + s.slice(1);
+
 function ThreadMenu({ t, point, onClose }: { t: ThreadSummary; point: { x: number; y: number }; onClose: () => void }) {
   const [snooze, setSnooze] = useState<HTMLElement | null>(null);
   const checked = useStore((s) => s.checked);
@@ -318,7 +321,7 @@ function Row({
           </span>
           <span className="row-icons">
             {t.hasAttachments && <Paperclip size={13} aria-hidden />}
-            {t.snoozedUntil && t.snoozedUntil > Date.now() && <span className="chip-snooze"><AlarmClock size={11} aria-hidden />{whenLabel(t.snoozedUntil)}</span>}
+            {t.snoozedUntil && t.snoozedUntil > Date.now() && <span className="chip-snooze"><AlarmClock size={11} aria-hidden />{capitalize(whenLabel(t.snoozedUntil))}</span>}
           </span>
           <span className="row-date">{shortDate(t.date)}</span>
         </>
@@ -332,7 +335,7 @@ function Row({
           <span className="row-icons">
             {t.hasAttachments && <Paperclip size={13} aria-hidden />}
             {t.snoozedUntil && t.snoozedUntil > Date.now() && (
-              <span className="chip-snooze"><AlarmClock size={11} aria-hidden />{whenLabel(t.snoozedUntil)}</span>
+              <span className="chip-snooze"><AlarmClock size={11} aria-hidden />{capitalize(whenLabel(t.snoozedUntil))}</span>
             )}
           </span>
           <span className="row-date">{shortDate(t.date)}</span>
