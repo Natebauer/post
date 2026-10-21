@@ -1,7 +1,7 @@
 import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import type React from "react";
-import { Bell, BookOpen, Shuffle, Moon, Sun, Keyboard, Monitor, Palette, PenLine, Plus, Sparkles, Trash2, UserRound, X } from "lucide-react";
+import { Bell, BookOpen, Moon, Sun, Keyboard, Monitor, Palette, PenLine, Plus, Sparkles, Trash2, UserRound, X } from "lucide-react";
 import { api, errText, type AiStatus, type ComposeMode, type Settings, type Template } from "../api";
 import { useStore } from "../store";
 import { accentFor, ACCENTS, AUTO_ACCENT, DEFAULT_ACCENT, resolvedTheme, WINDOW_COLORS, WINDOW_GRADIENTS, luminance } from "../theme";
@@ -191,36 +191,49 @@ function Seg<T extends string>({ value, options, onChange, label }: { value: T; 
   );
 }
 
-/** Everything behind the panes, in three short decisions: what kind of background (the mood's
-    own, a color or a gradient) with a live preview beside it, what the inbox card does on it, and
-    whether a seasonal pattern sits on top. */
-/** A random two-color gradient that goes together: neighboring hues, both pale or both deep, so
-    text reads across all of it. */
-function surpriseGradient(): string {
-  const hsl = (h: number, s: number, l: number) => {
-    const c = (1 - Math.abs(2 * l - 1)) * s;
-    const x = c * (1 - Math.abs(((h / 60) % 2) - 1));
-    const m = l - c / 2;
-    const [r, g, b] = h < 60 ? [c, x, 0] : h < 120 ? [x, c, 0] : h < 180 ? [0, c, x] : h < 240 ? [0, x, c] : h < 300 ? [x, 0, c] : [c, 0, x];
-    return "#" + [r, g, b].map((v) => Math.round((v + m) * 255).toString(16).padStart(2, "0")).join("");
-  };
-  const h = Math.random() * 360;
-  const h2 = (h + 40 + Math.random() * 35) % 360;
-  const deep = Math.random() < 0.4;
-  const s = deep ? 0.3 + Math.random() * 0.15 : 0.38 + Math.random() * 0.2;
-  const l = deep ? 0.17 + Math.random() * 0.05 : 0.86 + Math.random() * 0.04;
-  return `${hsl(h, s, l)}>${hsl(h2, s, l)}`;
+/** A color as #rrggbb from hue (degrees), saturation and lightness (0 to 1). */
+function hslHex(h: number, s: number, l: number): string {
+  const c = (1 - Math.abs(2 * l - 1)) * s;
+  const x = c * (1 - Math.abs(((h / 60) % 2) - 1));
+  const m = l - c / 2;
+  const [r, g, b] = h < 60 ? [c, x, 0] : h < 120 ? [x, c, 0] : h < 180 ? [0, c, x] : h < 240 ? [0, x, c] : h < 300 ? [x, 0, c] : [c, 0, x];
+  return "#" + [r, g, b].map((v) => Math.round((v + m) * 255).toString(16).padStart(2, "0")).join("");
 }
 
+/** The same color turned round the color wheel, keeping its lightness, so text reads the same on
+    both ends of a gradient made from the two. Greys get a touch of color, or there'd be nothing to turn. */
+function hueShift(hex: string, deg: number): string {
+  const [r, g, b] = [1, 3, 5].map((i) => parseInt(hex.slice(i, i + 2), 16) / 255);
+  const max = Math.max(r, g, b);
+  const min = Math.min(r, g, b);
+  const l = (max + min) / 2;
+  const d = max - min;
+  const s = d === 0 ? 0 : d / (1 - Math.abs(2 * l - 1));
+  const h = d === 0 ? 0 : max === r ? ((g - b) / d + 6) % 6 : max === g ? (b - r) / d + 2 : (r - g) / d + 4;
+  return hslHex((h * 60 + deg + 360) % 360, Math.max(s, 0.22), l);
+}
+
+const isDeep = (hex: string) => luminance(hex) < 0.179;
+
+/** Everything behind the panes, in three short decisions: the background (the mood's own, or a
+    color, which can fade into a second one) with a live preview beside it, what the inbox card
+    does on it, and whether a seasonal pattern sits on top. */
 function BackgroundSettings({ settings, look }: { settings: Settings; look: (p: Partial<Settings>) => void }) {
   const value = settings.windowColor?.toLowerCase() ?? "";
-  // Flat colors and gradients together, sorted by how light they are (which decides whether the
-  // text on them is dark or light), not by kind.
-  const all = [
-    ...WINDOW_COLORS.map((c) => ({ ...c, deep: luminance(c.value) < 0.179 })),
-    ...WINDOW_GRADIENTS.map((g) => ({ ...g, deep: !!g.deep })),
-  ];
-  const ownColor = /^#[0-9a-f]{6}$/.test(value) && !all.some((c) => c.value === value);
+  // A background is one color, or a color and the one it fades into.
+  const [base = "", second = ""] = value.split(">");
+  const grad = !!second;
+  const solids = WINDOW_COLORS.map((c) => ({ ...c, deep: isDeep(c.value) }));
+  const nameOf = (hex: string) => solids.find((c) => c.value === hex)?.name ?? hex;
+  const ownBase = !!base && !solids.some((c) => c.value === base);
+  const ownSecond = grad && !solids.some((c) => c.value === second);
+  // What picking a color does: with the gradient on, it keeps the second color if that still
+  // goes (as light or as deep as the new one), and otherwise finds it a partner.
+  const withBase = (b: string) => {
+    if (!grad) return b;
+    const keep = second !== b && isDeep(second) === isDeep(b);
+    return `${b}>${keep ? second : hueShift(b, 40)}`;
+  };
   // Backgrounds of your own you've used lately (colors or gradients), kept on this computer.
   const [recent, setRecent] = useState<string[]>(() => {
     try {
@@ -230,7 +243,7 @@ function BackgroundSettings({ settings, look }: { settings: Settings; look: (p: 
     }
   });
   useEffect(() => {
-    if (!value || all.some((c) => c.value === value)) return;
+    if (!value || solids.some((c) => c.value === value)) return;
     setRecent((r) => {
       const next = [value, ...r.filter((x) => x !== value)].slice(0, 4);
       try {
@@ -245,29 +258,28 @@ function BackgroundSettings({ settings, look }: { settings: Settings; look: (p: 
   // Pointing at a tile tries it in the little window beside, before you pick it.
   const [peek, setPeek] = useState<string | null>(null);
   const css = (v: string) => (v.includes(">") ? `linear-gradient(150deg, ${v.split(">").join(", ")})` : v);
-  const swatch = (c: (typeof all)[number]) => {
-    const stops = c.value.split(">");
-    return (
-      <button
-        key={c.value}
-        className={cx("swatch has-dot", stops.length > 1 && "swatch-grad", value === c.value && "on")}
-        style={
-          {
-            background: stops.length > 1 ? `linear-gradient(150deg, ${stops.join(", ")})` : c.value,
-            "--sw": stops[stops.length - 1],
-            // The accent Auto would bring with it, as a small dot in the corner.
-            "--dot": accentFor({ mood: settings.mood, accent: AUTO_ACCENT, windowColor: c.value }).value,
-          } as React.CSSProperties
-        }
-        title={stops.length > 1 ? `${c.name} gradient` : c.name}
-        aria-label={stops.length > 1 ? `${c.name} gradient` : c.name}
-        aria-pressed={value === c.value}
-        onClick={() => look({ windowColor: c.value })}
-        onMouseEnter={() => setPeek(c.value)}
-        onMouseLeave={() => setPeek(null)}
-      />
-    );
-  };
+  // A color tile; `to` is the background picking it would give.
+  const tile = (c: { name: string; value: string }, on: boolean, to: string) => (
+    <button
+      key={c.value}
+      className={cx("swatch has-dot", on && "on")}
+      style={
+        {
+          background: c.value,
+          "--sw": c.value,
+          // The accent Auto would bring with it, as a small dot in the corner.
+          "--dot": accentFor({ mood: settings.mood, accent: AUTO_ACCENT, windowColor: to }).value,
+        } as React.CSSProperties
+      }
+      title={c.name}
+      aria-label={c.name}
+      aria-pressed={on}
+      onClick={() => look({ windowColor: to })}
+      onMouseEnter={() => setPeek(to)}
+      onMouseLeave={() => setPeek(null)}
+    />
+  );
+  const preset = WINDOW_GRADIENTS.find((g) => g.value === value);
   return (
     <>
       <Row
@@ -276,12 +288,11 @@ function BackgroundSettings({ settings, look }: { settings: Settings; look: (p: 
           // The chosen one by name, ahead of what it does.
           <>
             <b className="sub-name">
-              {(() => {
-                if (!value) return "The mood's own";
-                const c = all.find((x) => x.value === value);
-                if (!c) return `Your color ${value.split(">")[0]}`;
-                return `${c.name} · ${c.deep ? "deep" : "pale"}${c.value.includes(">") ? " gradient" : ""}`;
-              })()}
+              {!value
+                ? "The mood's own"
+                : preset
+                  ? `${preset.name} · ${preset.deep ? "deep" : "pale"} gradient`
+                  : `${ownBase ? `Your color ${base}` : nameOf(base)}${grad ? ` into ${nameOf(second)}` : ""} · ${isDeep(base) ? "deep" : "pale"}`}
             </b>
             {" · what sits behind the panes. Text on it turns light or dark to match"}
           </>
@@ -291,9 +302,6 @@ function BackgroundSettings({ settings, look }: { settings: Settings; look: (p: 
       >
         <div className="bg-pick">
           <div className="bg-controls">
-            <button type="button" className="btn ghost bg-shuffle" onClick={() => look({ windowColor: surpriseGradient() })} title="A random gradient that goes together">
-              <Shuffle size={14} /> Surprise me
-            </button>
             <span className="bg-sub">Pale</span>
             <div className="swatches">
               {/* The mood's own backdrop, crossed through: no background of your own. */}
@@ -304,65 +312,64 @@ function BackgroundSettings({ settings, look }: { settings: Settings; look: (p: 
                 aria-pressed={!value}
                 onClick={() => look({ windowColor: "" })}
               />
-              {all.filter((c) => !c.deep).map(swatch)}
+              {solids.filter((c) => !c.deep).map((c) => tile(c, base === c.value, withBase(c.value)))}
             </div>
             <span className="bg-sub">Deep</span>
             <div className="swatches">
-              {all.filter((c) => c.deep).map(swatch)}
+              {solids.filter((c) => c.deep).map((c) => tile(c, base === c.value, withBase(c.value)))}
               {/* An exact color by its code, for a background of your own. */}
               <input
-                key={value}
+                key={base}
                 className="input bg-hex"
                 aria-label="Background color code"
                 placeholder="#rrggbb"
                 spellCheck={false}
                 maxLength={7}
-                defaultValue={ownColor ? value : ""}
+                defaultValue={ownBase ? base : ""}
                 onKeyDown={(e) => e.key === "Enter" && e.currentTarget.blur()}
                 onBlur={(e) => {
                   const v = e.currentTarget.value.trim().toLowerCase();
                   const hex = v.startsWith("#") ? v : `#${v}`;
-                  if (/^#[0-9a-f]{6}$/.test(hex) && hex !== value) look({ windowColor: hex });
+                  if (/^#[0-9a-f]{6}$/.test(hex) && hex !== base) look({ windowColor: withBase(hex) });
                 }}
               />
               <input
                 type="color"
-                className={cx("swatch-custom", ownColor && "on")}
-                title={ownColor ? `Custom background ${value}` : "Custom background"}
+                className={cx("swatch-custom", ownBase && "on")}
+                title={ownBase ? `Custom background ${base}` : "Custom background"}
                 aria-label="Custom background color"
-                value={ownColor ? value : "#e4e4e1"}
-                onChange={(e) => look({ windowColor: e.target.value })}
+                value={ownBase ? base : "#e4e4e1"}
+                onChange={(e) => look({ windowColor: withBase(e.target.value) })}
               />
             </div>
-            {/* A gradient of your own: pick where it starts and where it ends. */}
-            {(() => {
-              const presetGrad = WINDOW_GRADIENTS.some((g) => g.value === value);
-              const mine = value.includes(">") && !presetGrad;
-              const [from, to] = mine ? value.split(">") : [value.split(">")[0] || "#d6e1ec", value.split(">")[1] || "#e2dcee"];
-              return (
-                <div className="bg-own">
-                  <span className="bg-sub">Your gradient</span>
-                  <div className="bg-own-row">
-                    <button
-                      className={cx("swatch bg-own-tile", mine && "on")}
-                      style={{ background: `linear-gradient(150deg, ${from}, ${to})`, "--sw": to } as React.CSSProperties}
-                      title="Use your gradient"
-                      aria-label="Use your gradient"
-                      aria-pressed={mine}
-                      onClick={() => look({ windowColor: `${from}>${to}` })}
-                    />
-                    <label className="bg-stop">
-                      From
-                      <input type="color" value={from} aria-label="Gradient start" onChange={(e) => look({ windowColor: `${e.target.value}>${to}` })} />
-                    </label>
-                    <label className="bg-stop">
-                      To
-                      <input type="color" value={to} aria-label="Gradient end" onChange={(e) => look({ windowColor: `${from}>${e.target.value}` })} />
-                    </label>
-                  </div>
+            {/* A gradient is the chosen color fading into a second one. */}
+            <label className={cx("bg-grad", !base && "off")} title={base ? undefined : "Pick a color first"}>
+              <Switch
+                on={grad}
+                label="Gradient"
+                onChange={(v) => base && look({ windowColor: v ? `${base}>${hueShift(base, 40)}` : base })}
+              />
+              Gradient
+            </label>
+            {grad && (
+              <>
+                <span className="bg-sub">Fades into</span>
+                <div className="swatches">
+                  {/* Only colors as light or as deep as the first, so text reads all the way across. */}
+                  {solids
+                    .filter((c) => c.deep === isDeep(base) && c.value !== base)
+                    .map((c) => tile(c, second === c.value, `${base}>${c.value}`))}
+                  <input
+                    type="color"
+                    className={cx("swatch-custom", ownSecond && "on")}
+                    title={`The color it fades into: ${second}`}
+                    aria-label="Second gradient color"
+                    value={second}
+                    onChange={(e) => look({ windowColor: `${base}>${e.target.value}` })}
+                  />
                 </div>
-              );
-            })()}
+              </>
+            )}
             {recent.length > 0 && (
               <>
                 <div className="bg-sub">Recent</div>

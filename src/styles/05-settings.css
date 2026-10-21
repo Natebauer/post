@@ -196,42 +196,18 @@
 .bg-controls .swatch-custom::-webkit-color-swatch {
   border-radius: 4px;
 }
-/* "Your gradient": a tile of it, and where it starts and ends. */
-.bg-own {
-  display: flex;
-  flex-direction: column;
-  gap: var(--s-3);
-}
-.bg-own-row {
-  display: flex;
-  align-items: center;
-  gap: var(--s-3);
-}
-.bg-own-tile {
-  width: 64px !important;
-}
-.bg-stop {
+/* The gradient switch, between the first color and the one it fades into. */
+.bg-grad {
   display: inline-flex;
   align-items: center;
-  gap: 6px;
-  font-size: var(--fs-1);
+  gap: var(--s-3);
+  font-size: var(--fs-2);
   color: var(--text-2);
-}
-.bg-stop input {
-  width: 26px;
-  height: 26px;
-  padding: 0;
-  border: 0;
-  border-radius: 6px;
-  background: none;
   cursor: pointer;
 }
-.bg-stop input::-webkit-color-swatch-wrapper {
-  padding: 0;
-}
-.bg-stop input::-webkit-color-swatch {
-  border: 1px solid var(--border-strong);
-  border-radius: 6px;
+.bg-grad.off {
+  opacity: 0.5;
+  pointer-events: none;
 }
 /* Typing a background's color code. */
 .bg-hex {
@@ -239,13 +215,6 @@
   height: 28px;
   padding: 0 8px;
   font-family: var(--font-mono, ui-monospace, monospace);
-  font-size: var(--fs-1);
-}
-/* "Surprise me", tucked in at the top right of the background choices. */
-.bg-shuffle {
-  align-self: flex-end;
-  margin-bottom: calc(-1 * var(--s-5));
-  height: 26px;
   font-size: var(--fs-1);
 }
 .bg-sub {
