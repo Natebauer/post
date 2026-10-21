@@ -309,7 +309,6 @@ function BackgroundSettings({ settings, look }: { settings: Settings; look: (p: 
       >
         <div className="bg-pick">
           <div className="bg-controls">
-            <span className="bg-sub">Pale</span>
             <div className="swatches">
               {/* The mood's own backdrop, crossed through: no background of your own. */}
               <button
@@ -320,9 +319,8 @@ function BackgroundSettings({ settings, look }: { settings: Settings; look: (p: 
                 onClick={() => look({ windowColor: "" })}
               />
               {solids.filter((c) => !c.deep).map((c) => tile(c, base === c.value, withBase(c.value)))}
-            </div>
-            <span className="bg-sub">Deep</span>
-            <div className="swatches">
+            {/* Pale ones (dark text), then deep ones (light text). */}
+            <i className="bg-divider" aria-hidden />
               {solids.filter((c) => c.deep).map((c) => tile(c, base === c.value, withBase(c.value)))}
               <input
                 type="color"

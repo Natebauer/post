@@ -123,6 +123,13 @@
   align-items: center;
   flex-wrap: wrap;
 }
+/* Between the pale backgrounds and the deep ones. */
+.bg-divider {
+  width: 1px;
+  height: 20px;
+  margin: 0 3px;
+  background: var(--border-strong);
+}
 .swatch {
   width: 24px;
   height: 24px;
