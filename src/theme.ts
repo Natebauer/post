@@ -314,7 +314,7 @@ export const WINDOW_GRADIENTS: { name: string; value: string; deep?: boolean }[]
 ];
 
 /** The season now (northern hemisphere): spring from March, summer June, autumn September, winter December. */
-function season(d = new Date()): "spring" | "summer" | "autumn" | "winter" {
+export function season(d = new Date()): "spring" | "summer" | "autumn" | "winter" {
   const m = d.getMonth();
   return m >= 2 && m < 5 ? "spring" : m >= 5 && m < 8 ? "summer" : m >= 8 && m < 11 ? "autumn" : "winter";
 }

@@ -12,6 +12,7 @@ import { cx, relativeAgo } from "../util";
 import { Avatar } from "./Avatar";
 import { usePresence } from "../hooks";
 import { setZoom } from "../actions";
+import { season } from "../theme";
 import { etaText } from "./TitleBar";
 
 type Tab = "appearance" | "reading" | "compose" | "notifications" | "ai" | "shortcuts" | "system" | "account";
@@ -320,7 +321,8 @@ function BackgroundSettings({ settings, look }: { settings: Settings; look: (p: 
           value={settings.seasonal ? "seasonal" : "none"}
           options={[
             ["none", "None"],
-            ["seasonal", "Seasonal"],
+            // Named for the season it shows right now.
+            ["seasonal", `Seasonal · ${season()}`],
           ]}
           onChange={(v) => look({ seasonal: v === "seasonal" })}
         />
