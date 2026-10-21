@@ -53,7 +53,13 @@ function replyName(t: ThreadDetail, me: string) {
   const last = [...t.messages].reverse().find((m) => !m.isDraft);
   if (!last) return "";
   const who = last.from.email.toLowerCase() === me.toLowerCase() ? last.to[0] ?? last.from : last.from;
-  return displayName(who).split(" ")[0] || who.email;
+  // A person by their first name ("Maya" for maya@ or maya.chen@); a company in full ("The
+  // Browser Company", "Delta Air Lines"), since its first word alone means nothing.
+  const name = displayName(who);
+  const first = name.split(" ")[0];
+  const local = who.email.split("@")[0].toLowerCase();
+  const person = local === first.toLowerCase() || new RegExp(`^${first.toLowerCase().replace(/[^a-z0-9]/g, "")}[._-]`).test(local);
+  return (person ? first : name) || who.email;
 }
 
 const UNSUB_TEXT = /unsubscribe|opt[\s-]?out|email preferences|manage (your )?(email |notification |subscription )?(preferences|settings|subscriptions)|stop receiving/i;
