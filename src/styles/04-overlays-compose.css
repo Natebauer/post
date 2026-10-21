@@ -1407,6 +1407,8 @@ div.ob-check {
 .tp-item {
   gap: var(--s-3);
   min-width: 300px;
+  /* Each choice on one line: "Tomorrow morning", not "Tomorrow" over "morning". */
+  white-space: nowrap;
 }
 .tp-ic {
   width: 26px;
