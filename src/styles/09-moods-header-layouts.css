@@ -247,6 +247,10 @@
 .mood-note .spacer {
   flex: 1;
 }
+/* The Custom tab's own options (accent, background, card, pattern), rows like the rest of Settings. */
+.mood-custom > .set-row:last-child {
+  border-bottom: 0;
+}
 /* "Save current look": a dashed card at the end of your moods. */
 .mood-add {
   border-style: dashed;
@@ -297,17 +301,6 @@
 }
 .mood-save .input {
   width: 200px;
-}
-/* A quiet heading inside a settings page ("Make it yours"). */
-.settings .set-sub {
-  margin: var(--s-5) 0 0;
-  padding-top: var(--s-4);
-  font-size: var(--fs-1);
-  font-weight: 650;
-  letter-spacing: 0.05em;
-  text-transform: uppercase;
-  color: var(--text-3);
-  border-top: 1px solid var(--border);
 }
 /* ---------- settings: the scrim steps aside while the look is being adjusted ---------- */
 .scrim {

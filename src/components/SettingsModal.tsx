@@ -593,7 +593,54 @@ export function SettingsModal() {
                 />
               </Row>
               <Row title="Mood" sub="The feel of the whole app: its colors, background and inbox card. Each mood works in light and dark." col look>
-                <MoodPicker settings={settings} onApply={look} />
+                <MoodPicker
+                  settings={settings}
+                  onApply={look}
+                  // The Custom tab: your saved moods, then the accent, background, card and pattern.
+                  custom={
+                    <>
+                  <Row
+                    title="Accent color"
+                    sub={
+                      // The chosen one by name, ahead of what it's for.
+                      <>
+                        <b className="sub-name">
+                          {ACCENTS.find((a) => a.value === (settings.accent || moodById(settings.mood).accent).toLowerCase())?.name ??
+                            (settings.accent ? "Custom" : "The mood's own")}
+                        </b>
+                        {" · used for unread markers, selection and buttons"}
+                      </>
+                    }
+                    col
+                    look
+                  >
+                    <div className="swatches">
+                      {ACCENTS.map((a) => (
+                        <button
+                          key={a.value}
+                          className={cx("swatch", settings.accent.toLowerCase() === a.value && "on")}
+                          style={{ background: a.value, "--sw": a.value } as React.CSSProperties}
+                          title={a.name}
+                          aria-label={a.name}
+                          aria-pressed={settings.accent.toLowerCase() === a.value}
+                          onClick={() => look({ accent: a.value })}
+                        />
+                      ))}
+                      <input
+                        type="color"
+                        // A color of your own is the chosen one too: it wears the ring, and says its value.
+                        className={cx("swatch-custom", !!settings.accent && !ACCENTS.some((a) => a.value === settings.accent.toLowerCase()) && "on")}
+                        title={settings.accent && !ACCENTS.some((a) => a.value === settings.accent.toLowerCase()) ? `Custom color ${settings.accent}` : "Custom color"}
+                        aria-label="Custom accent color"
+                        value={settings.accent || moodById(settings.mood).accent || "#2a737b"}
+                        onChange={(e) => look({ accent: e.target.value })}
+                      />
+                    </div>
+                  </Row>
+                  <BackgroundSettings settings={settings} look={look} />
+                    </>
+                  }
+                />
               </Row>
               {settings.mood === "auto" && (
                 <Row title="Auto goes dark" sub="Ember, Auto's dark mood, between these times" look>
@@ -614,47 +661,6 @@ export function SettingsModal() {
                   </div>
                 </Row>
               )}
-              {/* Everything below adjusts the mood picked above. */}
-              <h5 className="set-sub">Make it yours</h5>
-              <Row
-                title="Accent color"
-                sub={
-                  // The chosen one by name, ahead of what it's for.
-                  <>
-                    <b className="sub-name">
-                      {ACCENTS.find((a) => a.value === (settings.accent || moodById(settings.mood).accent).toLowerCase())?.name ??
-                        (settings.accent ? "Custom" : "The mood's own")}
-                    </b>
-                    {" · used for unread markers, selection and buttons"}
-                  </>
-                }
-                col
-                look
-              >
-                <div className="swatches">
-                  {ACCENTS.map((a) => (
-                    <button
-                      key={a.value}
-                      className={cx("swatch", settings.accent.toLowerCase() === a.value && "on")}
-                      style={{ background: a.value, "--sw": a.value } as React.CSSProperties}
-                      title={a.name}
-                      aria-label={a.name}
-                      aria-pressed={settings.accent.toLowerCase() === a.value}
-                      onClick={() => look({ accent: a.value })}
-                    />
-                  ))}
-                  <input
-                    type="color"
-                    // A color of your own is the chosen one too: it wears the ring, and says its value.
-                    className={cx("swatch-custom", !!settings.accent && !ACCENTS.some((a) => a.value === settings.accent.toLowerCase()) && "on")}
-                    title={settings.accent && !ACCENTS.some((a) => a.value === settings.accent.toLowerCase()) ? `Custom color ${settings.accent}` : "Custom color"}
-                    aria-label="Custom accent color"
-                    value={settings.accent || moodById(settings.mood).accent || "#2a737b"}
-                    onChange={(e) => look({ accent: e.target.value })}
-                  />
-                </div>
-              </Row>
-              <BackgroundSettings settings={settings} look={look} />
               <Row title="Text size" sub="Also Ctrl + and Ctrl −">
                 <Seg
                   label="Text size"

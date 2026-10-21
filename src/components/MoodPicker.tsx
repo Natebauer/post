@@ -77,7 +77,16 @@ const sameLook = (a: MoodLook, b: MoodLook) => a.bg.toLowerCase() === b.bg.toLow
  * you've saved as moods of your own. Picking one applies the whole look. Once you change the
  * accent, background or card, the mood's card says so and offers its own look back.
  */
-export function MoodPicker({ settings, onApply }: { settings: Settings; onApply: (p: Partial<Settings>) => void }) {
+export function MoodPicker({
+  settings,
+  onApply,
+  custom,
+}: {
+  settings: Settings;
+  onApply: (p: Partial<Settings>) => void;
+  /** The controls for making a look your own (accent, background, card, pattern), on the Custom tab. */
+  custom?: React.ReactNode;
+}) {
   // Moods for both themes preview in your Theme setting; dark moods always preview dark.
   const theme = resolvedTheme({ ...settings, mood: "classic" });
   const current = settings.mood || "classic";
@@ -87,8 +96,12 @@ export function MoodPicker({ settings, onApply }: { settings: Settings; onApply:
     (l) => l.mood === current && l.accent === settings.accent && sameLook({ bg: l.windowColor, card: l.card }, now) && l.seasonal === !!settings.seasonal,
   );
   const [naming, setNaming] = useState<string | null>(null);
-  // Opens on the tab the current look comes from.
-  const [tab, setTab] = useState<"moods" | "yours">(savedOn >= 0 ? "yours" : "moods");
+  // Opens on the tab the current look comes from: Custom for a saved look or one you've changed.
+  const [tab, setTab] = useState<"moods" | "custom">(() => {
+    const m = moodById(current);
+    const own = (settings.accent || "").toLowerCase() === (m.accent || "").toLowerCase() && looksOf(current).some((l) => sameLook(l, now));
+    return savedOn >= 0 || !own ? "custom" : "moods";
+  });
 
   const apply = (c: Choice) =>
     onApply({
@@ -249,7 +262,7 @@ export function MoodPicker({ settings, onApply }: { settings: Settings; onApply:
     };
     onApply({ savedLooks: [...saved.filter((l) => l.name !== name), entry] });
     setNaming(null);
-    setTab("yours");
+    setTab("custom");
   };
 
   const nameForm = (
@@ -285,7 +298,7 @@ export function MoodPicker({ settings, onApply }: { settings: Settings; onApply:
         {(
           [
             ["moods", "Moods"],
-            ["yours", saved.length ? `Yours · ${saved.length}` : "Yours"],
+            ["custom", "Custom"],
           ] as const
         ).map(([k, l]) => (
           <button key={k} role="tab" aria-selected={tab === k} className={cx(tab === k && "on")} onClick={() => setTab(k)}>
@@ -327,6 +340,14 @@ export function MoodPicker({ settings, onApply }: { settings: Settings; onApply:
           </div>
         </>
       ) : (
+        <>
+        {custom && (
+          <>
+            <div className="mood-group-label">Adjust the look</div>
+            <div className="mood-custom">{custom}</div>
+          </>
+        )}
+        <div className="mood-group-label">Saved looks</div>
         <div role="radiogroup" aria-label="Your moods" className="moods">
           {saved.map(savedCard)}
           {/* Keeping the current look: its accent, background, inbox card and pattern, together. */}
@@ -344,6 +365,7 @@ export function MoodPicker({ settings, onApply }: { settings: Settings; onApply:
             )}
           </div>
         </div>
+        </>
       )}
     </div>
   );
