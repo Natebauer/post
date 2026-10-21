@@ -697,9 +697,9 @@ const TOUR: { sel: string; title: string; text: string }[] = [
     text: "Drag an email onto the sidebar to give its sender their own section. Drop it on Home to pin it.",
   },
   {
-    sel: ".search-wrap",
+    sel: '.list-head [aria-label="Search mail"]',
     title: "Search, and everything else",
-    text: "Search all your mail here, even while it's still indexing. Press Ctrl+K for every command.",
+    text: "Search all your mail from here, or press / anywhere, even while it's still indexing. Press Ctrl+K for every command.",
   },
 ];
 
