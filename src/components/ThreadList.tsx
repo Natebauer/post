@@ -632,7 +632,7 @@ export function ThreadList() {
   const title = search ? "Results" : folderTitle(folder);
   const unread = search ? 0 : folder === "INBOX" || folder === "SPAM" || folder.startsWith("sec:") ? counts[folder] ?? 0 : 0;
   const sub = search
-    ? `${items.length}${search.remote === null ? "+" : ""} found`
+    ? (<><RollingCount value={items.length} />{search.remote === null ? "+" : ""} found</>)
     : checked.length
       ? `${checked.length} selected`
       : unread
