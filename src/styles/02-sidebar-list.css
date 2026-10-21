@@ -598,6 +598,19 @@
   gap: 6px;
   flex: none;
 }
+/* "Search Gmail too", as a small button at the banner's end. */
+.banner-btn {
+  margin-left: auto;
+  padding: 2px 9px;
+  border-radius: 999px;
+  font-size: var(--fs-1);
+  font-weight: 600;
+  color: var(--accent-text);
+  transition: background var(--fast) var(--ease);
+}
+.banner-btn:hover {
+  background: var(--accent-soft);
+}
 
 /* ---------- avatar ---------- */
 .avatar {

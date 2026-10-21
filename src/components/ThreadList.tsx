@@ -688,7 +688,12 @@ export function ThreadList() {
           ) : search.remote ? (
             <>Showing local and Gmail results</>
           ) : (
-            <>Local results · press Enter to search Gmail too</>
+            <>
+              Local results
+              <button className="banner-btn" title="Also search older mail in Gmail (Enter)" onClick={() => void useStore.getState().runRemoteSearch()}>
+                Search Gmail too
+              </button>
+            </>
           )}
         </div>
       )}
