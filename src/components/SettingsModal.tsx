@@ -2,6 +2,7 @@ import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import type React from "react";
 import { Bell, BookOpen, Moon, Sun, Keyboard, Monitor, Palette, PenLine, Plus, Sparkles, Trash2, UserRound, X } from "lucide-react";
+import { ArrowLeftRight } from "lucide-react";
 import { api, errText, type AiStatus, type ComposeMode, type Settings, type Template } from "../api";
 import { useStore } from "../store";
 import { accentFor, ACCENTS, AUTO_ACCENT, DEFAULT_ACCENT, resolvedTheme, WINDOW_COLORS, WINDOW_GRADIENTS, luminance } from "../theme";
@@ -381,6 +382,10 @@ function BackgroundSettings({ settings, look }: { settings: Settings; look: (p: 
                     value={second}
                     onChange={(e) => look({ windowColor: `${base}>${e.target.value}` })}
                   />
+                  {/* Turn it round: the second color first. */}
+                  <button type="button" className="icon-btn sm bg-swap" title="Swap the two colors" aria-label="Swap the two colors" onClick={() => look({ windowColor: `${second}>${base}` })}>
+                    <ArrowLeftRight size={14} />
+                  </button>
                 </div>
               </>
             )}

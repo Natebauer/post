@@ -209,6 +209,10 @@
   opacity: 0.5;
   pointer-events: none;
 }
+/* Swapping the gradient's two ends. */
+.bg-swap {
+  margin-left: 2px;
+}
 /* Typing a background's color code. */
 .bg-hex {
   width: 84px;
