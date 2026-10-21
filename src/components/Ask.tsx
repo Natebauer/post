@@ -104,6 +104,18 @@ export function AskPanel() {
   useEffect(() => {
     if (open) window.setTimeout(() => input.current?.focus(), 30);
   }, [open]);
+  // Esc closes it from anywhere in it, not only from the text box (which AI being off disables).
+  useEffect(() => {
+    if (!open) return;
+    const key = (e: KeyboardEvent) => {
+      if (e.key !== "Escape" || e.defaultPrevented) return;
+      e.preventDefault();
+      close();
+    };
+    window.addEventListener("keydown", key);
+    return () => window.removeEventListener("keydown", key);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [open]);
 
   // Each request gets a number; an answer that arrives after you've moved on is dropped.
   const seq = useRef(0);
