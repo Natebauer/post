@@ -1,6 +1,7 @@
 import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import type React from "react";
+import { AppWindow, Maximize2, PanelRight, PictureInPicture2 } from "lucide-react";
 import { Bell, BookOpen, Moon, Sun, Keyboard, Monitor, Palette, PenLine, Plus, Sparkles, Trash2, UserRound, X } from "lucide-react";
 import { ArrowLeftRight } from "lucide-react";
 import { api, errText, type AiStatus, type ComposeMode, type Settings, type Template } from "../api";
@@ -891,10 +892,11 @@ export function SettingsModal() {
                   label="Compose opens in"
                   value={settings.composeMode}
                   options={[
-                    ["inline", "Reading pane"],
-                    ["floating", "Floating panel"],
-                    ["fullscreen", "Full screen"],
-                    ["window", "Separate window"],
+                    // Each with a small picture of where it opens.
+                    ["inline", <><PanelRight size={13} /> Reading pane</>],
+                    ["floating", <><PictureInPicture2 size={13} /> Floating panel</>],
+                    ["fullscreen", <><Maximize2 size={13} /> Full screen</>],
+                    ["window", <><AppWindow size={13} /> Separate window</>],
                   ]}
                   onChange={(composeMode) => set({ composeMode })}
                 />
