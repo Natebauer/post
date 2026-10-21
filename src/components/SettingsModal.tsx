@@ -4,7 +4,7 @@ import type React from "react";
 import { Bell, BookOpen, Moon, Sun, Keyboard, Monitor, Palette, PenLine, Plus, Sparkles, Trash2, UserRound, X } from "lucide-react";
 import { api, errText, type AiStatus, type ComposeMode, type Settings, type Template } from "../api";
 import { useStore } from "../store";
-import { ACCENTS, DEFAULT_ACCENT, WINDOW_COLORS, WINDOW_GRADIENTS, blendWindow, windowStops } from "../theme";
+import { ACCENTS, DEFAULT_ACCENT, resolvedTheme, WINDOW_COLORS, WINDOW_GRADIENTS, blendWindow, windowStops } from "../theme";
 import { MoodPicker } from "./MoodPicker";
 import { moodById } from "../moods";
 import { ShortcutList } from "./Shortcuts";
@@ -554,7 +554,14 @@ export function SettingsModal() {
               <h4>Appearance</h4>
               <Row
                 title="Theme"
-                sub={moodById(settings.mood).scheme === "dark" ? "Your mood is a dark one, so Post stays dark" : "Match Windows, or pick one"}
+                sub={
+                  moodById(settings.mood).scheme === "dark"
+                    ? "Your mood is a dark one, so Post stays dark"
+                    : settings.theme === "system"
+                      ? // Following Windows: say which way that is right now.
+                        `Match Windows, or pick one. Windows is ${resolvedTheme({ ...settings, mood: "classic" })} right now`
+                      : "Match Windows, or pick one"
+                }
                 look
               >
                 <Seg
