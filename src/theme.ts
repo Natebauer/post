@@ -363,6 +363,7 @@ export const ACCENTS: { name: string; value: string }[] = [
 
 /** Window backgrounds offered in Settings: pale ones, then dark ones ("" is the mood's own). */
 export const WINDOW_COLORS: { name: string; value: string }[] = [
+  { name: "White", value: "#ffffff" },
   { name: "Linen", value: "#ece4d6" },
   { name: "Sage", value: "#d9e2d6" },
   { name: "Mint", value: "#d3e8df" },

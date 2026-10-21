@@ -203,7 +203,8 @@ function hslHex(h: number, s: number, l: number): string {
 }
 
 /** The same color turned round the color wheel, keeping its lightness, so text reads the same on
-    both ends of a gradient made from the two. Greys get a touch of color, or there'd be nothing to turn. */
+    both ends of a gradient made from the two. Greys get a touch of color, or there'd be nothing to turn,
+    and white comes down to the palest tint, or the color would stay white. */
 function hueShift(hex: string, deg: number): string {
   const [r, g, b] = [1, 3, 5].map((i) => parseInt(hex.slice(i, i + 2), 16) / 255);
   const max = Math.max(r, g, b);
@@ -212,7 +213,7 @@ function hueShift(hex: string, deg: number): string {
   const d = max - min;
   const s = d === 0 ? 0 : d / (1 - Math.abs(2 * l - 1));
   const h = d === 0 ? 0 : max === r ? ((g - b) / d + 6) % 6 : max === g ? (b - r) / d + 2 : (r - g) / d + 4;
-  return hslHex((h * 60 + deg + 360) % 360, Math.max(s, 0.22), l);
+  return hslHex((h * 60 + deg + 360) % 360, Math.max(s, 0.22), Math.min(l, 0.93));
 }
 
 const isDeep = (hex: string) => luminance(hex) < 0.179;
@@ -289,7 +290,8 @@ function BackgroundSettings({ settings, look }: { settings: Settings; look: (p: 
         {
           // In the second row, each tile shows the gradient it would make.
           background: to === `${base}>${c.value}` ? css(to) : c.value,
-          "--sw": c.value,
+          // Its ring when chosen, in its own color (a grey one for white, which wouldn't show).
+          "--sw": luminance(c.value) > 0.9 ? "var(--text-3)" : c.value,
           // The accent Auto would bring with it, as a small dot in the corner.
           "--dot": accentFor({ mood: settings.mood, accent: AUTO_ACCENT, windowColor: to }).value,
         } as React.CSSProperties
