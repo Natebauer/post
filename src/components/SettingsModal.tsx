@@ -271,7 +271,8 @@ function BackgroundSettings({ settings, look }: { settings: Settings; look: (p: 
       className={cx("swatch has-dot", on && "on")}
       style={
         {
-          background: c.value,
+          // In the second row, each tile shows the gradient it would make.
+          background: to === `${base}>${c.value}` ? css(to) : c.value,
           "--sw": c.value,
           // The accent Auto would bring with it, as a small dot in the corner.
           "--dot": accentFor({ mood: settings.mood, accent: AUTO_ACCENT, windowColor: to }).value,
