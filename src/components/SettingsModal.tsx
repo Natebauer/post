@@ -324,22 +324,6 @@ function BackgroundSettings({ settings, look }: { settings: Settings; look: (p: 
             <span className="bg-sub">Deep</span>
             <div className="swatches">
               {solids.filter((c) => c.deep).map((c) => tile(c, base === c.value, withBase(c.value)))}
-              {/* An exact color by its code, for a background of your own. */}
-              <input
-                key={base}
-                className="input bg-hex"
-                aria-label="Background color code"
-                placeholder="#rrggbb"
-                spellCheck={false}
-                maxLength={7}
-                defaultValue={ownBase ? base : ""}
-                onKeyDown={(e) => e.key === "Enter" && e.currentTarget.blur()}
-                onBlur={(e) => {
-                  const v = e.currentTarget.value.trim().toLowerCase();
-                  const hex = v.startsWith("#") ? v : `#${v}`;
-                  if (/^#[0-9a-f]{6}$/.test(hex) && hex !== base) look({ windowColor: withBase(hex) });
-                }}
-              />
               <input
                 type="color"
                 className={cx("swatch-custom", ownBase && "on")}
