@@ -221,6 +221,27 @@ function BackgroundSettings({ settings, look }: { settings: Settings; look: (p: 
     ...WINDOW_GRADIENTS.map((g) => ({ ...g, deep: !!g.deep })),
   ];
   const ownColor = /^#[0-9a-f]{6}$/.test(value) && !all.some((c) => c.value === value);
+  // Backgrounds of your own you've used lately (colors or gradients), kept on this computer.
+  const [recent, setRecent] = useState<string[]>(() => {
+    try {
+      return JSON.parse(localStorage.getItem("post-recent-backgrounds") || "[]");
+    } catch {
+      return [];
+    }
+  });
+  useEffect(() => {
+    if (!value || all.some((c) => c.value === value)) return;
+    setRecent((r) => {
+      const next = [value, ...r.filter((x) => x !== value)].slice(0, 4);
+      try {
+        localStorage.setItem("post-recent-backgrounds", JSON.stringify(next));
+      } catch {
+        /* storage unavailable */
+      }
+      return next;
+    });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [value]);
   // Pointing at a tile tries it in the little window beside, before you pick it.
   const [peek, setPeek] = useState<string | null>(null);
   const css = (v: string) => (v.includes(">") ? `linear-gradient(150deg, ${v.split(">").join(", ")})` : v);
@@ -342,6 +363,24 @@ function BackgroundSettings({ settings, look }: { settings: Settings; look: (p: 
                 </div>
               );
             })()}
+            {recent.length > 0 && (
+              <>
+                <div className="bg-sub">Recent</div>
+                <div className="swatches">
+                  {recent.map((r) => (
+                    <button
+                      key={r}
+                      className={cx("swatch", value === r && "on")}
+                      style={{ background: r.includes(">") ? `linear-gradient(150deg, ${r.split(">").join(", ")})` : r, "--sw": r.split(">").pop() } as React.CSSProperties}
+                      title={`Your ${r.includes(">") ? "gradient" : "color"} ${r.replace(">", " to ")}`}
+                      aria-label={`Recent background ${r.replace(">", " to ")}`}
+                      aria-pressed={value === r}
+                      onClick={() => look({ windowColor: r })}
+                    />
+                  ))}
+                </div>
+              </>
+            )}
           </div>
           {/* A little window showing the result: the background, the sidebar and the inbox card. */}
           <div
