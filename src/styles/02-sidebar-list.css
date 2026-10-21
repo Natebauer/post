@@ -102,9 +102,44 @@
   gap: var(--s-2);
   border-bottom: 1px solid var(--border);
 }
-/* Searching: the query in quotes as the heading, a count pill and a clear button. */
+/* Searching: the field fills the header, growing out from the search button on the right. */
 .list-head.searching {
   gap: 8px;
+  position: relative;
+  z-index: 5;
+}
+.list-head .search-wrap {
+  flex: 1;
+  min-width: 0;
+  animation: lh-search-in 260ms cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+.list-head .search-wrap:focus-within {
+  flex-basis: auto;
+}
+@keyframes lh-search-in {
+  from {
+    clip-path: inset(0 0 0 calc(100% - 64px) round var(--r-1));
+    opacity: 0;
+  }
+  to {
+    clip-path: inset(0 0 0 0 round var(--r-1));
+    opacity: 1;
+  }
+}
+.list-head .search {
+  height: 32px;
+  background: var(--surface-2);
+  border-color: transparent;
+}
+.list-head .search:focus-within {
+  background: var(--surface);
+  border-color: var(--border-strong);
+}
+/* The dropdown sits just under the header, the list's full width. */
+.list-head .search-pop {
+  top: 38px;
+  left: -8px;
+  right: -8px;
 }
 .list-head .lh-ic {
   flex: none;

@@ -10,7 +10,6 @@ import {
   MailOpen,
   MoreHorizontal,
   Search,
-  X,
   OctagonAlert,
   Paperclip,
   Pin,
@@ -34,6 +33,7 @@ import { EmptyArt, partOfDay, type EmptyKind } from "./EmptyArt";
 import { folderTitle, ICONS } from "./Sidebar";
 import { TimePicker } from "./TimePicker";
 import { Popover } from "./Popover";
+import { SearchBox } from "./SearchBox";
 import { Highlight } from "./Highlight";
 import { ScheduledList } from "./Scheduled";
 import { togglePin } from "./Home";
@@ -446,6 +446,18 @@ function ListMenu({ anchor, onClose }: { anchor: HTMLElement; onClose: () => voi
 export function ThreadList() {
   const folder = useStore((s) => s.folder);
   const search = useStore((s) => s.search);
+  // Search lives in this header: a button (or / anywhere) opens the field in place of the
+  // folder's name, and it folds back once it's left empty.
+  const [searchOpen, setSearchOpen] = useState(false);
+  useEffect(() => {
+    const open = () => setSearchOpen(true);
+    window.addEventListener("post:focus-search", open);
+    return () => window.removeEventListener("post:focus-search", open);
+  }, []);
+  useEffect(() => {
+    // Cleared from elsewhere (Esc in the list): fold back unless you're still typing in it.
+    if (!search && !document.activeElement?.closest(".list-head")) setSearchOpen(false);
+  }, [search]);
   const threads = useStore((s) => s.threads);
   const total = useStore((s) => s.total);
   const selectedId = useStore((s) => s.selectedId);
@@ -592,7 +604,7 @@ export function ThreadList() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [last?.index, threads.length, total, search]);
 
-  if (folder === "SCHEDULED" && !search) return <ScheduledList />;
+  if (folder === "SCHEDULED" && !search && !searchOpen) return <ScheduledList />;
 
   const title = search ? "Results" : folderTitle(folder);
   const unread = search ? 0 : folder === "INBOX" || folder === "SPAM" || folder.startsWith("sec:") ? counts[folder] ?? 0 : 0;
@@ -608,23 +620,19 @@ export function ThreadList() {
 
   return (
     <section className={cx("list-pane", `size-${listSize}`)} ref={paneRef} aria-label={title}>
-      <div className={cx("list-head", search && "searching")}>
-        {search ? (
-          // Searching: the query itself is the heading, with how many were found and a way out.
-          <>
-            <Search size={15} className="lh-ic" aria-hidden />
-            <h2 className="lh-query" title={search.query}>
-              <span className="q">“</span>
-              {search.query}
-              <span className="q">”</span>
-            </h2>
-            <span className="found-pill tnum" aria-live="polite">
-              {sub}
-            </span>
-            <button className="icon-btn sm lh-clear" title="Clear search (Esc)" aria-label="Clear search" onClick={() => useStore.getState().setSearch(null)}>
-              <X size={14} />
-            </button>
-          </>
+      <div className={cx("list-head", (search || searchOpen) && "searching")}>
+        {search || searchOpen ? (
+          // Searching: the field itself is the heading, with how many were found inside it.
+          <SearchBox
+            extra={
+              search && (
+                <span className="found-pill tnum" aria-live="polite">
+                  {sub}
+                </span>
+              )
+            }
+            onDone={() => setSearchOpen(false)}
+          />
         ) : (
           <>
             {/* The folder's own icon, in the accent, beside its name. */}
@@ -635,7 +643,12 @@ export function ThreadList() {
             </span>
           </>
         )}
-        {!search && folder !== "SENT" && folder !== "DRAFT" && !folder.startsWith("sec:") && (
+        {!search && !searchOpen && (
+          <button className="icon-btn sm" title="Search mail (/)" aria-label="Search mail" onClick={() => setSearchOpen(true)}>
+            <Search size={16} />
+          </button>
+        )}
+        {!search && !searchOpen && folder !== "SENT" && folder !== "DRAFT" && !folder.startsWith("sec:") && (
           <button className="icon-btn sm" title="More" aria-label="List options" onClick={(e) => setListMenu(e.currentTarget)}>
             <MoreHorizontal size={16} />
           </button>
