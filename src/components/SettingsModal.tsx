@@ -225,6 +225,9 @@ function BackgroundSettings({ settings, look }: { settings: Settings; look: (p: 
   // A background is one color, or a color and the one it fades into.
   const [base = "", second = ""] = value.split(">");
   const grad = !!second;
+  // The color it last faded into, so switching the gradient off and on again brings it back.
+  const lastSecond = useRef("");
+  if (second) lastSecond.current = second;
   const solids = WINDOW_COLORS.map((c) => ({ ...c, deep: isDeep(c.value) }));
   const nameOf = (hex: string) => solids.find((c) => c.value === hex)?.name ?? hex;
   const ownBase = !!base && !solids.some((c) => c.value === base);
@@ -350,7 +353,11 @@ function BackgroundSettings({ settings, look }: { settings: Settings; look: (p: 
               <Switch
                 on={grad}
                 label="Gradient"
-                onChange={(v) => base && look({ windowColor: v ? `${base}>${hueShift(base, 40)}` : base })}
+                onChange={(v) => {
+                  const back = lastSecond.current;
+                  const again = back && back !== base && isDeep(back) === isDeep(base) ? back : hueShift(base, 40);
+                  if (base) look({ windowColor: v ? `${base}>${again}` : base });
+                }}
               />
               Gradient
             </label>
