@@ -21,6 +21,7 @@ import {
   MailCheck,
 } from "lucide-react";
 import type { MailFolder, ThreadSummary } from "../api";
+import { api } from "../api";
 import { useStore } from "../store";
 import { motionEase, motionMs, reduceMotion, scrollBehavior } from "../motionTokens";
 import { claimHighlight } from "../motion";
@@ -69,6 +70,12 @@ function ThreadMenu({ t, point, onClose }: { t: ThreadSummary; point: { x: numbe
   const [snooze, setSnooze] = useState<HTMLElement | null>(null);
   const checked = useStore((s) => s.checked);
   const multi = checked.length > 1 && checked.includes(t.threadId);
+  // Whether it's pinned, so the menu can say Pin or Unpin.
+  const [pinned, setPinned] = useState(false);
+  useEffect(() => {
+    if (!multi) api.isPinned(t.threadId).then(setPinned).catch(() => {});
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [t.threadId]);
   const ids = multi ? checked : [t.threadId];
   const folder = t.folder || useStore.getState().folder;
   // In an AI category, you can tell Claude a conversation doesn't belong.
@@ -102,15 +109,20 @@ function ThreadMenu({ t, point, onClose }: { t: ThreadSummary; point: { x: numbe
       )}
       {!multi && (
         <button className="menu-item" onClick={run(() => void togglePin(t.threadId))}>
-          <Pin size={15} /> Pin / unpin
+          <Pin size={15} /> {pinned ? "Unpin from Home" : "Pin to Home"}
         </button>
       )}
-      <button className="menu-item" onClick={run(() => void A.markRead(true, ids))}>
-        <MailOpen size={15} /> Mark as read
-      </button>
-      <button className="menu-item" onClick={run(() => void A.markRead(false, ids))}>
-        <Mail size={15} /> Mark as unread
-      </button>
+      {/* One conversation: just the one that applies. Several: both. */}
+      {(multi || t.unread) && (
+        <button className="menu-item" onClick={run(() => void A.markRead(true, ids))}>
+          <MailOpen size={15} /> Mark as read
+        </button>
+      )}
+      {(multi || !t.unread) && (
+        <button className="menu-item" onClick={run(() => void A.markRead(false, ids))}>
+          <Mail size={15} /> Mark as unread
+        </button>
+      )}
       {(folder === "INBOX" || folder === "SNOOZED") && (
         <button className="menu-item" onMouseDown={(e) => e.preventDefault()} onClick={(e) => setSnooze(e.currentTarget)}>
           <AlarmClock size={15} /> Snooze…
