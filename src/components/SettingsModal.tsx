@@ -276,6 +276,35 @@ function BackgroundSettings({ settings, look }: { settings: Settings; look: (p: 
                 onChange={(e) => look({ windowColor: e.target.value })}
               />
             </div>
+            {/* A gradient of your own: pick where it starts and where it ends. */}
+            {(() => {
+              const presetGrad = WINDOW_GRADIENTS.some((g) => g.value === value);
+              const mine = value.includes(">") && !presetGrad;
+              const [from, to] = mine ? value.split(">") : [value.split(">")[0] || "#d6e1ec", value.split(">")[1] || "#e2dcee"];
+              return (
+                <div className="bg-own">
+                  <span className="bg-sub">Your gradient</span>
+                  <div className="bg-own-row">
+                    <button
+                      className={cx("swatch bg-own-tile", mine && "on")}
+                      style={{ background: `linear-gradient(150deg, ${from}, ${to})`, "--sw": to } as React.CSSProperties}
+                      title="Use your gradient"
+                      aria-label="Use your gradient"
+                      aria-pressed={mine}
+                      onClick={() => look({ windowColor: `${from}>${to}` })}
+                    />
+                    <label className="bg-stop">
+                      From
+                      <input type="color" value={from} aria-label="Gradient start" onChange={(e) => look({ windowColor: `${e.target.value}>${to}` })} />
+                    </label>
+                    <label className="bg-stop">
+                      To
+                      <input type="color" value={to} aria-label="Gradient end" onChange={(e) => look({ windowColor: `${from}>${e.target.value}` })} />
+                    </label>
+                  </div>
+                </div>
+              );
+            })()}
           </div>
           {/* A little window showing the result: the background, the sidebar and the inbox card. */}
           <div
