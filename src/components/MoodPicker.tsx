@@ -1,6 +1,6 @@
 import type React from "react";
 import { useState } from "react";
-import { Check, X } from "lucide-react";
+import { Check, Moon, SunMoon, X } from "lucide-react";
 import type { SavedLook, Settings } from "../api";
 import { autoMoodId, lookFor, looksOf, moodById, MOODS, type CardStyle, type MoodLook, type MoodPalette } from "../moods";
 import { cardOf, cardPatch, luminance, mixHex, resolvedTheme, windowStops } from "../theme";
@@ -316,9 +316,13 @@ export function MoodPicker({ settings, onApply }: { settings: Settings; onApply:
             </div>
           )}
           <div role="radiogroup" aria-label="Mood" className="mood-groups">
-            <div className="mood-group-label">Light and dark</div>
+            <div className="mood-group-label">
+              <SunMoon size={13} /> Light and dark
+            </div>
             <div className="moods">{MOODS.filter((m) => m.scheme !== "dark").map(card)}</div>
-            <div className="mood-group-label">Always dark</div>
+            <div className="mood-group-label">
+              <Moon size={13} /> Always dark
+            </div>
             <div className="moods">{MOODS.filter((m) => m.scheme === "dark").map(card)}</div>
           </div>
         </>
