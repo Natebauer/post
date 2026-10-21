@@ -365,11 +365,15 @@ export const ACCENTS: { name: string; value: string }[] = [
 export const WINDOW_COLORS: { name: string; value: string }[] = [
   { name: "Linen", value: "#ece4d6" },
   { name: "Sage", value: "#d9e2d6" },
+  { name: "Mint", value: "#d3e8df" },
   { name: "Sky", value: "#d6e1ec" },
   { name: "Lilac", value: "#e2dcee" },
   { name: "Blush", value: "#eedcdf" },
+  { name: "Peach", value: "#f2dccb" },
   { name: "Slate", value: "#46525e" },
   { name: "Pine", value: "#27372f" },
+  { name: "Ocean", value: "#1b3640" },
+  { name: "Plum", value: "#3a2b3f" },
   { name: "Charcoal", value: "#232427" },
   { name: "Midnight", value: "#18203a" },
 ];
