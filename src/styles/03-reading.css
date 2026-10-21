@@ -167,6 +167,10 @@
   font-variant-numeric: tabular-nums;
   flex: 0 1 auto;
   min-width: 0;
+}
+/* A folded message's date is short, so it keeps all of it; the snippet gives way instead. */
+.msg.collapsed .msg-date {
+  flex: none;
   overflow: hidden;
   text-overflow: ellipsis;
 }
