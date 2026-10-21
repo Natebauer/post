@@ -19,6 +19,7 @@ export function SearchBox({ extra, onDone }: { extra?: React.ReactNode; onDone?:
   const [people, setPeople] = useState<Contact[]>([]);
   const [active, setActive] = useState(-1);
   const input = useRef<HTMLInputElement>(null);
+  const mirror = useRef<HTMLSpanElement>(null);
   const remoteTimer = useRef<number>();
   const localTimer = useRef<number>();
 
@@ -93,8 +94,25 @@ export function SearchBox({ extra, onDone }: { extra?: React.ReactNode; onDone?:
     <div className="search-wrap">
       <label className="search">
         <Search size={15} />
+        {/* The typed words over the field, so filter words (from:, has:…) can show in the accent. */}
+        <span className="search-field">
+        <span className="search-mirror" ref={mirror} aria-hidden>
+          <span>
+          {q.split(/(\s+)/).map((w, i) =>
+            /^-?(from|to|cc|subject|has|is|in|label|before|after|older_than|newer_than):/i.test(w) ? (
+              <mark key={i} className="search-tok">
+                {w}
+              </mark>
+            ) : (
+              w
+            ),
+          )}
+          </span>
+        </span>
         <input
           ref={input}
+          onScroll={(e) => mirror.current && (mirror.current.scrollLeft = e.currentTarget.scrollLeft)}
+          onSelect={(e) => mirror.current && (mirror.current.scrollLeft = e.currentTarget.scrollLeft)}
           value={q}
           placeholder="Search mail"
           spellCheck={false}
@@ -127,6 +145,7 @@ export function SearchBox({ extra, onDone }: { extra?: React.ReactNode; onDone?:
             }
           }}
         />
+        </span>
         {extra}
         {q ? (
           <button

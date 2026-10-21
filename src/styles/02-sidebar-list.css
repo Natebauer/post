@@ -141,6 +141,36 @@
   background: var(--surface-2);
   border-color: transparent;
 }
+/* Filter words in the accent: the field's own text is see-through, over a copy that colors them. */
+.search-field {
+  position: relative;
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  align-items: center;
+}
+.search-field input {
+  width: 100%;
+  color: transparent;
+  caret-color: var(--text);
+}
+.search-mirror {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  overflow: hidden;
+  white-space: pre;
+  pointer-events: none;
+  font-size: var(--fs-2);
+  color: var(--text);
+}
+/* (Stronger than the dark theme's search-match highlight on mark.) */
+:root .search-mirror .search-tok {
+  background: none;
+  box-shadow: none;
+  color: var(--accent-text);
+}
 .list-head .search:focus-within {
   background: var(--surface);
   border-color: var(--border-strong);
