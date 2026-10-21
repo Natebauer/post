@@ -102,6 +102,15 @@
   gap: var(--s-2);
   border-bottom: 1px solid var(--border);
 }
+/* Its buttons rest faded until you point at the inbox card. */
+.list-head > .icon-btn {
+  opacity: 0.45;
+  transition: opacity var(--fast) var(--ease), background var(--fast) var(--ease), color var(--fast) var(--ease);
+}
+.list-pane:hover .list-head > .icon-btn,
+.list-head > .icon-btn:focus-visible {
+  opacity: 1;
+}
 /* Searching: the field fills the header, growing out from the search button on the right. */
 .list-head.searching {
   gap: 8px;
