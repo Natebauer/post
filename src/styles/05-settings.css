@@ -233,6 +233,14 @@
   border: 1px solid var(--border-strong);
   border-radius: 6px;
 }
+/* Typing a background's color code. */
+.bg-hex {
+  width: 84px;
+  height: 28px;
+  padding: 0 8px;
+  font-family: var(--font-mono, ui-monospace, monospace);
+  font-size: var(--fs-1);
+}
 .bg-sub {
   margin-bottom: -4px;
   font-size: 10.5px;

@@ -267,6 +267,22 @@ function BackgroundSettings({ settings, look }: { settings: Settings; look: (p: 
             <span className="bg-sub">Deep</span>
             <div className="swatches">
               {all.filter((c) => c.deep).map(swatch)}
+              {/* An exact color by its code, for a background of your own. */}
+              <input
+                key={value}
+                className="input bg-hex"
+                aria-label="Background color code"
+                placeholder="#rrggbb"
+                spellCheck={false}
+                maxLength={7}
+                defaultValue={ownColor ? value : ""}
+                onKeyDown={(e) => e.key === "Enter" && e.currentTarget.blur()}
+                onBlur={(e) => {
+                  const v = e.currentTarget.value.trim().toLowerCase();
+                  const hex = v.startsWith("#") ? v : `#${v}`;
+                  if (/^#[0-9a-f]{6}$/.test(hex) && hex !== value) look({ windowColor: hex });
+                }}
+              />
               <input
                 type="color"
                 className={cx("swatch-custom", ownColor && "on")}
