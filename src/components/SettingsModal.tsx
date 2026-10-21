@@ -4,7 +4,7 @@ import type React from "react";
 import { Bell, BookOpen, Moon, Sun, Keyboard, Monitor, Palette, PenLine, Plus, Sparkles, Trash2, UserRound, X } from "lucide-react";
 import { api, errText, type AiStatus, type ComposeMode, type Settings, type Template } from "../api";
 import { useStore } from "../store";
-import { ACCENTS, DEFAULT_ACCENT, resolvedTheme, WINDOW_COLORS, WINDOW_GRADIENTS, blendWindow, windowStops } from "../theme";
+import { ACCENTS, DEFAULT_ACCENT, resolvedTheme, WINDOW_COLORS, WINDOW_GRADIENTS, luminance } from "../theme";
 import { MoodPicker } from "./MoodPicker";
 import { moodById } from "../moods";
 import { ShortcutList } from "./Shortcuts";
@@ -196,91 +196,56 @@ function Seg<T extends string>({ value, options, onChange, label }: { value: T; 
     whether a seasonal pattern sits on top. */
 function BackgroundSettings({ settings, look }: { settings: Settings; look: (p: Partial<Settings>) => void }) {
   const value = settings.windowColor?.toLowerCase() ?? "";
-  const stops = windowStops(value);
-  const preset = WINDOW_GRADIENTS.some((g) => g.value === value);
-  const kind: "mood" | "color" | "gradient" = !stops.length ? "mood" : preset ? "gradient" : "color";
-  const blended = kind === "color" && stops.length > 1;
-  // Switching kinds comes back to what you last had of that kind.
-  const last = useRef({ color: kind === "color" ? value : WINDOW_COLORS[0].value, gradient: preset ? value : WINDOW_GRADIENTS[0].value });
-  useEffect(() => {
-    if (kind === "color") last.current.color = value;
-    if (kind === "gradient") last.current.gradient = value;
-  }, [kind, value]);
-  const pickColor = (hex: string) => look({ windowColor: blended ? blendWindow(hex) : hex });
-  const grads = (deep: boolean) => (
-    <div className="swatches">
-      {WINDOW_GRADIENTS.filter((g) => !!g.deep === deep).map((g) => (
-        <button
-          key={g.value}
-          className={cx("swatch swatch-grad", value === g.value && "on")}
-          style={{ background: `linear-gradient(150deg, ${g.value.split(">").join(", ")})`, "--sw": g.value.split(">")[1] } as React.CSSProperties}
-          title={g.name}
-          aria-label={`${g.name} gradient`}
-          aria-pressed={value === g.value}
-          onClick={() => look({ windowColor: g.value })}
-        />
-      ))}
-    </div>
-  );
+  // Flat colors and gradients together, sorted by how light they are (which decides whether the
+  // text on them is dark or light), not by kind.
+  const all = [
+    ...WINDOW_COLORS.map((c) => ({ ...c, deep: luminance(c.value) < 0.179 })),
+    ...WINDOW_GRADIENTS.map((g) => ({ ...g, deep: !!g.deep })),
+  ];
+  const ownColor = /^#[0-9a-f]{6}$/.test(value) && !all.some((c) => c.value === value);
+  const swatch = (c: (typeof all)[number]) => {
+    const stops = c.value.split(">");
+    return (
+      <button
+        key={c.value}
+        className={cx("swatch", stops.length > 1 && "swatch-grad", value === c.value && "on")}
+        style={{ background: stops.length > 1 ? `linear-gradient(150deg, ${stops.join(", ")})` : c.value, "--sw": stops[stops.length - 1] } as React.CSSProperties}
+        title={stops.length > 1 ? `${c.name} gradient` : c.name}
+        aria-label={stops.length > 1 ? `${c.name} gradient` : c.name}
+        aria-pressed={value === c.value}
+        onClick={() => look({ windowColor: c.value })}
+      />
+    );
+  };
   return (
     <>
       <Row title="Background" sub="What sits behind the panes. Text on it turns light or dark to match" col look>
         <div className="bg-pick">
           <div className="bg-controls">
-            <Seg
-              label="Background"
-              value={kind}
-              options={[
-                ["mood", "Mood's own"],
-                ["color", "Color"],
-                ["gradient", "Gradient"],
-              ]}
-              onChange={(k) => look({ windowColor: k === "mood" ? "" : last.current[k] })}
-            />
-            {kind === "mood" && <p className="bg-note">The current mood's own backdrop, which changes with it.</p>}
-            {kind === "color" && (
-              <>
-                <div className="swatches">
-                  {WINDOW_COLORS.map((c) => (
-                    <button
-                      key={c.value}
-                      className={cx("swatch", stops[0] === c.value && "on")}
-                      style={{ background: c.value, "--sw": c.value } as React.CSSProperties}
-                      title={c.name}
-                      aria-label={c.name}
-                      aria-pressed={stops[0] === c.value}
-                      onClick={() => pickColor(c.value)}
-                    />
-                  ))}
-                  <input
-                    type="color"
-                    className="swatch-custom"
-                    title="Custom background"
-                    aria-label="Custom background color"
-                    value={stops[0] || "#e4e4e1"}
-                    onChange={(e) => pickColor(e.target.value)}
-                  />
-                </div>
-                <button
-                  type="button"
-                  className={cx("bg-chip", blended && "on")}
-                  aria-pressed={blended}
-                  title="Let the color drift softly into a neighboring shade across the window"
-                  onClick={() => look({ windowColor: blended ? stops[0] : blendWindow(stops[0]) })}
-                >
-                  <span className="bg-chip-dot" aria-hidden />
-                  Soft gradient
-                </button>
-              </>
-            )}
-            {kind === "gradient" && (
-              <>
-                <span className="bg-sub">Pale</span>
-                {grads(false)}
-                <span className="bg-sub">Deep</span>
-                {grads(true)}
-              </>
-            )}
+            <span className="bg-sub">Pale</span>
+            <div className="swatches">
+              {/* The mood's own backdrop, crossed through: no background of your own. */}
+              <button
+                className={cx("swatch swatch-mood", !value && "on")}
+                title="The mood's own"
+                aria-label="The mood's own background"
+                aria-pressed={!value}
+                onClick={() => look({ windowColor: "" })}
+              />
+              {all.filter((c) => !c.deep).map(swatch)}
+            </div>
+            <span className="bg-sub">Deep</span>
+            <div className="swatches">
+              {all.filter((c) => c.deep).map(swatch)}
+              <input
+                type="color"
+                className={cx("swatch-custom", ownColor && "on")}
+                title={ownColor ? `Custom background ${value}` : "Custom background"}
+                aria-label="Custom background color"
+                value={ownColor ? value : "#e4e4e1"}
+                onChange={(e) => look({ windowColor: e.target.value })}
+              />
+            </div>
           </div>
           {/* A little window showing the result: the background, the sidebar and the inbox card. */}
           <div className="bg-preview" aria-hidden>

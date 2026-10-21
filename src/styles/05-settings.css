@@ -174,11 +174,6 @@
   align-items: flex-start;
   gap: var(--s-3);
 }
-.bg-note {
-  margin: 0;
-  font-size: var(--fs-1);
-  color: var(--text-3);
-}
 .bg-sub {
   margin-bottom: -4px;
   font-size: 10.5px;
@@ -187,36 +182,11 @@
   text-transform: uppercase;
   color: var(--text-3);
 }
-/* "Soft gradient": a chip that blends the chosen color into a neighboring shade. */
-.bg-chip {
-  display: inline-flex;
-  align-items: center;
-  gap: 7px;
-  height: 26px;
-  padding: 0 11px 0 8px;
-  border-radius: 999px;
-  font: inherit;
-  font-size: var(--fs-1);
-  color: var(--text-2);
-  background: var(--surface-2);
-  box-shadow: inset 0 0 0 1px var(--border);
-  cursor: pointer;
-  transition: background var(--fast) var(--ease), color var(--fast) var(--ease), box-shadow var(--fast) var(--ease);
-}
-.bg-chip:hover {
-  background: var(--hover);
-}
-.bg-chip-dot {
-  width: 12px;
-  height: 12px;
-  border-radius: 50%;
-  background: var(--window-bg, var(--window-base));
-  box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.12);
-}
-.bg-chip.on {
-  color: var(--accent-text);
-  background: var(--accent-soft);
-  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--accent) 35%, transparent);
+/* "The mood's own": a plain swatch crossed through. */
+.swatch-mood {
+  background:
+    linear-gradient(135deg, transparent 45%, var(--text-3) 45% 55%, transparent 55%),
+    var(--surface-3);
 }
 .bg-preview {
   flex: none;
