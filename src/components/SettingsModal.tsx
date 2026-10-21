@@ -4,7 +4,7 @@ import type React from "react";
 import { Bell, BookOpen, Moon, Sun, Keyboard, Monitor, Palette, PenLine, Plus, Sparkles, Trash2, UserRound, X } from "lucide-react";
 import { api, errText, type AiStatus, type ComposeMode, type Settings, type Template } from "../api";
 import { useStore } from "../store";
-import { ACCENTS, DEFAULT_ACCENT, resolvedTheme, WINDOW_COLORS, WINDOW_GRADIENTS, luminance } from "../theme";
+import { accentFor, ACCENTS, AUTO_ACCENT, DEFAULT_ACCENT, resolvedTheme, WINDOW_COLORS, WINDOW_GRADIENTS, luminance } from "../theme";
 import { MoodPicker } from "./MoodPicker";
 import { moodById } from "../moods";
 import { ShortcutList } from "./Shortcuts";
@@ -570,8 +570,10 @@ export function SettingsModal() {
                       // The chosen one by name, ahead of what it's for.
                       <>
                         <b className="sub-name">
-                          {ACCENTS.find((a) => a.value === (settings.accent || moodById(settings.mood).accent).toLowerCase())?.name ??
-                            (settings.accent ? "Custom" : "The mood's own")}
+                          {(() => {
+                            const a = accentFor(settings);
+                            return a.auto ? `Auto · ${a.name}` : (ACCENTS.find((x) => x.value === a.value.toLowerCase())?.name ?? "Custom");
+                          })()}
                         </b>
                         {" · used for unread markers, selection and buttons"}
                       </>
@@ -580,6 +582,20 @@ export function SettingsModal() {
                     look
                   >
                     <div className="swatches">
+                      {/* Auto: the accent follows the background (theme.ts, accentFor). */}
+                      <button
+                        className={cx("swatch swatch-auto", accentFor(settings).auto && "on")}
+                        style={
+                          {
+                            background: accentFor({ ...settings, accent: AUTO_ACCENT }).value,
+                            "--sw": accentFor({ ...settings, accent: AUTO_ACCENT }).value,
+                          } as React.CSSProperties
+                        }
+                        title="Auto: follows the background"
+                        aria-label="Auto accent, following the background"
+                        aria-pressed={accentFor(settings).auto}
+                        onClick={() => look({ accent: AUTO_ACCENT })}
+                      />
                       {ACCENTS.map((a) => (
                         <button
                           key={a.value}
@@ -594,10 +610,10 @@ export function SettingsModal() {
                       <input
                         type="color"
                         // A color of your own is the chosen one too: it wears the ring, and says its value.
-                        className={cx("swatch-custom", !!settings.accent && !ACCENTS.some((a) => a.value === settings.accent.toLowerCase()) && "on")}
-                        title={settings.accent && !ACCENTS.some((a) => a.value === settings.accent.toLowerCase()) ? `Custom color ${settings.accent}` : "Custom color"}
+                        className={cx("swatch-custom", !accentFor(settings).auto && !ACCENTS.some((a) => a.value === settings.accent.toLowerCase()) && "on")}
+                        title={!accentFor(settings).auto && !ACCENTS.some((a) => a.value === settings.accent.toLowerCase()) ? `Custom color ${settings.accent}` : "Custom color"}
                         aria-label="Custom accent color"
-                        value={settings.accent || moodById(settings.mood).accent || "#2a737b"}
+                        value={accentFor(settings).value}
                         onChange={(e) => look({ accent: e.target.value })}
                       />
                     </div>
@@ -646,7 +662,7 @@ export function SettingsModal() {
                   const off = [
                     settings.theme !== "system" && "theme",
                     settings.mood !== "classic" && "mood",
-                    !!settings.accent && settings.accent.toLowerCase() !== DEFAULT_ACCENT && "accent",
+                    !accentFor(settings).auto && settings.accent.toLowerCase() !== DEFAULT_ACCENT && "accent",
                     !!settings.windowColor && "background",
                     (settings.cardTint || settings.cardFrost || settings.cardClear) && "inbox card",
                     settings.seasonal && "pattern",
@@ -668,7 +684,7 @@ export function SettingsModal() {
                     look({
                       theme: "system",
                       mood: "classic",
-                      accent: DEFAULT_ACCENT,
+                      accent: AUTO_ACCENT,
                       windowColor: "",
                       cardTint: false,
                       cardClear: false,

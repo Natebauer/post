@@ -1,6 +1,6 @@
 import { getCurrentWindow } from "@tauri-apps/api/window";
 import type { Settings } from "./api";
-import { applyMood, KEYS, moodById, nextAutoChange, paletteFor, setAutoSchedule, type CardStyle } from "./moods";
+import { applyMood, KEYS, looksOf, moodById, nextAutoChange, paletteFor, setAutoSchedule, type CardStyle } from "./moods";
 import { reduceMotion } from "./motionTokens";
 
 /** Post's teal, the app icon's color. */
@@ -66,7 +66,7 @@ function paint(s: Settings | null, t: "light" | "dark") {
   // The season's pattern behind the panes, when turned on.
   if (s?.seasonal) root.dataset.season = season();
   else delete root.dataset.season;
-  const accent = s?.accent || moodById(s?.mood).accent || DEFAULT_ACCENT;
+  const accent = accentFor(s).value;
   // Auto changes mood through the day: re-apply when it next turns over.
   window.clearTimeout(autoTimer);
   if (s?.mood === "auto")
@@ -210,6 +210,77 @@ function moodBackdrop(s: Settings | null, t: "light" | "dark"): string {
   if (!m) return "#" + base.map((v) => v.toString(16).padStart(2, "0")).join("");
   const a = m[4] === undefined ? 1 : Number(m[4]);
   return "#" + base.map((v, i) => Math.round(Number(m[i + 1]) * a + v * (1 - a)).toString(16).padStart(2, "0")).join("");
+}
+
+/** The accent setting that follows the background ("Auto"). */
+export const AUTO_ACCENT = "auto";
+
+/** The accent each ready-made background brings when the accent is Auto. */
+const BG_ACCENTS: Record<string, { name: string; value: string }> = {
+  "#ece4d6": { name: "Ink blue", value: "#33598a" },
+  "#d9e2d6": { name: "Fern", value: "#2f7a55" },
+  "#d6e1ec": { name: "Harbor blue", value: "#3b6a96" },
+  "#e2dcee": { name: "Violet", value: "#6e57c0" },
+  "#eedcdf": { name: "Raspberry", value: "#b8476f" },
+  "#46525e": { name: "Ice blue", value: "#8fb6d8" },
+  "#27372f": { name: "Mint", value: "#5cc49a" },
+  "#232427": { name: "Teal", value: "#3fb6ad" },
+  "#18203a": { name: "Periwinkle", value: "#7f97f0" },
+  "#f2dfd3>#e2daf0": { name: "Plum", value: "#8a5aa8" },
+  "#d2e4ee>#d6ede0": { name: "Lagoon teal", value: "#1f7f86" },
+  "#e5e9d0>#d3e5dc": { name: "Moss", value: "#4c7d3a" },
+  "#e4daf1>#f0dbe3": { name: "Orchid", value: "#9a4fa8" },
+  "#f3e4c8>#f0d6d9": { name: "Apricot", value: "#c0663f" },
+  "#373350>#56394b": { name: "Lavender", value: "#a993f0" },
+  "#1c3a3a>#1f2a4a": { name: "Aurora violet", value: "#9b8cff" },
+  "#2e2127>#47291f": { name: "Amber", value: "#e0a04a" },
+  "#13233a>#1c3b42": { name: "Sea glass", value: "#4fc3b5" },
+};
+
+/** An accent drawn from a background of your own: its hue, rich enough to stand out, dark on a
+    pale background and light on a deep one (Post teal for a gray). */
+function derivedAccent(bg: string): string {
+  const mid = mixHex(windowStops(bg));
+  const n = parseInt(mid.slice(1), 16);
+  const [r, g, b] = [(n >> 16) & 255, (n >> 8) & 255, n & 255].map((x) => x / 255);
+  const max = Math.max(r, g, b);
+  const min = Math.min(r, g, b);
+  const l = (max + min) / 2;
+  const d = max - min;
+  const sat = d ? d / (1 - Math.abs(2 * l - 1)) : 0;
+  const pale = luminance(mid) >= 0.179;
+  if (sat < 0.1) return pale ? DEFAULT_ACCENT : "#3fb6ad";
+  let h = 0;
+  if (d) h = max === r ? ((g - b) / d) % 6 : max === g ? (b - r) / d + 2 : (r - g) / d + 4;
+  const hue = (h * 60 + 360) % 360;
+  const s2 = pale ? Math.min(0.62, Math.max(sat, 0.45)) : Math.min(0.7, Math.max(sat, 0.5));
+  const l2 = pale ? 0.36 : 0.68;
+  const c = (1 - Math.abs(2 * l2 - 1)) * s2;
+  const x = c * (1 - Math.abs(((hue / 60) % 2) - 1));
+  const m = l2 - c / 2;
+  const [r2, g2, b2] =
+    hue < 60 ? [c, x, 0] : hue < 120 ? [x, c, 0] : hue < 180 ? [0, c, x] : hue < 240 ? [0, x, c] : hue < 300 ? [x, 0, c] : [c, 0, x];
+  return "#" + [r2, g2, b2].map((v) => Math.round((v + m) * 255).toString(16).padStart(2, "0")).join("");
+}
+
+/**
+ * The accent in use, and its name when Post picked it. A chosen accent is used as it is. Auto
+ * follows the background: a ready-made one brings its own accent, one of your own lends its hue,
+ * and a mood's own backdrop (or its own suggested background) keeps the mood's accent.
+ */
+export function accentFor(
+  s: Pick<Settings, "accent" | "mood" | "windowColor"> | null,
+): { value: string; auto: boolean; name: string | null } {
+  const a = s?.accent ?? "";
+  if (a && a !== AUTO_ACCENT) return { value: a, auto: false, name: null };
+  const mood = moodById(s?.mood);
+  const bg = (s?.windowColor ?? "").toLowerCase();
+  if (!windowStops(bg).length || looksOf(s?.mood).some((l) => l.bg.toLowerCase() === bg)) {
+    const value = mood.accent || DEFAULT_ACCENT;
+    return { value, auto: true, name: ACCENTS.find((x) => x.value === value.toLowerCase())?.name ?? `${mood.name}'s own` };
+  }
+  const preset = BG_ACCENTS[bg];
+  return preset ? { value: preset.value, auto: true, name: preset.name } : { value: derivedAccent(bg), auto: true, name: "from your color" };
 }
 
 /** The inbox card style a Settings holds (its three switches, as one choice). */

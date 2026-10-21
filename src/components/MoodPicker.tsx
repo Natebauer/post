@@ -3,7 +3,7 @@ import { useState } from "react";
 import { Check, Moon, SunMoon, X } from "lucide-react";
 import type { SavedLook, Settings } from "../api";
 import { autoMoodId, lookFor, looksOf, moodById, MOODS, type CardStyle, type MoodLook, type MoodPalette } from "../moods";
-import { cardOf, cardPatch, luminance, mixHex, resolvedTheme, windowStops } from "../theme";
+import { accentFor, AUTO_ACCENT, cardOf, cardPatch, luminance, mixHex, resolvedTheme, windowStops } from "../theme";
 import { cx } from "../util";
 
 /** Classic's own colors (from styles/01-base.css), so its preview matches the other moods'. */
@@ -70,6 +70,10 @@ interface Choice {
   seasonal?: boolean;
 }
 
+/** A mood's own accent: Auto (or none set), or the very accent it brings. */
+const ownAccent = (accent: string | undefined, moodAccent: string) =>
+  !accent || accent === AUTO_ACCENT || accent.toLowerCase() === (moodAccent || "").toLowerCase();
+
 const sameLook = (a: MoodLook, b: MoodLook) => a.bg.toLowerCase() === b.bg.toLowerCase() && a.card === b.card;
 
 /**
@@ -99,7 +103,7 @@ export function MoodPicker({
   // Opens on the tab the current look comes from: Custom for a saved look or one you've changed.
   const [tab, setTab] = useState<"moods" | "custom">(() => {
     const m = moodById(current);
-    const own = (settings.accent || "").toLowerCase() === (m.accent || "").toLowerCase() && looksOf(current).some((l) => sameLook(l, now));
+    const own = ownAccent(settings.accent, m.accent) && looksOf(current).some((l) => sameLook(l, now));
     return savedOn >= 0 || !own ? "custom" : "moods";
   });
 
@@ -179,8 +183,8 @@ export function MoodPicker({
     const on = savedOn < 0 && current === m.id;
     const look = lookFor(m.id, theme);
     // Changed since it was picked: a different accent, background or card than any it suggests.
-    const changed = on && ((settings.accent || "").toLowerCase() !== (m.accent || "").toLowerCase() || !looksOf(m.id).some((l) => sameLook(l, now)));
-    const accent = on ? settings.accent || r.accent : r.accent;
+    const changed = on && (!ownAccent(settings.accent, m.accent) || !looksOf(m.id).some((l) => sameLook(l, now)));
+    const accent = on ? accentFor(settings).value : r.accent;
     return (
       <button
         key={m.id}
@@ -188,7 +192,7 @@ export function MoodPicker({
         aria-checked={on}
         className={cx("mood", on && "on")}
         style={{ "--ma": accent } as React.CSSProperties}
-        onClick={() => apply({ mood: m.id, accent: m.accent, look })}
+        onClick={() => apply({ mood: m.id, accent: AUTO_ACCENT, look })}
         title={m.blurb}
       >
         {preview(m.id, r.accent, on ? now : look)}
@@ -206,7 +210,7 @@ export function MoodPicker({
   const savedCard = (l: SavedLook, i: number) => {
     const on = i === savedOn;
     const look = { bg: l.windowColor, card: l.card };
-    const accent = l.accent || moodById(l.mood).accent || "#2a737b";
+    const accent = accentFor({ mood: l.mood, accent: l.accent, windowColor: l.windowColor }).value;
     return (
       <button
         key={`${l.name}-${i}`}
@@ -249,7 +253,7 @@ export function MoodPicker({
   const base = moodById(current);
   const customized =
     savedOn < 0 &&
-    ((settings.accent || "").toLowerCase() !== (base.accent || "").toLowerCase() || !looksOf(current).some((l) => sameLook(l, now)));
+    (!ownAccent(settings.accent, base.accent) || !looksOf(current).some((l) => sameLook(l, now)));
   const saveLook = () => {
     const name = (naming ?? "").trim() || "My mood";
     const entry: SavedLook = {
@@ -316,7 +320,7 @@ export function MoodPicker({
               <span className="spacer" />
               {naming === null ? (
                 <>
-                  <button type="button" className="btn ghost" onClick={() => apply({ mood: current, accent: base.accent, look: lookFor(current, theme) })}>
+                  <button type="button" className="btn ghost" onClick={() => apply({ mood: current, accent: AUTO_ACCENT, look: lookFor(current, theme) })}>
                     Back to {base.name}'s look
                   </button>
                   <button type="button" className="btn outline" onClick={() => setNaming("")}>
