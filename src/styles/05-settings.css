@@ -181,6 +181,18 @@
   height: 26px;
   border-radius: 7px;
 }
+/* Each background's Auto accent, a small dot in its corner. */
+.bg-controls .swatch.has-dot::before {
+  content: "";
+  position: absolute;
+  right: 4px;
+  bottom: 4px;
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--dot);
+  box-shadow: 0 0 0 1.5px rgba(255, 255, 255, 0.75);
+}
 .bg-controls .swatch-custom::-webkit-color-swatch {
   border-radius: 4px;
 }

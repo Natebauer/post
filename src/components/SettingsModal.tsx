@@ -211,8 +211,15 @@ function BackgroundSettings({ settings, look }: { settings: Settings; look: (p: 
     return (
       <button
         key={c.value}
-        className={cx("swatch", stops.length > 1 && "swatch-grad", value === c.value && "on")}
-        style={{ background: stops.length > 1 ? `linear-gradient(150deg, ${stops.join(", ")})` : c.value, "--sw": stops[stops.length - 1] } as React.CSSProperties}
+        className={cx("swatch has-dot", stops.length > 1 && "swatch-grad", value === c.value && "on")}
+        style={
+          {
+            background: stops.length > 1 ? `linear-gradient(150deg, ${stops.join(", ")})` : c.value,
+            "--sw": stops[stops.length - 1],
+            // The accent Auto would bring with it, as a small dot in the corner.
+            "--dot": accentFor({ mood: settings.mood, accent: AUTO_ACCENT, windowColor: c.value }).value,
+          } as React.CSSProperties
+        }
         title={stops.length > 1 ? `${c.name} gradient` : c.name}
         aria-label={stops.length > 1 ? `${c.name} gradient` : c.name}
         aria-pressed={value === c.value}
