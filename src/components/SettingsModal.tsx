@@ -668,7 +668,25 @@ export function SettingsModal() {
                   onChange={(v) => void setZoom(Number(v))}
                 />
               </Row>
-              <Row title="Default look" sub="Back to Windows' theme, the Classic mood, Post teal, the mood's own background and the default text size">
+              <Row
+                title="Default look"
+                sub={(() => {
+                  // What a reset would change, by name, or that there's nothing to.
+                  const off = [
+                    settings.theme !== "system" && "theme",
+                    settings.mood !== "classic" && "mood",
+                    !!settings.accent && settings.accent.toLowerCase() !== DEFAULT_ACCENT && "accent",
+                    !!settings.windowColor && "background",
+                    (settings.cardTint || settings.cardFrost || settings.cardClear) && "inbox card",
+                    settings.seasonal && "pattern",
+                    (settings.zoom ?? 1) !== 1 && "text size",
+                  ].filter(Boolean) as string[];
+                  if (!off.length) return "You're on Post's defaults";
+                  const list = off.length > 1 ? `${off.slice(0, -1).join(", ")} and ${off[off.length - 1]}` : off[0];
+                  const cap = list[0].toUpperCase() + list.slice(1);
+                  return `${cap} ${off.length > 1 ? "differ" : "differs"} from Post's defaults, and would go back`;
+                })()}
+              >
                 <button
                   className="btn outline"
                   onClick={() => {
