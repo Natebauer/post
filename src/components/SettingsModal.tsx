@@ -203,6 +203,9 @@ function BackgroundSettings({ settings, look }: { settings: Settings; look: (p: 
     ...WINDOW_GRADIENTS.map((g) => ({ ...g, deep: !!g.deep })),
   ];
   const ownColor = /^#[0-9a-f]{6}$/.test(value) && !all.some((c) => c.value === value);
+  // Pointing at a tile tries it in the little window beside, before you pick it.
+  const [peek, setPeek] = useState<string | null>(null);
+  const css = (v: string) => (v.includes(">") ? `linear-gradient(150deg, ${v.split(">").join(", ")})` : v);
   const swatch = (c: (typeof all)[number]) => {
     const stops = c.value.split(">");
     return (
@@ -214,6 +217,8 @@ function BackgroundSettings({ settings, look }: { settings: Settings; look: (p: 
         aria-label={stops.length > 1 ? `${c.name} gradient` : c.name}
         aria-pressed={value === c.value}
         onClick={() => look({ windowColor: c.value })}
+        onMouseEnter={() => setPeek(c.value)}
+        onMouseLeave={() => setPeek(null)}
       />
     );
   };
@@ -266,7 +271,11 @@ function BackgroundSettings({ settings, look }: { settings: Settings; look: (p: 
             </div>
           </div>
           {/* A little window showing the result: the background, the sidebar and the inbox card. */}
-          <div className="bg-preview" aria-hidden>
+          <div
+            className={cx("bg-preview", peek && peek !== value && "peeking")}
+            style={peek && peek !== value ? { background: css(peek) } : undefined}
+            aria-hidden
+          >
             <span className="bgp-side">
               <i />
               <i />

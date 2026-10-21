@@ -198,6 +198,19 @@
     linear-gradient(135deg, transparent 45%, var(--text-3) 45% 55%, transparent 55%),
     var(--surface-3);
 }
+/* Trying a background in the preview: a small label says it isn't picked yet. */
+.bg-preview.peeking::after {
+  content: "Preview";
+  position: absolute;
+  right: 6px;
+  bottom: 6px;
+  padding: 1px 6px;
+  border-radius: 999px;
+  font-size: 10px;
+  font-weight: 600;
+  color: var(--text-2);
+  background: color-mix(in srgb, var(--surface) 85%, transparent);
+}
 .bg-preview {
   flex: none;
   position: relative;
