@@ -289,6 +289,16 @@
 :root[data-wscheme="dark"] .bgp-home i {
   background: rgba(255, 255, 255, 0.28);
 }
+/* Your accent where the app shows it: the folder you're in and the open email's row. */
+.bg-preview .bgp-side i:first-child {
+  background: var(--accent);
+}
+.bg-preview .bgp-card i:first-child {
+  height: 10px;
+  margin: -3px -3px 0;
+  border-radius: 3px;
+  background: color-mix(in srgb, var(--accent) 28%, transparent);
+}
 .swatch-custom {
   width: 24px;
   height: 24px;
