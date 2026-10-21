@@ -307,11 +307,14 @@ function EventCard({ e, s, en, past, live, clash }: { e: CalEvent; s: Date; en: 
         meeting ? `Click to join ${meetingName(meeting)}` : "Click to open in Google Calendar"
       }`}
     >
-      <span className="cw-time tnum">
-        {timeRange(s, en)}
-        {clash && <Layers size={11} className="cw-clash" aria-label="Overlaps another event" />}
-      </span>
+      <span className="cw-time tnum">{timeRange(s, en)}</span>
       <span className="cw-title">{e.title}</span>
+      {/* Said in words under the title, rather than a small icon squeezed in after the time. */}
+      {clash && (
+        <span className="cw-clash">
+          <Layers size={11} aria-hidden /> Overlaps
+        </span>
+      )}
       {meeting ? (
         <span className="cw-join">
           <Video size={12} /> Join {meetingName(meeting)}
