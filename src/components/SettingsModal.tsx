@@ -219,7 +219,25 @@ function BackgroundSettings({ settings, look }: { settings: Settings; look: (p: 
   };
   return (
     <>
-      <Row title="Background" sub="What sits behind the panes. Text on it turns light or dark to match" col look>
+      <Row
+        title="Background"
+        sub={
+          // The chosen one by name, ahead of what it does.
+          <>
+            <b className="sub-name">
+              {(() => {
+                if (!value) return "The mood's own";
+                const c = all.find((x) => x.value === value);
+                if (!c) return `Your color ${value.split(">")[0]}`;
+                return `${c.name} · ${c.deep ? "deep" : "pale"}${c.value.includes(">") ? " gradient" : ""}`;
+              })()}
+            </b>
+            {" · what sits behind the panes. Text on it turns light or dark to match"}
+          </>
+        }
+        col
+        look
+      >
         <div className="bg-pick">
           <div className="bg-controls">
             <span className="bg-sub">Pale</span>
