@@ -197,6 +197,16 @@ function marked(label: string, q: string) {
   return out;
 }
 
+/** The command run last, so it can lead the list next time. */
+const LAST = "post.lastCommand";
+function lastCommand(): string | null {
+  try {
+    return localStorage.getItem(LAST);
+  } catch {
+    return null;
+  }
+}
+
 function score(c: Cmd, q: string): number {
   if (!q) return 1;
   const hay = `${c.label} ${c.keywords ?? ""}`.toLowerCase();
@@ -232,6 +242,11 @@ export function CommandPalette() {
       .filter((x) => x.s > 0)
       .sort((a, b) => (q.trim() ? b.s - a.s : GROUPS.indexOf(groupOf(a.c.id)) - GROUPS.indexOf(groupOf(b.c.id))))
       .map((x) => x.c);
+    // With nothing typed, the command you used last comes first.
+    if (!q.trim()) {
+      const i = list.findIndex((c) => c.id === lastCommand());
+      if (i > 0) list.unshift(...list.splice(i, 1));
+    }
     if (q.trim())
       list.push({
         id: "search-q",
@@ -252,6 +267,11 @@ export function CommandPalette() {
   if (!mounted) return null;
   const close = () => useStore.setState({ paletteOpen: false });
   const run = (c: Cmd) => {
+    try {
+      if (c.id !== "search-q") localStorage.setItem(LAST, c.id);
+    } catch {
+      /* storage unavailable */
+    }
     close();
     setTimeout(c.run, 0);
   };
@@ -283,8 +303,9 @@ export function CommandPalette() {
         />
         <div className="palette-list" ref={listRef}>
           {items.map((c, i) => {
-            const group = q.trim() ? null : groupOf(c.id);
-            const heading = group && (i === 0 || groupOf(items[i - 1].id) !== group);
+            const recent = !q.trim() && i === 0 && c.id === lastCommand();
+            const group = q.trim() ? null : recent ? "Recent" : groupOf(c.id);
+            const heading = group && (i === 0 || (i === 1 && items[0].id === lastCommand()) || groupOf(items[i - 1].id) !== group);
             return (
               <Fragment key={c.id}>
                 {heading && <div className="menu-label palette-group">{group}</div>}
