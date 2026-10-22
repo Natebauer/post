@@ -800,7 +800,7 @@ export function ThreadList() {
           {!search && items.length > 6 && threads.length >= total && (
             <div className="list-end" aria-hidden>
               <MailCheck size={14} />
-              That's everything
+              That's everything · {total.toLocaleString()} conversations
             </div>
           )}
           </>
