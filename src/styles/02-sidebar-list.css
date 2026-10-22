@@ -406,6 +406,12 @@
   margin-left: 4px;
   font-weight: 400;
 }
+.row-addr {
+  margin-left: 6px;
+  font-size: var(--fs-1);
+  font-weight: 400;
+  color: var(--text-3);
+}
 .row-date {
   font-size: var(--fs-1);
   color: var(--text-3);

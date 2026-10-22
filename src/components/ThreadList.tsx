@@ -332,6 +332,8 @@ function Row({
           <span className="row-from">
             <SenderText sender={sender} folder={viewFolder} />
             {t.count > 1 && <span className="n">{t.count}</span>}
+            {/* In Spam, the real address beside the name, since a name is easy to fake. */}
+            {viewFolder === "SPAM" && <span className="row-addr">{t.participants.find((p) => !p.isMe)?.email}</span>}
           </span>
           <span className="row-icons">
             {t.hasAttachments && <Paperclip size={13} aria-hidden />}
