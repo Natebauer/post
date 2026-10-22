@@ -418,6 +418,16 @@
   -webkit-mask-image: linear-gradient(to right, #000 calc(100% - 44px), transparent);
   mask-image: linear-gradient(to right, #000 calc(100% - 44px), transparent);
 }
+/* In a narrow window the line may wrap once, so the date shows instead of fading away. */
+@media (max-width: 1000px) {
+  .rh-by {
+    white-space: normal;
+    line-height: 20px;
+    max-height: 40px;
+    -webkit-mask-image: none;
+    mask-image: none;
+  }
+}
 .rh-name,
 .rh-name .who-btn {
   font-weight: 600;
