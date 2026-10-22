@@ -162,7 +162,7 @@ function AiSettings({ settings, set }: { settings: Settings; set: (p: Partial<Se
           }`}
         >
           <div className="progress" role="progressbar" aria-valuenow={Math.round(pct)} aria-valuemin={0} aria-valuemax={100}>
-            <div style={{ width: `${pct}%`, background: status.capped ? "var(--danger)" : undefined }} />
+            <div style={{ width: `${pct}%`, background: status.capped ? "var(--danger)" : pct >= 80 ? "var(--warning)" : undefined }} />
           </div>
         </Row>
       )}

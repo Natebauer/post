@@ -166,6 +166,10 @@ body.dragging-mail .sidebar-inner {
 .home-ai-bar.capped > span {
   background: var(--danger);
 }
+/* Most of the month's budget spent: amber, ahead of the red at the cap. */
+.home-ai-bar.near > span {
+  background: var(--warning);
+}
 .home-ai {
   display: inline-flex;
   align-items: center;

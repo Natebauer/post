@@ -113,7 +113,7 @@ function AiFooter() {
     <button className="home-ai tnum" onClick={openAi} title={`${s.monthCalls} request${s.monthCalls === 1 ? "" : "s"} to ${s.model} this month`}>
       <Sparkles size={13} /> AI this month
       <span
-        className={cx("home-ai-bar", s.capped && "capped")}
+        className={cx("home-ai-bar", s.capped && "capped", !s.capped && pct >= 80 && "near")}
         role="progressbar"
         aria-label="Monthly AI budget used"
         aria-valuenow={Math.round(pct)}
