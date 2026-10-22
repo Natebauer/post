@@ -682,14 +682,11 @@ export function ThreadList() {
             <span
               className={cx("sub tnum", !checked.length && unread > 0 && "pill")}
               aria-live="polite"
-              // The unread count takes you to the first unread conversation.
-              title={!checked.length && unread > 0 ? "Go to the first unread" : undefined}
+              // The unread count takes you back to the top of the list, where new mail is; the cursor stays put.
+              title={!checked.length && unread > 0 ? "Back to the top" : undefined}
               onClick={() => {
                 if (checked.length || !unread) return;
-                const i = items.findIndex((x) => x.unread);
-                if (i < 0) return;
-                useStore.setState({ cursorId: items[i].threadId });
-                v.scrollToIndex(i, { align: "center" });
+                scrollRef.current?.scrollTo({ top: 0, behavior: scrollBehavior() });
               }}
             >
               {sub}

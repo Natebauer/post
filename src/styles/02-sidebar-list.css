@@ -244,7 +244,7 @@
   white-space: nowrap;
   flex: 1;
 }
-/* "4 unread" as a small accent pill beside the folder's name (a click goes to the first one). */
+/* "4 unread" as a small accent pill beside the folder's name (a click goes back to the top). */
 .list-head .sub.pill {
   cursor: pointer;
   flex: 0 0 auto;
