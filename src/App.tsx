@@ -207,6 +207,11 @@ export function App() {
     void init();
   }, [init]);
 
+  // Shortcut keys beside buttons, while you're learning them (Settings > Shortcuts).
+  useEffect(() => {
+    document.documentElement.toggleAttribute("data-show-keys", !!settings?.showKeys);
+  }, [settings?.showKeys]);
+
   useEffect(() => {
     applyTheme(settings);
     // The splash goes once the mood is on and there's a first frame to show.

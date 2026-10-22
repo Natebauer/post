@@ -985,6 +985,9 @@ export function SettingsModal() {
           {tab === "shortcuts" && (
             <div className="settings-shortcuts">
               <h4>Keyboard shortcuts</h4>
+              <Row title="Show shortcut keys" sub="While you're learning Post: buttons that have a shortcut show its key beside their name, like Reply R">
+                <Switch label="Show shortcut keys" on={!!settings.showKeys} onChange={(v) => set({ showKeys: v })} />
+              </Row>
               <Row title="Compose from anywhere" sub="Ctrl+Alt+M opens a new message, even when Post is in the background. Takes effect after restart.">
                 <Switch label="Global compose shortcut" on={settings.globalShortcut} onChange={(v) => set({ globalShortcut: v })} />
               </Row>

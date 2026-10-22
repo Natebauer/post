@@ -8,6 +8,7 @@ import { cx } from "../util";
 import { useGlide } from "../hooks";
 import { useRef } from "react";
 import { RollingCount } from "./RollingCount";
+import { KeyHint } from "./KeyHint";
 import { etaText, SyncRing } from "./TitleBar";
 
 export const FOLDER_NAMES: Record<MailFolder, string> = {
@@ -96,6 +97,7 @@ export function Sidebar() {
         {glide && <span className="nav-glide" style={glide} aria-hidden />}
         <button className="compose-btn" onClick={compose} title="Compose (C)" aria-label="Compose">
           <PenSquare size={16} /> <span className="nav-text">Compose</span>
+          <KeyHint k="C" />
         </button>
         <Item f="INBOX" count={counts.INBOX} tab={tab} />
         {(counts.SNOOZED ?? 0) > 0 && <Item f="SNOOZED" tab={tab} />}

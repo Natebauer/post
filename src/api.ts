@@ -199,6 +199,8 @@ export interface Settings {
   cardFrost: boolean;
   /** Looks saved as moods of your own. */
   savedLooks: SavedLook[];
+  /** Buttons with a keyboard shortcut show its key beside their name, for learning them. */
+  showKeys: boolean;
 }
 
 /** A look saved as a mood of your own: a mood's colors plus what was chosen with it. */

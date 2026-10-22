@@ -237,6 +237,8 @@ pub struct Settings {
     pub card_frost: bool,
     /// Looks saved from Settings as moods of your own ("Save as a mood").
     pub saved_looks: Vec<SavedLook>,
+    /// Buttons that have a keyboard shortcut show its key beside their name, for learning them.
+    pub show_keys: bool,
 }
 
 /// A look saved as a mood of your own: a mood's colors plus the accent, background, inbox card
@@ -359,6 +361,7 @@ impl Default for Settings {
             card_clear: false,
             card_frost: false,
             saved_looks: Vec::new(),
+            show_keys: false,
         }
     }
 }

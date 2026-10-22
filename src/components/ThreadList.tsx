@@ -28,6 +28,7 @@ import { claimHighlight } from "../motion";
 import * as A from "../actions";
 import { cx, participantLine, shortDate, whenLabel } from "../util";
 import { Avatar } from "./Avatar";
+import { KeyHint } from "./KeyHint";
 import { RollingCount } from "./RollingCount";
 import { InboxZeroConfetti } from "./Confetti";
 import { EmptyArt, partOfDay, type EmptyKind } from "./EmptyArt";
@@ -684,6 +685,7 @@ export function ThreadList() {
         {!search && !searchOpen && (
           <button className="icon-btn sm" title="Search mail (/)" aria-label="Search mail" onClick={() => setSearchOpen(true)}>
             <Search size={16} />
+            <KeyHint k="/" />
           </button>
         )}
         {!search && !searchOpen && folder !== "SENT" && folder !== "DRAFT" && !folder.startsWith("sec:") && (

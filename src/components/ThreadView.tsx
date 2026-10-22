@@ -38,6 +38,7 @@ import { useStore } from "../store";
 import * as A from "../actions";
 import { cx, displayName, longDate, relativeAgo, whenLabel } from "../util";
 import { Avatar } from "./Avatar";
+import { KeyHint } from "./KeyHint";
 import { TimePicker } from "./TimePicker";
 import { Composer } from "./Composer";
 import { Popover } from "./Popover";
@@ -99,19 +100,19 @@ function BulkView({ ids }: { ids: string[] }) {
         <div className="big">{ids.length} conversations selected</div>
         <div className="actions">
           <button className="btn outline" onClick={() => void A.markRead(true, ids)}>
-            <MailOpen size={15} /> Mark read
+            <MailOpen size={15} /> Mark read <KeyHint k="Shift I" />
           </button>
           <button className="btn outline" onClick={() => void A.markRead(false, ids)}>
-            <Mail size={15} /> Mark unread
+            <Mail size={15} /> Mark unread <KeyHint k="Shift U" />
           </button>
           {(folder === "INBOX" || folder === "SNOOZED") && (
             <button className="btn outline" onClick={(e) => setSnooze(e.currentTarget)}>
-              <AlarmClock size={15} /> Snooze
+              <AlarmClock size={15} /> Snooze <KeyHint k="B" />
             </button>
           )}
           {folder !== "TRASH" && (
             <button className="btn outline" onClick={() => void A.spam(ids)}>
-              <ShieldAlert size={15} /> {folder === "SPAM" ? "Not spam" : "Spam"}
+              <ShieldAlert size={15} /> {folder === "SPAM" ? "Not spam" : "Spam"} <KeyHint k="!" />
             </button>
           )}
           {folder === "TRASH" ? (
@@ -120,7 +121,7 @@ function BulkView({ ids }: { ids: string[] }) {
             </button>
           ) : (
             <button className="btn outline danger" onClick={() => void A.trash(ids)}>
-              <Trash2 size={15} /> Delete
+              <Trash2 size={15} /> Delete <KeyHint k="#" />
             </button>
           )}
         </div>
@@ -465,15 +466,18 @@ function ThreadDetailView() {
                 <button className="icon-btn labeled tb-reply" title="Reply (R)" aria-label="Reply" onClick={() => void A.respond("reply")}>
                   <Reply size={16} />
                   <span className="tb-label">Reply</span>
+                  <KeyHint k="R" />
                 </button>
                 {shown.messages.some((m) => m.to.length + m.cc.length > 1) && (
                   <button className="icon-btn" title="Reply all (A)" aria-label="Reply all" onClick={() => void A.respond("replyAll")}>
                     <ReplyAll size={16} />
+                    <KeyHint k="A" />
                   </button>
                 )}
                 <button className="icon-btn labeled" title="Forward (F)" aria-label="Forward" onClick={() => void A.respond("forward")}>
                   <Forward size={16} />
                   <span className="tb-label">Forward</span>
+                  <KeyHint k="F" />
                 </button>
                 <span className="tb-sep" />
               </>
@@ -487,6 +491,7 @@ function ThreadDetailView() {
             >
               {pinned ? <PinOff size={16} /> : <Pin size={16} />}
               <span className="tb-label">{pinned ? "Unpin" : "Pin"}</span>
+              <KeyHint k="P" />
             </button>
             {viewFolder === "SPAM" && (
               <button className="icon-btn labeled" title="Not spam" aria-label="Not spam" onClick={() => void A.spam()}>
@@ -503,6 +508,7 @@ function ThreadDetailView() {
               <button className="icon-btn labeled" title="Delete (#)" aria-label="Delete" onClick={() => void A.trash()}>
                 <Trash2 size={16} />
                 <span className="tb-label">Delete</span>
+                <KeyHint k="#" />
               </button>
             )}
             <button

@@ -36,6 +36,7 @@ import { flySend } from "../sendFly";
 import { RecipientField } from "./RecipientField";
 import { fileKind } from "./Attachments";
 import { Avatar } from "./Avatar";
+import { KeyHint } from "./KeyHint";
 import { TimePicker } from "./TimePicker";
 import { WindowControls } from "./TitleBar";
 import { Popover } from "./Popover";
@@ -578,6 +579,7 @@ export function Composer({ draft: original, mode: initialMode }: { draft: Compos
                 <button ref={sendBtn} className="btn primary" disabled={busy || checking} onClick={() => void send(null)} title="Send (Ctrl+Enter)">
                   {checking ? <Loader2 size={14} className="spin" /> : null}
                   {checking ? "Checking…" : "Send"}
+                  <KeyHint k="Ctrl Enter" />
                 </button>
                 <button
                   className="btn primary"
