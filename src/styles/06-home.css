@@ -320,9 +320,9 @@ body.resizing iframe {
 .hrow {
   gap: var(--s-5);
 }
-/* A little more room between the calendar and the pinned emails. */
+/* Plenty of room between the calendar and the pinned emails. */
 .home-rows {
-  gap: var(--s-8);
+  gap: calc(var(--s-8) + 100px);
 }
 
 /* ---------- drag an email onto home to pin it ---------- */
