@@ -790,10 +790,11 @@ export function SettingsModal() {
                   label="Text size"
                   value={String(settings.zoom ?? 1)}
                   options={[
-                    ["0.9", "Small"],
-                    ["1", "Default"],
-                    ["1.1", "Large"],
-                    ["1.2", "Larger"],
+                    // Each name in its own size.
+                    ["0.9", <span style={{ fontSize: 11.5 }}>Small</span>],
+                    ["1", <span style={{ fontSize: 13 }}>Default</span>],
+                    ["1.1", <span style={{ fontSize: 14.3 }}>Large</span>],
+                    ["1.2", <span style={{ fontSize: 15.6 }}>Larger</span>],
                   ]}
                   onChange={(v) => void setZoom(Number(v))}
                 />
