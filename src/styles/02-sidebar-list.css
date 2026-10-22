@@ -784,9 +784,9 @@
   border: 0;
   border-radius: 0 calc(var(--r-3) - 6px) calc(var(--r-3) - 6px) 0;
   box-shadow: none;
-  background: linear-gradient(var(--hover), var(--hover)), var(--surface);
-  -webkit-mask-image: linear-gradient(to right, transparent, #000 32px);
-  mask-image: linear-gradient(to right, transparent, #000 32px);
+  /* No backing of its own: the row's text fades out before the buttons instead (below), which
+     works on every inbox card, the see-through ones included. */
+  background: none;
   transition:
     opacity var(--fast) var(--ease),
     transform var(--med) var(--ease);
@@ -794,12 +794,17 @@
 .row:hover .row-actions {
   transform: none;
 }
-.row.selected .row-actions {
-  background: var(--selected-bg);
+/* Pointing at a row: its text, date included, fades out where the buttons slide in. */
+.row:hover .row-main {
+  -webkit-mask-image: linear-gradient(to left, transparent 96px, #000 136px);
+  mask-image: linear-gradient(to left, transparent 96px, #000 136px);
 }
-.row.cursor .row-actions,
-.row.checked .row-actions {
-  background: linear-gradient(var(--accent-softer), var(--accent-softer)), var(--surface);
+.list-pane.size-large .row:hover :is(.row-icons, .row-date) {
+  visibility: hidden;
+}
+.list-pane.size-large .row:hover .row-sub {
+  -webkit-mask-image: linear-gradient(to left, transparent 40px, #000 72px);
+  mask-image: linear-gradient(to left, transparent 40px, #000 72px);
 }
 
 /* First sync: how far the download has got. */
