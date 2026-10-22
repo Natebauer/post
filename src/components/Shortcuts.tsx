@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { createPortal } from "react-dom";
 import { X } from "lucide-react";
 import { useStore } from "../store";
@@ -78,10 +78,16 @@ function Keys({ k }: { k: string }) {
 }
 
 /** Every keyboard shortcut, grouped (shown in Settings and on ?). */
-export function ShortcutList() {
+export function ShortcutList({ filter = "" }: { filter?: string }) {
+  // Typing in the sheet's filter keeps the shortcuts whose name or keys match.
+  const f = filter.trim().toLowerCase();
+  const shown = GROUPS.map(([g, rows]) => [g, rows.filter(([a, k]) => !f || a.toLowerCase().includes(f) || k.toLowerCase().includes(f))] as const).filter(
+    ([, rows]) => rows.length,
+  );
   return (
     <>
-      {GROUPS.map(([g, rows]) => (
+      {f && !shown.length && <p className="faint">No shortcut matches "{filter.trim()}".</p>}
+      {shown.map(([g, rows]) => (
         <div key={g} className="shortcut-group">
           <div className="menu-label" style={{ padding: "0 0 4px" }}>
             {g}
@@ -107,9 +113,13 @@ export function ShortcutList() {
 export function Shortcuts() {
   const open = useStore((s) => s.shortcutsOpen);
   const { mounted, closing } = usePresence(open);
+  const [filter, setFilter] = useState("");
   useEffect(() => {
     if (!open) return;
+    setFilter("");
     const k = (e: KeyboardEvent) => {
+      // A "?" typed into the filter is just a character.
+      if (e.key === "?" && (e.target as HTMLElement | null)?.tagName === "INPUT") return;
       if (e.key === "Escape" || e.key === "?") {
         e.stopPropagation();
         e.preventDefault();
@@ -127,11 +137,12 @@ export function Shortcuts() {
       <div className={cx("modal shortcuts", closing && "closing")} role="dialog" aria-label="Keyboard shortcuts">
         <div style={{ display: "flex", alignItems: "center", marginBottom: 8 }}>
           <h4 style={{ margin: 0, flex: 1, fontSize: 16 }}>Keyboard shortcuts</h4>
+          <input className="input sk-filter" placeholder="Filter" aria-label="Filter shortcuts" value={filter} onChange={(e) => setFilter(e.target.value)} />
           <button className="icon-btn" onClick={close} aria-label="Close">
             <X size={17} />
           </button>
         </div>
-        <ShortcutList />
+        <ShortcutList filter={filter} />
       </div>
     </>,
     document.body,

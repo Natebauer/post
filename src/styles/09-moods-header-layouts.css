@@ -637,6 +637,11 @@ body:not(.dragging-mail) .sidebar.rail .nav-sep {
 .shortcuts .shortcut-group {
   margin-top: 14px;
 }
+.sk-filter {
+  width: 180px;
+  height: 30px;
+  margin-right: 8px;
+}
 
 /* ---------- inbox list adapts to its width ----------
    Narrow (under 380px): avatar, subject and date. Standard: two-line rows. Wide (720px and up):
