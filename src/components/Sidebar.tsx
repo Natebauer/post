@@ -21,6 +21,9 @@ export const FOLDER_NAMES: Record<MailFolder, string> = {
   SPAM: "Spam",
 };
 
+/** The second key after G that goes to each folder (keyboard.ts). */
+const GO_KEYS: Partial<Record<MailFolder, string>> = { INBOX: "I", SENT: "T", DRAFT: "D", SNOOZED: "B", SPAM: "!" };
+
 export const ICONS: Record<MailFolder, JSX.Element> = {
   INBOX: <Inbox size={16} />,
   SNOOZED: <AlarmClock size={16} />,
@@ -44,7 +47,7 @@ function Item({ f, count }: { f: MailFolder; count?: number; tab?: number }) {
       onClick={() => goFolder(f)}
       aria-current={active ? "page" : undefined}
       aria-label={count ? `${FOLDER_NAMES[f]}, ${count}` : FOLDER_NAMES[f]}
-      title={FOLDER_NAMES[f]}
+      title={GO_KEYS[f] ? `${FOLDER_NAMES[f]} (G then ${GO_KEYS[f]})` : FOLDER_NAMES[f]}
     >
       {ICONS[f]}
       <span className="nav-text">{FOLDER_NAMES[f]}</span>
