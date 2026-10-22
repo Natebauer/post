@@ -83,7 +83,7 @@ function AiSettings({ settings, set }: { settings: Settings; set: (p: Partial<Se
 
   return (
     <>
-      <h4>AI</h4>
+      <h4>{TAB_ICONS.ai}AI</h4>
       <p className="muted" style={{ margin: "0 0 4px", fontSize: 13 }}>
         Post uses Claude for the AI assistant (questions about your mail, and doing things like archiving or
         accepting invitations after you confirm), drafting replies, summarizing emails, sorting mail into AI sections
@@ -715,7 +715,7 @@ export function SettingsModal() {
           </div>
           {tab === "appearance" && (
             <>
-              <h4>Appearance</h4>
+              <h4>{TAB_ICONS.appearance}Appearance</h4>
               <Row
                 title="Theme"
                 sub={
@@ -856,7 +856,7 @@ export function SettingsModal() {
           )}
           {tab === "reading" && (
             <>
-              <h4>Reading</h4>
+              <h4>{TAB_ICONS.reading}Reading</h4>
               <Row
                 title="Load images in emails"
                 sub="When off, pictures from the web stay hidden until you choose to show them, so senders can't tell when you open their email"
@@ -887,7 +887,7 @@ export function SettingsModal() {
           )}
           {tab === "compose" && (
             <>
-              <h4>Writing</h4>
+              <h4>{TAB_ICONS.compose}Writing</h4>
               <Row title="Compose opens in" col>
                 <Seg<ComposeMode>
                   label="Compose opens in"
@@ -949,7 +949,7 @@ export function SettingsModal() {
           )}
           {tab === "notifications" && (
             <>
-              <h4>Notifications</h4>
+              <h4>{TAB_ICONS.notifications}Notifications</h4>
               <Row title="Notify for new email" sub='Windows notifications with "Reply" and "Mark as read" buttons'>
                 <Switch label="Notifications" on={settings.notifications} onChange={(v) => set({ notifications: v })} />
               </Row>
@@ -985,7 +985,7 @@ export function SettingsModal() {
           {tab === "ai" && <AiSettings settings={settings} set={set} />}
           {tab === "shortcuts" && (
             <div className="settings-shortcuts">
-              <h4>Keyboard shortcuts</h4>
+              <h4>{TAB_ICONS.shortcuts}Keyboard shortcuts</h4>
               <Row title="Show shortcut keys" sub="While you're learning Post: buttons that have a shortcut show its key beside their name, like Reply R">
                 <Switch label="Show shortcut keys" on={!!settings.showKeys} onChange={(v) => set({ showKeys: v })} />
               </Row>
@@ -997,7 +997,7 @@ export function SettingsModal() {
           )}
           {tab === "system" && (
             <>
-              <h4>System & sync</h4>
+              <h4>{TAB_ICONS.system}System & sync</h4>
               <SyncDetails />
               <Row title="Check for new mail every" sub="Post checks Gmail in the background">
                 <Seg
@@ -1039,7 +1039,7 @@ export function SettingsModal() {
           )}
           {tab === "account" && (
             <>
-              <h4>Account</h4>
+              <h4>{TAB_ICONS.account}Account</h4>
               <AccountCard email={email ?? ""} name={settings?.displayName ?? ""} />
               <Row title="Sign out" sub="Connected through your own Google Cloud OAuth client">
                 <button

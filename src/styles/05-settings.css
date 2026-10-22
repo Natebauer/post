@@ -167,6 +167,16 @@
     opacity: 0;
   }
 }
+/* Each Settings page's title, with its icon from the list beside it, in the accent. */
+.settings section > h4,
+.settings section > .settings-shortcuts > h4 {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.settings section h4 > svg {
+  color: var(--accent-text);
+}
 /* ---------- Background: kind, options, and a little window showing the result ---------- */
 .bg-pick {
   display: flex;
