@@ -1394,6 +1394,11 @@ div.ob-check {
   font-size: var(--fs-1);
   color: var(--text-3);
 }
+/* What you typed, in bold in each command's name. */
+.palette-list .menu-item b {
+  font-weight: 700;
+  color: var(--accent-text);
+}
 .palette-foot span {
   display: inline-flex;
   align-items: center;

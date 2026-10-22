@@ -1,3 +1,4 @@
+import type React from "react";
 import { Fragment, useEffect, useMemo, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import {
@@ -176,6 +177,26 @@ function commands(): Cmd[] {
   ];
 }
 
+/** A command's name with the words you typed in bold. */
+function marked(label: string, q: string) {
+  const words = q.trim().toLowerCase().split(/\s+/).filter(Boolean);
+  if (!words.length) return label;
+  const on = new Array<boolean>(label.length).fill(false);
+  for (const w of words) {
+    const i = label.toLowerCase().indexOf(w);
+    if (i >= 0) for (let j = i; j < i + w.length; j++) on[j] = true;
+  }
+  const out: React.ReactNode[] = [];
+  let i = 0;
+  while (i < label.length) {
+    let j = i;
+    while (j < label.length && on[j] === on[i]) j++;
+    out.push(on[i] ? <b key={i}>{label.slice(i, j)}</b> : label.slice(i, j));
+    i = j;
+  }
+  return out;
+}
+
 function score(c: Cmd, q: string): number {
   if (!q) return 1;
   const hay = `${c.label} ${c.keywords ?? ""}`.toLowerCase();
@@ -273,7 +294,7 @@ export function CommandPalette() {
                   onClick={() => run(c)}
                 >
                   <span className="pi">{c.icon}</span>
-                  {c.label}
+                  <span>{marked(c.label, q)}</span>
                   {c.hint && (
                     <span className="hint keys">
                       {c.hint.split(/(?<=\S)[ +](?=\S)/).map((k, j) => (
