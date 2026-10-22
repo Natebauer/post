@@ -677,7 +677,19 @@ export function ThreadList() {
             {/* The folder's own icon, in the accent, beside its name. */}
             {ICONS[folder as MailFolder] && <span className="lh-folder" aria-hidden>{ICONS[folder as MailFolder]}</span>}
             <h2>{title}</h2>
-            <span className={cx("sub tnum", !checked.length && unread > 0 && "pill")} aria-live="polite">
+            <span
+              className={cx("sub tnum", !checked.length && unread > 0 && "pill")}
+              aria-live="polite"
+              // The unread count takes you to the first unread conversation.
+              title={!checked.length && unread > 0 ? "Go to the first unread" : undefined}
+              onClick={() => {
+                if (checked.length || !unread) return;
+                const i = items.findIndex((x) => x.unread);
+                if (i < 0) return;
+                useStore.setState({ cursorId: items[i].threadId });
+                v.scrollToIndex(i, { align: "center" });
+              }}
+            >
               {sub}
             </span>
           </>
