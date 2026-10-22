@@ -709,7 +709,7 @@ export function SettingsModal() {
         </nav>
         <section>
           <div style={{ display: "flex", justifyContent: "flex-end", margin: "-12px -12px 0 0" }}>
-            <button className="icon-btn" onClick={close} aria-label="Close settings" title="Close">
+            <button className="icon-btn" onClick={close} aria-label="Close settings" title="Close (Esc)">
               <X size={17} />
             </button>
           </div>

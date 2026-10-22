@@ -163,7 +163,7 @@ function QuickLook({
             <ExternalLink size={15} /> Open
           </button>
           <SaveButton messageId={messageId} a={a} />
-          <button className="icon-btn" onClick={onClose} aria-label="Close">
+          <button className="icon-btn" onClick={onClose} aria-label="Close" title="Close (Esc)">
             <X size={17} />
           </button>
         </div>

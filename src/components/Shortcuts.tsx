@@ -153,7 +153,7 @@ export function Shortcuts() {
         <div style={{ display: "flex", alignItems: "center", marginBottom: 8 }}>
           <h4 style={{ margin: 0, flex: 1, fontSize: 16 }}>Keyboard shortcuts</h4>
           <input className="input sk-filter" placeholder="Filter" aria-label="Filter shortcuts" value={filter} onChange={(e) => setFilter(e.target.value)} />
-          <button className="icon-btn" onClick={close} aria-label="Close">
+          <button className="icon-btn" onClick={close} aria-label="Close" title="Close (Esc)">
             <X size={17} />
           </button>
         </div>

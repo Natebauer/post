@@ -295,7 +295,7 @@ export function AskPanel() {
               <ArrowRight size={16} />
             </button>
           )}
-          <button type="button" className="icon-btn sm" onClick={close} aria-label="Close">
+          <button type="button" className="icon-btn sm" onClick={close} aria-label="Close" title="Close (Esc)">
             <X size={15} />
           </button>
         </form>
