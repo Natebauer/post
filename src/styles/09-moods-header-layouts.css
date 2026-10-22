@@ -637,6 +637,10 @@ body:not(.dragging-mail) .sidebar.rail .nav-sep {
 .shortcuts .shortcut-group {
   margin-top: 14px;
 }
+/* The shortcut you just pressed, lit for a moment. */
+.shortcuts tr.lit td {
+  background: color-mix(in srgb, var(--accent) 20%, transparent);
+}
 .sk-filter {
   width: 180px;
   height: 30px;

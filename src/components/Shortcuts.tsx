@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { X } from "lucide-react";
 import { useStore } from "../store";
@@ -77,8 +77,14 @@ function Keys({ k }: { k: string }) {
   );
 }
 
+/** Whether a key just pressed ("R", "Shift I", "Ctrl K") is one of a shortcut's own. */
+function matches(k: string, pressed: string) {
+  const norm = (x: string) => x.trim().replace(/\s+/g, " ").toLowerCase();
+  return k.split(/\s+(?:\/|or)\s+/).some((alt) => norm(alt) === norm(pressed));
+}
+
 /** Every keyboard shortcut, grouped (shown in Settings and on ?). */
-export function ShortcutList({ filter = "" }: { filter?: string }) {
+export function ShortcutList({ filter = "", lit }: { filter?: string; lit?: string }) {
   // Typing in the sheet's filter keeps the shortcuts whose name or keys match.
   const f = filter.trim().toLowerCase();
   const shown = GROUPS.map(([g, rows]) => [g, rows.filter(([a, k]) => !f || a.toLowerCase().includes(f) || k.toLowerCase().includes(f))] as const).filter(
@@ -95,7 +101,7 @@ export function ShortcutList({ filter = "" }: { filter?: string }) {
           <table>
             <tbody>
               {rows.map(([a, k]) => (
-                <tr key={a}>
+                <tr key={a} className={cx(lit && matches(k, lit) && "lit")}>
                   <td>{a}</td>
                   <td>
                     <Keys k={k} />
@@ -114,6 +120,9 @@ export function Shortcuts() {
   const open = useStore((s) => s.shortcutsOpen);
   const { mounted, closing } = usePresence(open);
   const [filter, setFilter] = useState("");
+  // The shortcut whose keys you just pressed lights up for a moment.
+  const [lit, setLit] = useState<string | null>(null);
+  const litTimer = useRef<number>();
   useEffect(() => {
     if (!open) return;
     setFilter("");
@@ -124,6 +133,12 @@ export function Shortcuts() {
         e.stopPropagation();
         e.preventDefault();
         useStore.setState({ shortcutsOpen: false });
+      } else if ((e.target as HTMLElement | null)?.tagName !== "INPUT" && !["Shift", "Control", "Alt", "Meta"].includes(e.key)) {
+        const key = e.key.length === 1 ? e.key.toUpperCase() : e.key;
+        const combo = [e.ctrlKey && "Ctrl", e.shiftKey && /^[a-z]$/i.test(e.key) && "Shift", key].filter(Boolean).join(" ");
+        setLit(combo);
+        window.clearTimeout(litTimer.current);
+        litTimer.current = window.setTimeout(() => setLit(null), 1400);
       }
     };
     window.addEventListener("keydown", k, true);
@@ -142,7 +157,7 @@ export function Shortcuts() {
             <X size={17} />
           </button>
         </div>
-        <ShortcutList filter={filter} />
+        <ShortcutList filter={filter} lit={lit ?? undefined} />
       </div>
     </>,
     document.body,
