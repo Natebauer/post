@@ -214,6 +214,26 @@ export function SearchBox({ extra, onDone }: { extra?: React.ReactNode; onDone?:
                     <Clock size={14} />
                   </span>
                   {it.label}
+                  {/* Forget this one. */}
+                  <span
+                    className="search-forget"
+                    role="button"
+                    aria-label={`Remove ${it.label} from recent searches`}
+                    title="Remove from recent searches"
+                    onMouseDown={(e) => {
+                      e.preventDefault();
+                      e.stopPropagation();
+                      const rest = useStore.getState().recentSearches.filter((r) => r !== it.value);
+                      useStore.setState({ recentSearches: rest });
+                      try {
+                        localStorage.setItem("post.recentSearches", JSON.stringify(rest));
+                      } catch {
+                        /* storage unavailable */
+                      }
+                    }}
+                  >
+                    <X size={13} />
+                  </span>
                 </>
               )}
             </button>
