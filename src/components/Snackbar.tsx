@@ -56,6 +56,8 @@ export function Snackbar() {
               }}
             >
               {s.action.label}
+              {/* Undo's key, for next time. */}
+              {s.action.label === "Undo" && <kbd className="snack-key">Ctrl Z</kbd>}
             </button>
           )}
           <button className="icon-btn sm x" onClick={() => drop(s.id)} aria-label="Dismiss" style={s.action ? undefined : { marginLeft: "auto" }}>
