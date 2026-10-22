@@ -368,7 +368,7 @@ function Row({
         )}
         <button
           className="icon-btn sm"
-          title={t.unread ? "Mark as read" : "Mark as unread"}
+          title={t.unread ? "Mark as read (Shift I)" : "Mark as unread (Shift U)"}
           aria-label={t.unread ? "Mark as read" : "Mark as unread"}
           onClick={() => void A.markRead(t.unread, [t.threadId])}
         >
