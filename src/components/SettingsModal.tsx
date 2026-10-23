@@ -998,6 +998,9 @@ export function SettingsModal() {
           {tab === "system" && (
             <>
               <h4>{TAB_ICONS.system}System & sync</h4>
+              <Row title="Start Post with Windows" sub="Runs quietly in the tray so mail and scheduled sends keep flowing">
+                <Switch label="Start with Windows" on={settings.launchAtStartup} onChange={(v) => set({ launchAtStartup: v })} />
+              </Row>
               <SyncDetails />
               <Row title="Check for new mail every" sub="Post checks Gmail in the background">
                 <Seg
@@ -1011,9 +1014,6 @@ export function SettingsModal() {
                   ]}
                   onChange={(v) => set({ pollSeconds: Number(v) })}
                 />
-              </Row>
-              <Row title="Start Post with Windows" sub="Runs quietly in the tray so mail and scheduled sends keep flowing">
-                <Switch label="Start with Windows" on={settings.launchAtStartup} onChange={(v) => set({ launchAtStartup: v })} />
               </Row>
               <Row title="Default email app" sub="Open mailto: links in Post. Windows asks you to confirm in Settings.">
                 <button className="btn outline" onClick={() => void api.makeDefaultMailApp()}>
