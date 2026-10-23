@@ -6,8 +6,10 @@ import { useStore } from "../store";
 import { resolvedTheme } from "../theme";
 import { fromComposeData, openCompose } from "../compose";
 import { escapeHtml, parseAddressList } from "../util";
-import { AArrowDown, AArrowUp, Globe, ImageOff, Lock, LockOpen, Mail, Type } from "lucide-react";
+import { AArrowDown, AArrowUp, ExternalLink, Globe, Image as ImageIcon, ImageOff, Lock, LockOpen, Mail, Type } from "lucide-react";
 import { highlightDom } from "./Highlight";
+import { Popover } from "./Popover";
+import { ImageViewer, imageName } from "./ImageViewer";
 import { prepareEmail } from "../safeHtml";
 
 /* ---------- color math for dark-mode adaptation ---------- */
@@ -437,6 +439,9 @@ export function EmailFrame({
   const [quiet, setQuiet] = useState(false);
   // The address of the link under the mouse, shown like a browser's status bubble.
   const [hover, setHover] = useState<{ text: string; left: number; bottom: number } | null>(null);
+  // Right-clicking a picture: a small menu to view it on its own, and the picture being viewed.
+  const [imgMenu, setImgMenu] = useState<{ src: string; name: string; x: number; y: number } | null>(null);
+  const [viewing, setViewing] = useState<{ src: string; name: string } | null>(null);
   const adapt = dark && (settings?.emailDarkMode ?? true) && !original;
   // Remote images can be held back (Settings → Appearance) so senders can't tell you opened it.
   const [showImages, setShowImages] = useState(false);
@@ -603,6 +608,20 @@ export function EmailFrame({
       };
       doc.addEventListener("click", onLink, { signal });
       doc.addEventListener("auxclick", onLink, { signal });
+      // Right-click a picture for "View image" (anything else keeps the usual menu).
+      doc.addEventListener(
+        "contextmenu",
+        (e) => {
+          const img = (e.target as Element).closest?.("img");
+          const src = img?.currentSrc || img?.getAttribute("src") || "";
+          if (!img || !src) return;
+          e.preventDefault();
+          const box = frame.getBoundingClientRect();
+          const z = parseFloat(doc.documentElement.style.zoom) || 1;
+          setImgMenu({ src, name: imageName(src, img.getAttribute("alt")), x: box.left + e.clientX * z, y: box.top + e.clientY * z });
+        },
+        { signal },
+      );
     };
     // Set up as soon as the HTML is parsed ("interactive"), not after every remote image loads.
     const poll = () => {
@@ -660,6 +679,31 @@ export function EmailFrame({
         title="Email content"
         style={!adapt && dark ? { borderRadius: 8, background: "#fff", padding: 0 } : undefined}
       />
+      {imgMenu && (
+        <Popover point={{ x: imgMenu.x, y: imgMenu.y }} onClose={() => setImgMenu(null)}>
+          <button
+            className="menu-item"
+            onClick={() => {
+              setViewing({ src: imgMenu.src, name: imgMenu.name });
+              setImgMenu(null);
+            }}
+          >
+            <ImageIcon size={15} /> View image
+          </button>
+          {/^https?:/i.test(imgMenu.src) && (
+            <button
+              className="menu-item"
+              onClick={() => {
+                void openUrl(imgMenu.src);
+                setImgMenu(null);
+              }}
+            >
+              <ExternalLink size={15} /> Open image in browser
+            </button>
+          )}
+        </Popover>
+      )}
+      {viewing && <ImageViewer src={viewing.src} name={viewing.name} onClose={() => setViewing(null)} />}
       {hover && (
         <div className="link-status" style={{ left: hover.left, bottom: hover.bottom }} role="status">
           <LinkAddress text={hover.text} />
