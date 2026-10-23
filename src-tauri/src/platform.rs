@@ -113,10 +113,11 @@ pub fn register_mailto() -> anyhow::Result<()> {
 pub fn apply_autostart(app: &AppHandle, enabled: bool) {
     use tauri_plugin_autostart::ManagerExt;
     let m = app.autolaunch();
-    let current = m.is_enabled().unwrap_or(false);
-    if enabled && !current {
+    if enabled {
+        // Always (re)write it: an entry left from an older install can point at a post.exe that's
+        // gone, and "is enabled" would still say yes, so Windows would quietly start nothing.
         let _ = m.enable();
-    } else if !enabled && current {
+    } else if m.is_enabled().unwrap_or(false) {
         let _ = m.disable();
     }
 }

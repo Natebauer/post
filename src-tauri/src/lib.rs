@@ -118,8 +118,9 @@ pub fn run() {
                 std::thread::spawn(move || files::clean_up(&st));
             }
 
-            // First run: default to launching with Windows.
-            if !cfg!(debug_assertions) && db.kv_get("first_run_done").is_none() {
+            // Start with Windows (on unless turned off): checked on every launch, so the entry
+            // always points at this post.exe, not one from an older install that's since moved.
+            if !cfg!(debug_assertions) {
                 platform::apply_autostart(app.handle(), db.settings().launch_at_startup);
                 let _ = db.kv_set("first_run_done", "1");
             }
