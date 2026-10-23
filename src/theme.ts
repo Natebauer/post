@@ -19,8 +19,9 @@ media.addEventListener("change", () => {
 });
 
 export function resolvedTheme(s: Settings | null): "light" | "dark" {
-  // Dark moods are dark whatever the Theme setting says.
-  if (moodById(s?.mood).scheme === "dark") return "dark";
+  // Dark moods are dark whatever the Theme setting says, and White is light.
+  const only = moodById(s?.mood).scheme;
+  if (only) return only;
   if (s?.theme === "light" || s?.theme === "dark") return s.theme;
   return systemDark ? "dark" : "light";
 }
@@ -77,8 +78,8 @@ function paint(s: Settings | null, t: "light" | "dark") {
   root.style.setProperty("--av-l", t === "dark" ? "30%" : "88%");
   root.style.setProperty("--av-t", t === "dark" ? "82%" : "32%");
   try {
-    const forced = moodById(s?.mood).scheme === "dark";
-    const pin = forced ? "dark" : s?.theme === "system" || !s ? null : s.theme;
+    const forced = moodById(s?.mood).scheme;
+    const pin = forced ?? (s?.theme === "system" || !s ? null : s.theme);
     // Unpinned, the window follows the system again, and any change after that is the system's.
     const win = getCurrentWindow();
     if (pin) windowPinned = true;

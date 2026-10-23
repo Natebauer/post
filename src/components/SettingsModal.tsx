@@ -721,7 +721,9 @@ export function SettingsModal() {
                 sub={
                   moodById(settings.mood).scheme === "dark"
                     ? "Your mood is a dark one, so Post stays dark"
-                    : settings.theme === "system"
+                    : moodById(settings.mood).scheme === "light"
+                      ? "Your mood is White, so Post stays light"
+                      : settings.theme === "system"
                       ? // Following Windows: say which way that is right now.
                         `Match Windows, or pick one. Windows is ${resolvedTheme({ ...settings, mood: "classic" })} right now`
                       : "Match Windows, or pick one"

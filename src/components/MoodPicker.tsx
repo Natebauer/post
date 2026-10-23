@@ -123,7 +123,7 @@ export function MoodPicker({
   /** A miniature Post: the window in its background, the inbox card as it sits there, the reading pane. */
   const preview = (moodId: string, accent: string, look: MoodLook) => {
     const r = moodId === "auto" ? moodById("auto") : moodById(moodId);
-    const scheme = theme === "dark" || r.scheme === "dark" ? "dark" : "light";
+    const scheme = r.scheme ?? (theme === "dark" ? "dark" : "light");
     const p = (scheme === "dark" ? r.dark : r.light) ?? CLASSIC[scheme];
     const stops = windowStops(look.bg);
     const mid = stops.length ? mixHex(stops) : solid(p.chrome);

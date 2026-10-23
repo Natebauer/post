@@ -4,7 +4,8 @@
  * accent; it can still be changed afterwards) and optionally a heading typeface.
  *
  * Classic has no overrides: it is the palette in styles/01-base.css. Dark moods (scheme: "dark") are made for
- * dark mode only and keep the app dark whatever the Theme setting is.
+ * dark mode only and keep the app dark whatever the Theme setting is; White (scheme: "light") is its
+ * mirror, light only, and keeps the app light.
  */
 
 /** The color variables a mood sets (names match the CSS variables, without the leading "--"). */
@@ -35,8 +36,8 @@ export interface Mood {
   display?: string;
   /** Body face for plain-text emails; defaults to the UI face. */
   read?: string;
-  /** "dark": a dark-only mood. It stays dark whatever the Theme setting says. */
-  scheme?: "dark";
+  /** "dark": a dark-only mood. It stays dark whatever the Theme setting says. "light": the same, light only. */
+  scheme?: "dark" | "light";
   light?: MoodPalette;
   dark?: MoodPalette;
 }
@@ -95,6 +96,19 @@ export const MOODS: Mood[] = [
   { id: "classic", name: "Classic", blurb: "Post's original: neutral and calm, with Post teal.", accent: "#2a737b" },
   // Follows the time of day (autoMoodId); its colors and accent are whichever mood is current.
   { id: "auto", name: "Auto", blurb: "Follows the day: cool in the morning, Classic by day, warm in the evening and dark at night, at the times you choose.", accent: "" },
+  // As white as it gets: the window, sidebar and cards all white, set apart by hairlines. Light only.
+  {
+    id: "white",
+    name: "White",
+    blurb: "As white as it gets: white window, sidebar and cards, with Post teal. Always light.",
+    accent: "#2a737b",
+    scheme: "light",
+    light: {
+      chrome: "rgba(255, 255, 255, 1)", surface: "#ffffff", "surface-2": "#fafafa", "surface-3": "#f2f2f2", elevated: "#ffffff",
+      text: "#141414", "text-2": "#4d4d4d", "text-3": "#757575", ...tint("0, 0, 0", [0.08, 0.14, 0.04, 0.075]),
+      "avatar-bg": "#f1f1f1", "avatar-ink": "#555555", "tint-base": "#ffffff",
+    },
+  },
   {
     id: "paper",
     name: "Paper",
