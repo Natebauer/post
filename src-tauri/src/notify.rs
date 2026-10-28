@@ -192,8 +192,15 @@ fn code_toast(app: &AppHandle, m: &StoredMessage, code: &str) {
             let a = a.clone();
             let thread = thread.clone();
             match action.as_deref() {
+                // Copying the code is all the email was for, so it's marked read too (once the
+                // code is safely on the clipboard); there's no need to open it.
                 Some("copy") => match arboard::Clipboard::new().and_then(|mut c| c.set_text(copy.clone())) {
-                    Ok(()) => log::info!("copied a code from a notification"),
+                    Ok(()) => {
+                        log::info!("copied a code from a notification");
+                        tauri::async_runtime::spawn(async move {
+                            let _ = crate::commands::set_read(&a, vec![thread], true).await;
+                        });
+                    }
                     Err(e) => log::warn!("couldn't copy the code: {e}"),
                 },
                 Some("markread") => {
