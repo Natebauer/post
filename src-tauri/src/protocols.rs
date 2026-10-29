@@ -115,7 +115,8 @@ pub async fn handle_attachment(st: &AppState, req: Request<Vec<u8>>) -> Response
     };
     let part = urlencoding::decode(part).map(|s| s.into_owned()).unwrap_or_default();
     match fetch_attachment(st, msg, &part).await {
-        Ok((bytes, mime, _)) => respond(200, &mime, bytes),
+        // Serve it as what it really is: a PDF sent as "application/octet-stream" won't preview otherwise.
+        Ok((bytes, mime, _)) => respond(200, crate::ai::sniff(&bytes).unwrap_or(&mime), bytes),
         Err(e) => respond(502, "text/plain", e.to_string().into_bytes()),
     }
 }

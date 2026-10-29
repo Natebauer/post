@@ -639,7 +639,7 @@ fn readable(mime: &str, name: &str) -> Option<&'static str> {
 }
 
 /// What a file really is, from its first bytes (emails often label attachments loosely).
-fn sniff(bytes: &[u8]) -> Option<&'static str> {
+pub(crate) fn sniff(bytes: &[u8]) -> Option<&'static str> {
     if bytes.starts_with(b"%PDF") {
         Some("application/pdf")
     } else if bytes.starts_with(&[0x89, b'P', b'N', b'G']) {

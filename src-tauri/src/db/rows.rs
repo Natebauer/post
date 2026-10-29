@@ -3,8 +3,9 @@
 use super::*;
 
 pub fn attachment_url(msg_id: &str, a: &AttachmentMeta) -> String {
+    // `v`: bumped when what's served changes, so the webview drops responses it cached before.
     format!(
-        "{}/{}/{}?name={}&mime={}",
+        "{}/{}/{}?name={}&mime={}&v=2",
         crate::protocols::ATT_BASE,
         msg_id,
         urlencoding::encode(&a.part_id),
