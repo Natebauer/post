@@ -179,8 +179,11 @@
     display: none;
   }
 }
+/* Clipped only top and bottom: an email widened past the reading column (see EmailFrame's widen)
+   must not lose its edges. */
 .msg-collapse > div {
-  overflow: hidden;
+  overflow-x: visible;
+  overflow-y: clip;
   min-height: 0;
 }
 /* Opening or folding a message (only when the user does it, not when a thread first loads). */
