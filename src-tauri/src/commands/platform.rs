@@ -60,8 +60,9 @@ pub async fn save_raw(app: AppHandle, st: St<'_>, message_id: String, name: Stri
     Ok(true)
 }
 
+/// Save every attachment into a folder the user picks. Returns how many, and the folder.
 #[tauri::command]
-pub async fn save_all_attachments(app: AppHandle, st: St<'_>, message_id: String) -> R<Option<usize>> {
+pub async fn save_all_attachments(app: AppHandle, st: St<'_>, message_id: String) -> R<Option<(usize, String)>> {
     let Some(dir) = crate::files::ask_folder(&app, "Save attachments to…").await else { return Ok(None) };
     let atts = st.db.message_attachments(&message_id).unwrap_or_default();
     let mut used = HashSet::new();
@@ -83,7 +84,7 @@ pub async fn save_all_attachments(app: AppHandle, st: St<'_>, message_id: String
         crate::files::write_download(&dir.join(&name), &bytes)?;
         n += 1;
     }
-    Ok(Some(n))
+    Ok(Some((n, remember_saved(dir))))
 }
 
 #[tauri::command]

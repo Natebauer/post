@@ -285,10 +285,15 @@ body:has(.composer.floating:not(.min)) .snacks {
 }
 .snack .act {
   margin-left: auto;
+  flex: none;
+  white-space: nowrap;
   color: color-mix(in srgb, var(--accent) 55%, white);
   font-weight: 600;
   padding: 4px var(--s-2);
   border-radius: var(--r-1);
+}
+.snack .act + .act {
+  margin-left: calc(-1 * var(--s-2));
 }
 .snack .act:hover {
   background: rgba(255, 255, 255, 0.08);

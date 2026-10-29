@@ -253,6 +253,8 @@ pub fn run() {
             commands::take_compose_init,
             commands::open_attachment,
             commands::save_attachment,
+            commands::open_saved,
+            commands::show_saved,
             commands::set_badge,
             commands::make_default_mail_app,
             commands::take_launch_mailto,

@@ -20,6 +20,8 @@ export interface Snack {
   id: number;
   text: string;
   action?: { label: string; run: () => void };
+  /** A second button after `action`, e.g. "Show in folder" beside "Open". */
+  action2?: { label: string; run: () => void };
   ms?: number;
   leaving?: boolean;
   /** "sending": a ring that runs down the undo window, then a check as it goes. */

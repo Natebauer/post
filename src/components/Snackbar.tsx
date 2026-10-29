@@ -60,6 +60,17 @@ export function Snackbar() {
               {s.action.label === "Undo" && <kbd className="snack-key">Ctrl Z</kbd>}
             </button>
           )}
+          {s.action2 && (
+            <button
+              className="act"
+              onClick={() => {
+                drop(s.id);
+                s.action2!.run();
+              }}
+            >
+              {s.action2.label}
+            </button>
+          )}
           <button className="icon-btn sm x" onClick={() => drop(s.id)} aria-label="Dismiss" style={s.action ? undefined : { marginLeft: "auto" }}>
             <X size={14} />
           </button>

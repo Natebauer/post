@@ -36,10 +36,32 @@ export function fileKind(filename: string, mimeType = ""): { label: string; colo
   return { label: ext || "FILE", color: "#6c6f77" };
 }
 
+/** Open what Post just saved; a file that can run programs needs a second, deliberate click. */
+export async function openSaved(path: string, name: string) {
+  try {
+    if ((await api.openSaved(path)) === "confirm")
+      useStore.getState().snack({
+        text: `${name} can run programs on your computer. Only open it if you trust the sender.`,
+        ms: 9000,
+        action: { label: "Open anyway", run: () => void api.openSaved(path, true).catch(() => {}) },
+      });
+  } catch (e) {
+    useStore.getState().snack({ text: errText(e) });
+  }
+}
+
 async function saveAs(messageId: string, a: Attachment): Promise<boolean> {
   try {
-    if (await api.saveAttachment(messageId, a.partId)) {
-      useStore.getState().snack({ text: `Saved ${a.filename}` });
+    const path = await api.saveAttachment(messageId, a.partId);
+    if (path) {
+      useStore.getState().snack({
+        text: `Saved ${a.filename}`,
+        action: { label: "Open", run: () => void openSaved(path, a.filename) },
+        action2: {
+          label: "Show in folder",
+          run: () => void api.showSaved(path).catch((e) => useStore.getState().snack({ text: errText(e) })),
+        },
+      });
       return true;
     }
   } catch (e) {

@@ -387,8 +387,12 @@ export const api = {
   /** "confirm" means the file can run code; ask, then call again with confirmed. */
   openAttachment: (messageId: string, partId: string, confirmed = false) =>
     invoke<"opened" | "confirm">("open_attachment", { messageId, partId, confirmed }),
-  /** Opens a save dialog; false if cancelled. */
-  saveAttachment: (messageId: string, partId: string) => invoke<boolean>("save_attachment", { messageId, partId }),
+  /** Opens a save dialog; where the file went, or null if cancelled. */
+  saveAttachment: (messageId: string, partId: string) => invoke<string | null>("save_attachment", { messageId, partId }),
+  /** Open a file or folder Post just saved; "confirm" as for openAttachment. */
+  openSaved: (path: string, confirmed = false) => invoke<"opened" | "confirm">("open_saved", { path, confirmed }),
+  /** Show a file Post just saved, selected in File Explorer. */
+  showSaved: (path: string) => invoke<void>("show_saved", { path }),
   /** Opens a file picker; the chosen files are copied where Post sends from. */
   pickAttachments: () => invoke<{ path: string; name: string }[]>("pick_attachments"),
 
@@ -399,7 +403,7 @@ export const api = {
   markAllRead: (folder: string) => invoke<number>("mark_all_read", { folder }),
   getRaw: (messageId: string) => invoke<string>("get_raw", { messageId }),
   saveRaw: (messageId: string, name: string) => invoke<boolean>("save_raw", { messageId, name }),
-  saveAllAttachments: (messageId: string) => invoke<number | null>("save_all_attachments", { messageId }),
+  saveAllAttachments: (messageId: string) => invoke<[number, string] | null>("save_all_attachments", { messageId }),
   listSendAs: () => invoke<SendAs[]>("list_send_as"),
   rsvp: (messageId: string, ics: string, response: "yes" | "maybe" | "no") => invoke<void>("rsvp", { messageId, ics, response }),
   rsvpStatus: (messageIds: string[]) => invoke<Record<string, string>>("rsvp_status", { messageIds }),

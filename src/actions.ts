@@ -293,8 +293,14 @@ export async function saveOriginal(m: Message) {
 
 export async function downloadAll(m: Message) {
   try {
-    const n = await api.saveAllAttachments(m.id);
-    if (n !== null) S().snack({ text: `Saved ${n} attachment${n === 1 ? "" : "s"}` });
+    const r = await api.saveAllAttachments(m.id);
+    if (r) {
+      const [n, dir] = r;
+      S().snack({
+        text: `Saved ${n} attachment${n === 1 ? "" : "s"}`,
+        action: { label: "Open folder", run: () => void api.openSaved(dir).catch((e) => S().snack({ text: errText(e) })) },
+      });
+    }
   } catch (e) {
     S().snack({ text: errText(e) });
   }
