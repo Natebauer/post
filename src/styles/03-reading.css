@@ -646,9 +646,9 @@
     box-shadow var(--fast) var(--ease);
 }
 .reply-box:hover {
-  background: var(--surface);
-  border-color: color-mix(in srgb, var(--accent) 40%, var(--border-strong));
-  box-shadow: var(--shadow-2);
+  background: color-mix(in srgb, var(--surface-3) 60%, var(--surface-2));
+  border-color: transparent;
+  box-shadow: none;
 }
 .reply-bar .btn.outline {
   border-radius: 20px;

@@ -209,8 +209,9 @@ function typicalSize(boxes: TextBox[]) {
   return { size: 0, chars: total };
 }
 
-/** Comfortable reading sizes, in on-screen pixels. Outside these, Post adjusts the email. */
-const READABLE_MIN = 12.5;
+/** Comfortable reading sizes, in on-screen pixels. Outside these, Post adjusts the email.
+ *  13px (Gmail's "small", common in mail sent through bulk services) counts as too small. */
+const READABLE_MIN = 14;
 const READABLE_MAX = 24;
 const READABLE_TARGET_UP = 15;
 const READABLE_TARGET_DOWN = 18;
