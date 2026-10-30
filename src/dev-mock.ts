@@ -230,6 +230,13 @@ export function installMock() {
           answer: "Daniel suggested dinner Saturday at 7:30 at the Ethiopian place on 5th [1]. Priya's reply about the API contract is unrelated [2].",
           sources: threads.slice(2, 4).map((t, i) => ({ n: i + 1, threadId: t.threadId, subject: t.subject, from: t.participants[0]?.name ?? "", date: t.date })),
         };
+      case "find_event": {
+        // The flight confirmation reads as an event; nothing else does.
+        if (!/lisbon/i.test(a.subject as string)) return null;
+        const d = new Date(Date.now() + 15 * 86_400_000);
+        const day = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+        return { title: "Flight to Lisbon", start: `${day}T18:05:00-05:00`, end: "", allDay: false, location: "JFK", link: "" };
+      }
       case "tone_check":
         return /idiot|ridiculous|!!!/i.test(a.text as string)
           ? { flag: true, note: "“This is ridiculous” may read as harsher than you intend." }

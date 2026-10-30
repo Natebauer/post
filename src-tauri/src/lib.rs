@@ -273,6 +273,7 @@ pub fn run() {
             commands::ai_describe_category,
             commands::ask_inbox,
             commands::tone_check,
+            commands::find_event,
             commands::category_mark,
             commands::category_classify,
             commands::home_summary,

@@ -1,7 +1,8 @@
 import { useEffect, useState } from "react";
 import type React from "react";
-import { Check, HelpCircle, MapPin, X } from "lucide-react";
-import { api, errText, type Message } from "../api";
+import { CalendarPlus, Check, HelpCircle, MapPin, Sparkles, X } from "lucide-react";
+import { openUrl } from "@tauri-apps/plugin-opener";
+import { api, errText, type EventIdea, type Message } from "../api";
 import { useStore } from "../store";
 import { cx } from "../util";
 import { calendarColorFor } from "./Calendar";
@@ -151,6 +152,152 @@ export function InviteCard({ m }: { m: Message }) {
           </div>
         )}
       </div>
+    </div>
+  );
+}
+
+/* ---------- an event an email mentions (no invite attached) ---------- */
+
+const EVENT_SEEN_KEY = "post.eventSeen";
+/** Suggestions you've added or waved away, by message (newest last, a few hundred kept). */
+function eventSeen(): Record<string, "added" | "dismissed"> {
+  try {
+    return JSON.parse(localStorage.getItem(EVENT_SEEN_KEY) || "{}");
+  } catch {
+    return {};
+  }
+}
+function markEvent(id: string, how: "added" | "dismissed") {
+  try {
+    const all = eventSeen();
+    delete all[id];
+    all[id] = how;
+    const ids = Object.keys(all);
+    for (const old of ids.slice(0, Math.max(0, ids.length - 300))) delete all[old];
+    localStorage.setItem(EVENT_SEEN_KEY, JSON.stringify(all));
+  } catch {
+    /* storage unavailable: the choice lasts until the email closes */
+  }
+}
+
+/** "2026-11-03T10:00:00-08:00" (an instant), "2026-11-03T10:00:00" (local time) or "2026-11-03" (a day). */
+function eventDate(s: string): Date | null {
+  const day = s.match(/^(\d{4})-(\d{2})-(\d{2})$/);
+  const d = day ? new Date(+day[1], +day[2] - 1, +day[3]) : new Date(s);
+  return isNaN(d.getTime()) ? null : d;
+}
+
+const gcalStamp = (d: Date, allDay: boolean) =>
+  allDay
+    ? `${d.getFullYear()}${String(d.getMonth() + 1).padStart(2, "0")}${String(d.getDate()).padStart(2, "0")}`
+    : d.toISOString().replace(/[-:]/g, "").replace(/\.\d{3}/, "");
+
+/** Google Calendar's "new event" page, filled in, for you to look over and save. */
+function gcalLink(inv: Invite, link: string, subject: string) {
+  const start = inv.start!;
+  const end = inv.end ?? (inv.allDay ? new Date(start.getFullYear(), start.getMonth(), start.getDate() + 1) : new Date(start.getTime() + 3_600_000));
+  const details = [link, `From the email “${subject}”`].filter(Boolean).join("\n\n");
+  const q = new URLSearchParams({
+    action: "TEMPLATE",
+    text: inv.summary,
+    dates: `${gcalStamp(start, inv.allDay)}/${gcalStamp(end, inv.allDay)}`,
+    details,
+    location: inv.location || link,
+  });
+  return `https://calendar.google.com/calendar/render?${q}`;
+}
+
+/**
+ * An email that confirms an appointment, booking or webinar but has no calendar invite: Post asks
+ * Claude whether it names one (once per email, and only when it mentions a date and a time), and
+ * offers to add it to your calendar.
+ */
+export function EventSuggestion({ m, me }: { m: Message; me: string }) {
+  const aiOn = useStore((s) => s.settings?.aiEnabled ?? false);
+  const [idea, setIdea] = useState<EventIdea | null>(null);
+  const [seen, setSeen] = useState(() => eventSeen()[m.id] ?? null);
+  // Recent mail only: an old email's event is over, and isn't worth asking about.
+  const eligible =
+    aiOn && !m.ics && !m.isDraft && m.from.email.toLowerCase() !== me.toLowerCase() && Date.now() - m.date < 45 * 86_400_000 &&
+    !m.attachments.some((a) => a.mimeType === "text/calendar" || /\.ics$/i.test(a.filename));
+
+  useEffect(() => {
+    if (!eligible || seen === "dismissed") return;
+    let live = true;
+    const text = m.text.trim() || new DOMParser().parseFromString(m.html ?? "", "text/html").body.textContent || "";
+    api
+      .findEvent(m.id, m.subject, m.from.name ? `${m.from.name} <${m.from.email}>` : m.from.email, m.date, text.replace(/\s+/g, " "))
+      .then((r) => live && setIdea(r))
+      .catch(() => {});
+    return () => {
+      live = false;
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [m.id, eligible]);
+
+  if (!idea || seen === "dismissed") return null;
+  const start = eventDate(idea.start);
+  if (!start) return null;
+  const inv: Invite = {
+    uid: "",
+    summary: idea.title,
+    start,
+    end: idea.end ? eventDate(idea.end) : null,
+    allDay: idea.allDay,
+    location: idea.location,
+    organizer: "",
+    method: "",
+  };
+  // Already over: nothing to add.
+  if ((inv.end ?? start).getTime() < Date.now() - (idea.allDay ? 86_400_000 : 0)) return null;
+
+  const add = () => {
+    void openUrl(gcalLink(inv, idea.link, m.subject));
+    markEvent(m.id, "added");
+    setSeen("added");
+  };
+  const dismiss = () => {
+    markEvent(m.id, "dismissed");
+    setSeen("dismissed");
+  };
+
+  return (
+    <div
+      className="invite event-idea"
+      role="group"
+      aria-label={`Event in this email: ${inv.summary}`}
+      style={{ "--cal": calendarColorFor(inv.summary, inv.start) ?? undefined } as React.CSSProperties}
+    >
+      <div className="cal" aria-hidden>
+        <div className="m">{start.toLocaleDateString(undefined, { month: "short" })}</div>
+        <div className="d">{start.getDate()}</div>
+      </div>
+      <div>
+        <div className="event-idea-kicker">
+          <Sparkles size={12} aria-hidden /> Looks like an event
+        </div>
+        <h4>{inv.summary}</h4>
+        <div className="when">{whenText(inv)}</div>
+        {inv.location && (
+          <div className="when" style={{ display: "flex", gap: 4, alignItems: "center", marginTop: 2 }}>
+            <MapPin size={12} /> {inv.location}
+          </div>
+        )}
+        <div className="rsvp">
+          {seen === "added" ? (
+            <span className="faint event-idea-done">
+              <Check size={14} /> Opened in Google Calendar to save
+            </span>
+          ) : (
+            <button className="btn outline" onClick={add} title="Opens Google Calendar with this filled in, to look over and save">
+              <CalendarPlus size={14} /> Add to calendar
+            </button>
+          )}
+        </div>
+      </div>
+      <button className="icon-btn sm event-idea-x" title="Not an event" aria-label="Dismiss this suggestion" onClick={dismiss}>
+        <X size={14} />
+      </button>
     </div>
   );
 }

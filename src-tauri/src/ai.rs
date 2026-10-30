@@ -884,3 +884,98 @@ false, \"note\": \"if flagged, one short sentence saying which part reads sharpl
         note: v["note"].as_str().unwrap_or("").trim().to_string(),
     })
 }
+/* ---------------- an event mentioned in an email ---------------- */
+
+#[derive(Debug, Clone, Serialize, serde::Deserialize, PartialEq)]
+#[serde(rename_all = "camelCase")]
+pub struct EventIdea {
+    pub title: String,
+    /// ISO 8601: "2026-11-03T10:00:00-08:00" when the email gives a time zone, "2026-11-03T10:00:00"
+    /// (local) when it doesn't, or "2026-11-03" for an all-day event.
+    pub start: String,
+    /// Same form as `start`, or "" when the email gives neither an end nor a length.
+    pub end: String,
+    pub all_day: bool,
+    pub location: String,
+    /// A link to join or see the details (a webinar, a booking), or "".
+    pub link: String,
+}
+
+/// A date with a time, or a weekday or month with a day: the cheap check that an email might
+/// name an event, before asking Claude.
+fn mentions_a_date(text: &str) -> bool {
+    static DATE: once_cell::sync::Lazy<regex::Regex> = once_cell::sync::Lazy::new(|| {
+        regex::Regex::new(
+            r"(?i)\b(\d{1,2}[/.-]\d{1,2}([/.-]\d{2,4})?|(jan|feb|mar|apr|may|jun|jul|aug|sep|sept|oct|nov|dec)[a-z]*\.?\s+\d{1,2}(st|nd|rd|th)?|\d{1,2}(st|nd|rd|th)?\s+(of\s+)?(jan|feb|mar|apr|may|jun|jul|aug|sep|sept|oct|nov|dec)[a-z]*|(mon|tues?|wed(nes)?|thu(rs)?|fri|sat(ur)?|sun)(day)?,?\s+(the\s+)?\d{1,2}|tomorrow|tonight)\b",
+        )
+        .unwrap()
+    });
+    static TIME: once_cell::sync::Lazy<regex::Regex> = once_cell::sync::Lazy::new(|| {
+        regex::Regex::new(r"(?i)\b\d{1,2}(:\d{2})?\s*([ap]\.?m\.?)|\b\d{1,2}:\d{2}\b|\ball[- ]day\b|\bnoon\b").unwrap()
+    });
+    DATE.is_match(text) && TIME.is_match(text)
+}
+
+/// The appointment, booking, webinar or similar that an email confirms or schedules for the user,
+/// if any. Checked once per email (the answer is kept), and only for emails that mention a date
+/// and a time; a calendar invite has its own card and isn't asked about.
+pub async fn find_event(st: &AppState, message_id: &str, subject: &str, from: &str, received_ms: i64, text: &str) -> Result<Option<EventIdea>> {
+    let key = format!("event:{message_id}");
+    if let Some(v) = st.db.kv_get(&key) {
+        return Ok(serde_json::from_str(&v).unwrap_or(None));
+    }
+    let text: String = text.chars().take(5000).collect();
+    let remember = |idea: &Option<EventIdea>| {
+        let _ = st.db.kv_set(&key, &serde_json::to_string(idea).unwrap_or_else(|_| "null".into()));
+    };
+    if !mentions_a_date(&format!("{subject}\n{text}")) {
+        remember(&None);
+        return Ok(None);
+    }
+    let received = chrono::DateTime::from_timestamp_millis(received_ms)
+        .map(|d| d.with_timezone(&chrono::Local).format("%A, %B %-d, %Y").to_string())
+        .unwrap_or_default();
+    let system = "You read one email and decide whether it confirms or schedules a specific event the recipient \
+will attend or must be at: an appointment, a booking or reservation, a registered webinar or class, an interview, \
+a meeting, a delivery window they must be home for. Sales, promotions, newsletters, deadlines to act by, past events \
+and vague plans are NOT events. Respond with only a JSON object. If there is no such event: {\"event\": null}. \
+Otherwise: {\"event\": {\"title\": \"short name for a calendar, without words like Confirmation\", \"start\": \"ISO 8601\", \
+\"end\": \"ISO 8601 or empty\", \"allDay\": true or false, \"location\": \"place or address, or empty\", \"link\": \"URL to \
+join or view it, or empty\"}}. Dates and times: when the email states a time zone or UTC offset, write the time as \
+given with its offset (e.g. 2026-11-03T10:00:00-08:00); with no time zone, write local time without an offset; for an \
+all-day event write only the date. Work out the end from a stated duration. Resolve words like \"tomorrow\" from the \
+date the email was received.";
+    let user = format!("Received: {received}\nFrom: {from}\nSubject: {subject}\n\n{text}");
+    let reply = complete(st, "find_event", system, &user, 300).await?;
+    let v = json_object(&reply)?;
+    let e = &v["event"];
+    let idea = if e.is_object() && e["start"].as_str().is_some_and(|s| !s.is_empty()) {
+        let s = |k: &str| e[k].as_str().unwrap_or("").trim().to_string();
+        Some(EventIdea {
+            title: if s("title").is_empty() { subject.to_string() } else { s("title") },
+            start: s("start"),
+            end: s("end"),
+            all_day: e["allDay"].as_bool().unwrap_or(false),
+            location: s("location"),
+            link: s("link"),
+        })
+    } else {
+        None
+    };
+    remember(&idea);
+    Ok(idea)
+}
+
+#[cfg(test)]
+mod event_tests {
+    use super::mentions_a_date;
+
+    #[test]
+    fn date_check() {
+        assert!(mentions_a_date("Date / Time: 11/3/2026 10:00 AM, (UTC-08:00) Pacific Time"));
+        assert!(mentions_a_date("See you Tuesday, Nov 4th at 2pm"));
+        assert!(mentions_a_date("Your table is booked for 12 March at 19:30"));
+        assert!(!mentions_a_date("Sale ends soon! 40% off everything"));
+        assert!(!mentions_a_date("Your order shipped on 10/28."), "a date alone isn't enough");
+    }
+}

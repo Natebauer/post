@@ -105,6 +105,16 @@ export interface Message {
   ics: string | null;
 }
 
+/** An event an email confirms or schedules (see ai.rs `find_event`). */
+export interface EventIdea {
+  title: string;
+  start: string;
+  end: string;
+  allDay: boolean;
+  location: string;
+  link: string;
+}
+
 export interface AskTurn {
   role: "user" | "assistant";
   text: string;
@@ -419,6 +429,8 @@ export const api = {
   askInbox: (question: string) => invoke<AskAnswer>("ask_inbox", { question }),
   /** Summarize one conversation (empty history) or answer a follow-up about it. */
   askThread: (threadId: string, history: AskTurn[]) => invoke<string>("ask_thread", { threadId, history }),
+  findEvent: (messageId: string, subject: string, from: string, received: number, text: string) =>
+    invoke<EventIdea | null>("find_event", { messageId, subject, from, received, text }),
   toneCheck: (text: string) => invoke<{ flag: boolean; note: string }>("tone_check", { text }),
   /** Ask Claude to do something with one email; `invites` lists invitations still to answer. */
   /** A question or an instruction for the AI assistant. */
