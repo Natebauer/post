@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react";
+import { createPortal } from "react-dom";
 import type React from "react";
-import { AtSign, Clock, Paperclip, Search, Type, X } from "lucide-react";
+import { AtSign, Clock, Mail, Paperclip, Search, Send, Star, Type, X } from "lucide-react";
 import { api, type Contact } from "../api";
 import { useStore } from "../store";
 import { cx } from "../util";
@@ -9,7 +10,37 @@ import { Avatar } from "./Avatar";
 /** The search field, in the list's header: it opens there in place of the folder's name, and the
     list below filters as you type. `extra` sits inside it (the found count); `onDone` is called
     when it's left empty, to fold it back to the folder's name. */
-export function SearchBox({ extra, onDone }: { extra?: React.ReactNode; onDone?: () => void }) {
+/** Words that narrow a search (from:, has:…), as typed in the field. */
+const FILTER_WORD = /^-?(from|to|cc|subject|has|is|in|label|before|after|older_than|newer_than):/i;
+
+/** "after:" a number of days ago, as Gmail writes dates. */
+const since = (days: number) => {
+  const d = new Date(Date.now() - days * 86_400_000);
+  return `${d.getFullYear()}/${String(d.getMonth() + 1).padStart(2, "0")}/${String(d.getDate()).padStart(2, "0")}`;
+};
+const WHEN: [string, number | null][] = [
+  ["Any time", null],
+  ["Past week", 7],
+  ["Past month", 30],
+  ["Past year", 365],
+];
+const WHERE: [string, string | null][] = [
+  ["All mail", null],
+  ["Inbox", "inbox"],
+  ["Sent", "sent"],
+  ["With spam & trash", "anywhere"],
+];
+
+export function SearchBox({
+  extra,
+  onDone,
+  panel,
+}: {
+  extra?: React.ReactNode;
+  onDone?: () => void;
+  /** Where to lay the search's controls out in full (the list spread wide), instead of a dropdown. */
+  panel?: HTMLElement | null;
+}) {
   const search = useStore((s) => s.search);
   const recent = useStore((s) => s.recentSearches);
   const setSearch = useStore((s) => s.setSearch);
@@ -81,7 +112,7 @@ export function SearchBox({ extra, onDone }: { extra?: React.ReactNode; onDone?:
         return { kind: "person" as const, label: c.name || c.email, value: words.join(" "), c };
       })
     : recent.map((r) => ({ kind: "recent" as const, label: r, value: r }));
-  const showPop = focused;
+  const showPop = focused && !panel;
   // Quick filters: a complete one runs straight away; one that needs a value waits for it.
   const addFilter = (token: string) => {
     const next = `${q.trim()}${q.trim() ? " " : ""}${token}`;
@@ -89,6 +120,100 @@ export function SearchBox({ extra, onDone }: { extra?: React.ReactNode; onDone?:
     else onChange(next);
     input.current?.focus();
   };
+
+  // The wide controls read and write the same words you'd type, so the two never disagree.
+  const words = q.trim() ? q.trim().split(/\s+/) : [];
+  const hasWord = (w: string) => words.some((x) => x.toLowerCase() === w);
+  const valueOf = (key: string) => words.find((x) => x.toLowerCase().startsWith(`${key}:`))?.slice(key.length + 1) ?? null;
+  const withWords = (rest: string[]) => {
+    onChange(rest.join(" "));
+    input.current?.focus();
+  };
+  const toggleWord = (w: string) => withWords(hasWord(w) ? words.filter((x) => x.toLowerCase() !== w) : [...words, w]);
+  const setKey = (key: string, v: string | null) =>
+    withWords([...words.filter((x) => !x.toLowerCase().startsWith(`${key}:`)), ...(v ? [`${key}:${v}`] : [])]);
+  const after = valueOf("after");
+  const where = valueOf("in")?.toLowerCase() ?? null;
+  const keep = (e: React.MouseEvent) => e.preventDefault();
+
+  const forget = (value: string) => {
+    const rest = useStore.getState().recentSearches.filter((r) => r !== value);
+    useStore.setState({ recentSearches: rest });
+    try {
+      localStorage.setItem("post.recentSearches", JSON.stringify(rest));
+    } catch {
+      /* storage unavailable */
+    }
+  };
+
+  const wideControls = panel && (
+    <div className="sp" aria-label="Search filters">
+      <div className="sp-group" role="group" aria-label="Show only">
+        {(
+          [
+            ["is:unread", "Unread", <Mail size={13} key="u" />],
+            ["is:starred", "Starred", <Star size={13} key="s" />],
+            ["has:attachment", "Has attachment", <Paperclip size={13} key="a" />],
+          ] as const
+        ).map(([w, label, icon]) => (
+          <button key={w} className={cx("search-chip", hasWord(w) && "on")} aria-pressed={hasWord(w)} onMouseDown={keep} onClick={() => toggleWord(w)}>
+            {icon}
+            {label}
+          </button>
+        ))}
+      </div>
+      <div className="sp-group seg" role="radiogroup" aria-label="Where">
+        {WHERE.map(([label, v]) => (
+          <button key={label} role="radio" aria-checked={where === v} className={cx("sp-seg", where === v && "on")} onMouseDown={keep} onClick={() => setKey("in", v)}>
+            {v === "sent" && <Send size={12} />}
+            {label}
+          </button>
+        ))}
+      </div>
+      <div className="sp-group seg" role="radiogroup" aria-label="When">
+        {WHEN.map(([label, days]) => {
+          const on = days === null ? !after : after === since(days);
+          return (
+            <button key={label} role="radio" aria-checked={on} className={cx("sp-seg", on && "on")} onMouseDown={keep} onClick={() => setKey("after", days === null ? null : since(days))}>
+              {label}
+            </button>
+          );
+        })}
+      </div>
+      <div className="sp-group" role="group" aria-label="Search by">
+        {(
+          [
+            ["from:", "From…", <AtSign size={13} key="f" />],
+            ["to:", "To…", <AtSign size={13} key="t" />],
+            ["subject:", "Subject…", <Type size={13} key="s" />],
+          ] as const
+        ).map(([token, label, icon]) => (
+          <button key={token} className="search-chip" onMouseDown={keep} onClick={() => addFilter(token)}>
+            {icon}
+            {label}
+          </button>
+        ))}
+      </div>
+      {items.length > 0 && (
+        <div className="sp-suggest">
+          <span className="sp-label">{q.trim() ? "People" : "Recent"}</span>
+          {items.map((it) => (
+            <span key={it.value} className={cx("sp-pill", it.kind)}>
+              <button onMouseDown={keep} onClick={() => run(it.value)} title={it.c ? it.c.email : undefined}>
+                {it.c ? <Avatar email={it.c.email} name={it.label} size="xs" /> : <Clock size={13} />}
+                {it.c ? `Mail from ${it.label}` : it.label}
+              </button>
+              {it.kind === "recent" && (
+                <button className="sp-forget" aria-label={`Remove ${it.label} from recent searches`} title="Remove from recent searches" onMouseDown={keep} onClick={() => forget(it.value)}>
+                  <X size={12} />
+                </button>
+              )}
+            </span>
+          ))}
+        </div>
+      )}
+    </div>
+  );
 
   return (
     <div className="search-wrap">
@@ -99,7 +224,7 @@ export function SearchBox({ extra, onDone }: { extra?: React.ReactNode; onDone?:
         <span className="search-mirror" ref={mirror} aria-hidden>
           <span>
           {q.split(/(\s+)/).map((w, i) =>
-            /^-?(from|to|cc|subject|has|is|in|label|before|after|older_than|newer_than):/i.test(w) ? (
+            FILTER_WORD.test(w) ? (
               <mark key={i} className="search-tok">
                 {w}
               </mark>
@@ -223,13 +348,7 @@ export function SearchBox({ extra, onDone }: { extra?: React.ReactNode; onDone?:
                     onMouseDown={(e) => {
                       e.preventDefault();
                       e.stopPropagation();
-                      const rest = useStore.getState().recentSearches.filter((r) => r !== it.value);
-                      useStore.setState({ recentSearches: rest });
-                      try {
-                        localStorage.setItem("post.recentSearches", JSON.stringify(rest));
-                      } catch {
-                        /* storage unavailable */
-                      }
+                      forget(it.value);
                     }}
                   >
                     <X size={13} />
@@ -240,6 +359,7 @@ export function SearchBox({ extra, onDone }: { extra?: React.ReactNode; onDone?:
           ))}
         </div>
       )}
+      {wideControls && createPortal(wideControls, panel!)}
     </div>
   );
 }

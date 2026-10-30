@@ -22,7 +22,7 @@ import {
 } from "lucide-react";
 import type { MailFolder, ThreadSummary } from "../api";
 import { api } from "../api";
-import { useStore } from "../store";
+import { searchWide, useStore } from "../store";
 import { motionEase, motionMs, reduceMotion, scrollBehavior } from "../motionTokens";
 import { claimHighlight } from "../motion";
 import * as A from "../actions";
@@ -466,7 +466,11 @@ export function ThreadList() {
   const search = useStore((s) => s.search);
   // Search lives in this header: a button (or / anywhere) opens the field in place of the
   // folder's name, and it folds back once it's left empty.
-  const [searchOpen, setSearchOpen] = useState(false);
+  const searchOpen = useStore((s) => s.searchOpen);
+  const setSearchOpen = (open: boolean) => useStore.setState({ searchOpen: open });
+  // With nothing open, the list spreads across the window and the search's controls sit under the field.
+  const wide = useStore(searchWide);
+  const [searchPanel, setSearchPanel] = useState<HTMLDivElement | null>(null);
   useEffect(() => {
     const open = () => setSearchOpen(true);
     window.addEventListener("post:focus-search", open);
@@ -673,6 +677,7 @@ export function ThreadList() {
               )
             }
             onDone={closeSearch}
+            panel={wide ? searchPanel : null}
           />
         ) : (
           <>
@@ -705,6 +710,7 @@ export function ThreadList() {
           </button>
         )}
       </div>
+      {wide && <div className="search-panel" ref={setSearchPanel} />}
       {search && (
         <div className="search-banner" aria-live="polite">
           {search.loading ? (

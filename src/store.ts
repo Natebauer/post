@@ -65,6 +65,8 @@ interface Store {
   leaving: string[];
   thread: ThreadDetail | null;
   search: SearchState | null;
+  /** The search field is open in the list's header (it may still be empty). */
+  searchOpen: boolean;
   recentSearches: string[];
   sendAs: SendAs[] | null;
 
@@ -137,6 +139,19 @@ function loadRecent(): string[] {
   }
 }
 
+/** Whether the reading pane shows something (an email, a selection or a composer) or Home. */
+export function paneHasContent(s: Store) {
+  const mode = s.composeForcedMode ?? s.settings?.composeMode ?? "inline";
+  const inThread = s.compose && s.compose.kind !== "new" && s.compose.threadId === s.selectedId;
+  return !!s.selectedId || s.checked.length > 1 || (!!s.compose && mode === "inline" && !inThread);
+}
+
+/** Searching with nothing open: the list spreads across the reading pane's space, with room for
+ *  the search's controls. Opening an email gives the pane back. */
+export function searchWide(s: Store) {
+  return (!!s.search || s.searchOpen) && !paneHasContent(s);
+}
+
 export const useStore = create<Store>((set, get) => ({
   info: null,
   settings: null,
@@ -155,6 +170,7 @@ export const useStore = create<Store>((set, get) => ({
   leaving: [],
   thread: null,
   search: null,
+  searchOpen: false,
   recentSearches: loadRecent(),
   sendAs: null,
   compose: null,
