@@ -265,8 +265,8 @@
 }
 .list-head .sub.pill.on {
   padding-right: 6px;
-  color: var(--accent-ink);
-  background: var(--accent);
+  color: var(--accent-fill-ink);
+  background: var(--accent-fill);
 }
 .list-scroll {
   flex: 1;

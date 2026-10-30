@@ -10,6 +10,8 @@
   interpolate-size: allow-keywords;
   --accent: #2a737b;
   --accent-ink: #ffffff;
+  --accent-fill: var(--accent);
+  --accent-fill-ink: #ffffff;
   --accent-soft: color-mix(in srgb, var(--accent) 12%, transparent);
   /* The selected email in the inbox list. */
   --selected-bg: color-mix(in srgb, var(--accent) 12%, var(--surface));
@@ -621,13 +623,13 @@ button.sync-pill:hover {
   white-space: nowrap;
 }
 .btn.primary {
-  /* A touch deeper than the accent so white text stays readable on light accents. */
-  background: color-mix(in srgb, var(--accent) 90%, black);
-  color: var(--accent-ink);
+  /* The accent, deepened just enough for its text to read (theme.ts accentFill). */
+  background: var(--accent-fill);
+  color: var(--accent-fill-ink);
   box-shadow: 0 1px 2px color-mix(in srgb, var(--accent) 40%, transparent);
 }
 .btn.primary:hover {
-  background: color-mix(in srgb, var(--accent) 80%, black);
+  background: color-mix(in srgb, var(--accent-fill) 88%, black);
 }
 .btn.primary:disabled {
   opacity: 0.5;
@@ -666,7 +668,7 @@ button.sync-pill:hover {
 .split-btn .btn.primary:last-child {
   border-radius: 0 var(--r-1) var(--r-1) 0;
   padding: 0 7px;
-  border-left: 1px solid color-mix(in srgb, var(--accent-ink) 25%, transparent);
+  border-left: 1px solid color-mix(in srgb, var(--accent-fill-ink) 25%, transparent);
 }
 
 /* Changing the theme or mood switches every color at once, rather than hover colors trailing a
