@@ -478,28 +478,14 @@ export function ThreadList() {
     window.addEventListener("post:focus-search", open);
     return () => window.removeEventListener("post:focus-search", open);
   }, []);
-  // Folding back: the field shrinks into the search button, then the folder's name fades in.
+  // Closing: the spread-out list closes back over Home (searchMotion.ts), and the folder's name fades in.
   const [unfolding, setUnfolding] = useState(false);
-  const closing = useRef(false);
   const closeSearch = () => {
     // Folding the field away while results are showing would leave no way out of them.
-    if (closing.current || useStore.getState().search) return;
-    const done = () => {
-      closing.current = false;
-      setSearchOpen(false);
-      setUnfolding(true);
-      window.setTimeout(() => setUnfolding(false), 400);
-    };
-    const w = document.querySelector<HTMLElement>(".list-head .search-wrap");
-    if (!w || reduceMotion()) return done();
-    closing.current = true;
-    w.animate(
-      [
-        { clipPath: "inset(0 0 0 0 round 8px)", opacity: 1 },
-        { clipPath: "inset(0 0 0 calc(100% - 64px) round 8px)", opacity: 0 },
-      ],
-      { duration: 200, easing: "cubic-bezier(0.4, 0, 1, 1)", fill: "forwards" },
-    ).finished.then(done, done);
+    if (useStore.getState().search) return;
+    setSearchOpen(false);
+    setUnfolding(true);
+    window.setTimeout(() => setUnfolding(false), 400);
   };
   useEffect(() => {
     // Cleared from elsewhere (Esc in the list): fold back unless you're still typing in it.

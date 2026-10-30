@@ -347,16 +347,16 @@ a:focus-visible {
   position: relative;
   container-type: inline-size;
 }
-/* Searching with nothing open: the list grows over Home (which stays put underneath, held in
-   place by a stand-in for the list), and folds back over it the same way. With an email open,
-   the two share the space half and half. (Widths, not flex, so the change can glide.) */
-.sheet:is(.search-wide, .search-leaving)::before {
+/* Searching with nothing open: the list lies over Home (which stays put underneath, held in
+   place by a stand-in for the list). With an email open, the two share the space half and half.
+   The changes between them are clips, not resizing (searchMotion.ts). */
+.sheet.search-wide::before {
   content: "";
   flex: none;
   order: -1;
   width: var(--list-w, clamp(340px, 36%, 460px));
 }
-.sheet:is(.search-wide, .search-leaving) .list-pane {
+.sheet.search-wide .list-pane {
   position: absolute;
   top: 0;
   bottom: 0;
@@ -368,8 +368,6 @@ a:focus-visible {
   background: linear-gradient(var(--surface), var(--surface)), var(--surface);
   -webkit-backdrop-filter: blur(28px) saturate(1.3);
   backdrop-filter: blur(28px) saturate(1.3);
-}
-.sheet.search-wide .list-pane {
   width: 100%;
 }
 .sheet.search-split .list-pane {

@@ -291,7 +291,8 @@ export const useStore = create<Store>((set, get) => ({
   select: (id) => {
     const apply = () => set({ selectedId: id, cursorId: id ?? get().cursorId, anchorId: id ?? get().anchorId });
     // Closing an email fades it out over Home first (paneFade.ts); anything else is immediate.
-    if (id === null && get().selectedId && closeWithFade(apply)) return;
+    // (Not beside a search: the list spreads back over it straight away, as the email fades.)
+    if (id === null && get().selectedId && searchLayout(get()) !== "split" && closeWithFade(apply)) return;
     cancelCloseFade();
     apply();
   },

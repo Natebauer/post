@@ -11,6 +11,7 @@ import { useShortcuts } from "./keyboard";
 import { useNavHistory } from "./history";
 import { cx } from "./util";
 import { fadePane, isClosingWithFade, registerPane } from "./paneFade";
+import { revealList, shrinkStill, stillList } from "./searchMotion";
 import * as A from "./actions";
 import { TitleBar } from "./components/TitleBar";
 import { Sidebar } from "./components/Sidebar";
@@ -133,10 +134,10 @@ function MainView() {
   // With nothing open, the reading pane drops its card and sits on the window background.
   const hasContent = !!selectedId || checked.length > 1 || !!paneComposer;
   const searchAt = useStore(searchLayout);
-  // The list's width just before a search spreads it out, splits it with an email, or gives the space back.
+  // The list's width just before a search spreads it out, splits it with an email, or gives the
+  // space back, and a still copy of it when it was spread wide (see searchMotion.ts).
   const listFrom = useRef<number | null>(null);
-  // A wide search folding back keeps floating over Home until it's back to its own width.
-  const [wideLeaving, setWideLeaving] = useState(false);
+  const listStill = useRef<HTMLElement | null>(null);
 
   // Opening or closing an email fades the email card over Home (see paneFade.ts). The still copy
   // has to be taken before React swaps the pane's content, so watch the store directly.
@@ -148,29 +149,31 @@ function MainView() {
         const was = paneHasContent(prev);
         const now = paneHasContent(s);
         // A close that already faded the real email out (closeWithFade) needs no copy, and neither
-        // does a search spread wide (the list glides over the pane, or off it).
-        const hidden = searchLayout(prev) === "wide" || searchLayout(s) === "wide";
-        if (was !== now && !(was && isClosingWithFade()) && !hidden) finishFade.current = fadePane(paneRef.current, now);
+        // does an email opened from a wide search (the list's copy uncovers it).
+        const fromWide = searchLayout(prev) === "wide";
+        if (was !== now && !(was && isClosingWithFade()) && !fromWide) finishFade.current = fadePane(paneRef.current, now);
         if (searchLayout(prev) !== searchLayout(s)) {
-          listFrom.current = paneRef.current?.parentElement?.querySelector(".list-pane")?.getBoundingClientRect().width ?? null;
-          if (searchLayout(prev) === "wide" && searchLayout(s) === null && !reduceMotion()) setWideLeaving(true);
+          const list = paneRef.current?.parentElement?.querySelector<HTMLElement>(".list-pane");
+          listFrom.current = list?.getBoundingClientRect().width ?? null;
+          listStill.current?.remove();
+          listStill.current = fromWide && list && !reduceMotion() ? stillList(list) : null;
         }
       }),
     [],
   );
-  // Every change of width glides from the one the list had: over Home when the search spreads
-  // wide, and making room when an email slides in beside it.
+  // The list takes its new width at once; only a clip moves (searchMotion.ts). Spreading wide, it
+  // opens out over Home; coming back, a copy of the wide list closes over it to the new edge.
   useLayoutEffect(() => {
     const from = listFrom.current;
-    listFrom.current = null;
+    const still = listStill.current;
+    listFrom.current = listStill.current = null;
     const list = paneRef.current?.parentElement?.querySelector<HTMLElement>(".list-pane");
-    const settle = () => setWideLeaving(false);
-    if (from === null || !list || reduceMotion()) return settle();
+    if (from === null || !list || reduceMotion()) return void still?.remove();
     const to = list.getBoundingClientRect().width;
-    if (Math.abs(to - from) < 2) return settle();
-    list
-      .animate([{ width: `${from}px` }, { width: `${to}px` }], { duration: motionMs("emphasis"), easing: motionEase("ease-move") })
-      .finished.then(settle, settle);
+    if (still) shrinkStill(still, to);
+    else if (searchAt === "wide") revealList(list, from);
+    else if (Math.abs(to - from) > 1)
+      list.animate([{ width: `${from}px` }, { width: `${to}px` }], { duration: motionMs("emphasis"), easing: motionEase("ease-move") });
   }, [searchAt]);
   useLayoutEffect(() => {
     registerPane(paneRef.current);
@@ -186,7 +189,7 @@ function MainView() {
       <div className="body">
         <Sidebar />
         <main
-          className={cx("sheet", searchAt && `search-${searchAt}`, wideLeaving && !searchAt && "search-leaving")}
+          className={cx("sheet", searchAt && `search-${searchAt}`)}
           aria-label="Mail"
           style={listWidth ? ({ "--list-w": `${listWidth}px` } as React.CSSProperties) : undefined}
         >
