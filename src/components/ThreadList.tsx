@@ -24,8 +24,9 @@ import {
 import type { MailFolder, ThreadSummary } from "../api";
 import { api } from "../api";
 import { searchLayout, useStore } from "../store";
-import { motionEase, motionMs, reduceMotion, scrollBehavior } from "../motionTokens";
+import { motionMs, reduceMotion, scrollBehavior } from "../motionTokens";
 import { claimHighlight } from "../motion";
+import { relayoutList, stillList } from "../searchMotion";
 import * as A from "../actions";
 import { cx, participantLine, shortDate, whenLabel } from "../util";
 import { Avatar } from "./Avatar";
@@ -524,24 +525,35 @@ export function ThreadList() {
   // Measure the list's width to pick its layout (and the virtual list's row height).
   const paneRef = useRef<HTMLElement>(null);
   const [listSize, setListSize] = useState<ListSize>("medium");
+  const shownSize = useRef<ListSize | null>(null);
+  // How the list looked just before it was dragged into another layout (see searchMotion.ts).
+  const sizeStill = useRef<HTMLElement | null>(null);
   useEffect(() => {
     const el = paneRef.current;
     if (!el) return;
-    const ro = new ResizeObserver(() => setListSize(sizeFor(el.getBoundingClientRect().width)));
+    const ro = new ResizeObserver(() => {
+      const size = sizeFor(el.getBoundingClientRect().width);
+      // Not on first measuring, and not while a search spreading out or coming back moves it.
+      const busy = el.parentElement?.querySelector("[data-still-list]");
+      if (shownSize.current && size !== shownSize.current && !sizeStill.current && !busy && !reduceMotion())
+        sizeStill.current = stillList(el, false);
+      setListSize(size);
+    });
     ro.observe(el);
     return () => ro.disconnect();
   }, []);
-  // Crossing into another layout: rows take their new places at once and the list fades back in,
-  // rather than every row gliding to a new height.
-  const shownSize = useRef(listSize);
+  // Crossing into another layout: rows take their new places at once (no row gliding to a new
+  // height), and a copy of how they looked moves piece by piece into them.
   useLayoutEffect(() => {
-    if (shownSize.current === listSize) return;
+    const was = shownSize.current;
     shownSize.current = listSize;
+    const still = sizeStill.current;
+    sizeStill.current = null;
     const pane = paneRef.current;
-    if (!pane || reduceMotion()) return;
+    if (!was || was === listSize || !pane || reduceMotion()) return void still?.remove();
     pane.classList.add("relayout");
-    scrollRef.current?.animate([{ opacity: 0.4 }, { opacity: 1 }], { duration: motionMs("fast"), easing: motionEase("ease") });
     requestAnimationFrame(() => requestAnimationFrame(() => pane.classList.remove("relayout")));
+    if (still) relayoutList(still, pane);
   }, [listSize]);
   const rowH = ROW_H[listSize];
   const v = useVirtualizer({

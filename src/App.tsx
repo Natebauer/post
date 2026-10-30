@@ -11,7 +11,7 @@ import { useShortcuts } from "./keyboard";
 import { useNavHistory } from "./history";
 import { cx } from "./util";
 import { fadePane, isClosingWithFade, registerPane } from "./paneFade";
-import { revealList, shrinkStill, stillList } from "./searchMotion";
+import { growList, revealList, shrinkStill, stillList } from "./searchMotion";
 import * as A from "./actions";
 import { TitleBar } from "./components/TitleBar";
 import { Sidebar } from "./components/Sidebar";
@@ -156,7 +156,9 @@ function MainView() {
           const list = paneRef.current?.parentElement?.querySelector<HTMLElement>(".list-pane");
           listFrom.current = list?.getBoundingClientRect().width ?? null;
           listStill.current?.remove();
-          listStill.current = fromWide && list && !reduceMotion() ? stillList(list) : null;
+          // Leaving wide, the copy carries the wide card; spreading out, the list brings its own.
+          const toWide = searchLayout(s) === "wide";
+          listStill.current = list && !reduceMotion() && (fromWide || toWide) ? stillList(list, fromWide) : null;
         }
       }),
     [],
@@ -170,7 +172,8 @@ function MainView() {
     const list = paneRef.current?.parentElement?.querySelector<HTMLElement>(".list-pane");
     if (from === null || !list || reduceMotion()) return void still?.remove();
     const to = list.getBoundingClientRect().width;
-    if (still) shrinkStill(still, to, list, searchAt === "split" ? paneRef.current : null);
+    if (still && searchAt === "wide") growList(still, list, from);
+    else if (still) shrinkStill(still, to, list, searchAt === "split" ? paneRef.current : null);
     else if (searchAt === "wide") revealList(list, from);
     else if (Math.abs(to - from) > 1)
       list.animate([{ width: `${from}px` }, { width: `${to}px` }], { duration: motionMs("emphasis"), easing: motionEase("ease-move") });

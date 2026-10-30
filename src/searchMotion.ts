@@ -1,19 +1,23 @@
 /**
- * The list spreading out for a search, and coming back in. Nothing is resized frame by frame
+ * The list changing its layout: spreading out for a search, coming back in, or dragged across
+ * the width where its rows switch between two lines and one. Nothing is resized frame by frame
  * (that re-lays out every row on every frame, and they switch layouts partway): the list takes
- * its new size at once and only a clip moves.
- *   - Spreading out: the list is already full width, and its clip opens from where its edge was.
- *   - Coming back (search closed, or an email opened beside it): a still copy of the wide list
- *     stays on top and its clip closes to the new edge. Inside it, every email that's in both
- *     layouts travels piece by piece (photo, sender, subject line, date) from its one-line place
- *     to its two-line one, its text narrowing as it goes; what's only in one of them fades. When
- *     it lands it looks exactly like the list underneath, which takes over.
+ * its new size at once, a still copy of how it looked lies over it, and inside that copy every
+ * email in both layouts travels piece by piece (photo, sender, subject line, date) to its new
+ * place, its text narrowing or widening as it goes; what's only in one of them fades. When it
+ * lands it looks exactly like the list underneath, which takes over.
+ *   - Spreading out: the list is already full width and its clip opens from where its edge was;
+ *     the copy's pieces travel out with it.
+ *   - Coming back (search closed, or an email opened beside it): the copy carries the wide card
+ *     and its clip closes to the new edge.
+ *   - Dragged across a layout width: the card stays put and only what's in it moves.
  */
 
 import { motionEase, motionMs } from "./motionTokens";
 import { sizeFor } from "./components/ThreadList";
 
-const clip = (right: number, r: string) => `inset(0 ${Math.max(0, right)}px 0 0 round ${r})`;
+// Negative reaches past the right edge: a copy narrower than what's moving out of it.
+const clip = (right: number, r: string) => `inset(0 ${right}px 0 0 round ${r})`;
 
 /** The pieces of a row that find their own way to their new places. */
 const PARTS = [".dot", ".avatar", ".row-from", ".row-sub", ".row-icons", ".row-date"];
@@ -50,8 +54,9 @@ function keepScroll(list: HTMLElement, copy: HTMLElement) {
   copy.querySelectorAll<HTMLElement>("*").forEach((el, i) => scrolled[i]?.scrollTop && (el.scrollTop = scrolled[i].scrollTop));
 }
 
-/** A still copy of the list as shown, laid exactly over it in the sheet. Take it before the layout changes. */
-export function stillList(list: HTMLElement): HTMLElement | null {
+/** A still copy of the list as shown, laid exactly over it in the sheet. Take it before the layout
+ *  changes. Without its `card`, it's only what's in the list, over the list's own card. */
+export function stillList(list: HTMLElement, card = true): HTMLElement | null {
   const sheet = list.parentElement;
   if (!sheet) return null;
   const s = sheet.getBoundingClientRect();
@@ -67,11 +72,13 @@ export function stillList(list: HTMLElement): HTMLElement | null {
     margin: "0",
     zIndex: "5",
     pointerEvents: "none",
-    background: cs.background,
-    boxShadow: cs.boxShadow,
-    backdropFilter: cs.backdropFilter,
+    background: card ? cs.background : "none",
+    borderColor: card ? cs.borderColor : "transparent",
+    boxShadow: card ? cs.boxShadow : "none",
+    backdropFilter: card ? cs.backdropFilter : "none",
   });
-  copy.style.setProperty("-webkit-backdrop-filter", cs.backdropFilter);
+  copy.style.setProperty("-webkit-backdrop-filter", copy.style.backdropFilter);
+  copy.dataset.stillList = "";
   sheet.appendChild(copy);
   keepScroll(list, copy);
   return copy;
@@ -97,7 +104,40 @@ export function shrinkStill(copy: HTMLElement, width: number, list: HTMLElement,
   }
   list.animate([{ opacity: 0 }, { opacity: 0 }], { duration: t.duration });
   // The list picks its row layout from its width a render or two later; measure it once it has.
-  whenSettled(list, () => keepPlace(copy, list), () => copy.isConnected && morph(copy, list, start - performance.now()));
+  whenSettled(list, () => keepPlace(copy, list), () => copy.isConnected && morph(copy, list, start - performance.now(), t.duration));
+}
+
+/** The list, already full width for a search, opens out from the edge it had at `from`, and what
+ *  was in it travels out to its one-line places as it does. Its header and filters are its own
+ *  from the start (the field takes typing at once, the filters unfold themselves). */
+export function growList(copy: HTMLElement, list: HTMLElement, from: number) {
+  const t = timing();
+  const start = performance.now();
+  const r = getComputedStyle(list).borderTopLeftRadius;
+  const out = copy.getBoundingClientRect().width - list.getBoundingClientRect().width;
+  revealList(list, from);
+  copy.style.overflow = "visible";
+  copy
+    .animate([{ clipPath: clip(0, r) }, { clipPath: clip(out, r) }], { ...t, fill: "forwards" })
+    .finished.finally(() => copy.remove());
+  for (const el of list.children)
+    if (el.matches(".list-head")) el.animate([{ opacity: 0 }, { opacity: 0, offset: 0.3 }, { opacity: 1 }], { duration: t.duration });
+    else if (!el.matches(".search-panel")) el.animate([{ opacity: 0 }, { opacity: 0 }], { duration: t.duration });
+  whenSettled(
+    list,
+    () => keepPlace(copy, list),
+    () => copy.isConnected && morph(copy, list, start - performance.now(), t.duration, ".list-head, .search-panel"),
+  );
+}
+
+/** The list was dragged across the width where its rows change layout: what's in it moves to its
+ *  new places over its own card, quicker than a search spreading out. */
+export function relayoutList(copy: HTMLElement, list: HTMLElement) {
+  const d = motionMs("emphasis") * 0.7;
+  const start = performance.now();
+  for (const el of list.children) el.animate([{ opacity: 0 }, { opacity: 0 }], { duration: d });
+  copy.animate([{ opacity: 1 }, { opacity: 1 }], { duration: d }).finished.finally(() => copy.remove());
+  whenSettled(list, () => keepPlace(copy, list), () => copy.isConnected && morph(copy, list, start - performance.now(), d));
 }
 
 /** Once the list has looked the same for a few frames (its width shows a frame later, its new row
@@ -172,10 +212,30 @@ function travel(el: HTMLElement, to: HTMLElement, base: DOMRect, move: KeyframeA
   });
 }
 
-function morph(copy: HTMLElement, list: HTMLElement, delay: number) {
-  // Rows sliding to new heights would be measured mid-slide.
+/** `keep`: what above the rows the list shows itself, rather than the copy. */
+function morph(copy: HTMLElement, list: HTMLElement, delay: number, D: number, keep?: string) {
+  // Rows sliding to new heights would be measured mid-slide; and where the list is still
+  // unfolding (its filters, say), measure where things will end up, then let it carry on.
   for (const a of list.getAnimations({ subtree: true })) if (a instanceof CSSTransition) a.finish();
-  const D = motionMs("emphasis");
+  const held = list.getAnimations({ subtree: true }).flatMap((a) => {
+    const t = a.currentTime;
+    const end = Number(a.effect?.getComputedTiming().endTime);
+    if (t === null || !Number.isFinite(end)) return [];
+    try {
+      a.currentTime = end;
+      return [() => (a.currentTime = t)];
+    } catch {
+      return []; // tied to scrolling, not time
+    }
+  });
+  try {
+    pieces(copy, list, delay, D, keep);
+  } finally {
+    held.forEach((back) => back());
+  }
+}
+
+function pieces(copy: HTMLElement, list: HTMLElement, delay: number, D: number, keep?: string) {
   const move: KeyframeAnimationOptions = { duration: D, delay, easing: motionEase("ease-move"), fill: "both" };
   const fade: KeyframeAnimationOptions = { duration: D, delay, easing: "linear", fill: "both" };
   const fadeOut = [{ opacity: 1 }, { opacity: 0, offset: 0.35 }, { opacity: 0 }];
@@ -221,19 +281,33 @@ function morph(copy: HTMLElement, list: HTMLElement, delay: number) {
     if (!to || !inView(row, was.scroll)) continue;
     const a = boxIn(row, base);
     const b = boxIn(to, base);
-    const parts = PARTS.flatMap((s) => {
+    // A piece only the new layout has (the compact one leaves out the sender and date) comes
+    // as a copy of the new one.
+    const parts = PARTS.flatMap((s): { x: HTMLElement; from: Box | null; to: Box | null; sizes: string[] }[] => {
       const x = row.querySelector<HTMLElement>(s);
       const y = to.querySelector<HTMLElement>(s);
-      return x && y ? [{ x, from: within(boxIn(x, base), a), to: within(boxIn(y, base), b), sizes: [getComputedStyle(x).fontSize, getComputedStyle(y).fontSize] }] : [];
+      if (!y) return x ? [{ x, from: within(boxIn(x, base), a), to: null, sizes: [getComputedStyle(x).fontSize, ""] }] : [];
+      const size = getComputedStyle(y).fontSize;
+      if (!x) return [{ x: y.cloneNode(true) as HTMLElement, from: null, to: within(boxIn(y, base), b), sizes: [size, size] }];
+      return [{ x, from: within(boxIn(x, base), a), to: within(boxIn(y, base), b), sizes: [getComputedStyle(x).fontSize, size] }];
     });
+    const shown = (b: Box | null): b is Box => !!b && b.w > 0 && b.h > 0;
     twin(to)?.style.setProperty("visibility", "hidden");
     row.querySelector(".row-actions")?.remove();
     stage.appendChild(row);
     Object.assign(row.style, { ...place(a), right: "auto", margin: "0", transform: "none", display: "block", transition: "none" });
     row.animate([place(a), place(b)], move);
     for (const p of parts) {
+      if (!p.x.isConnected) row.appendChild(p.x);
       Object.assign(p.x.style, { position: "absolute", margin: "0", display: "block" });
-      p.x.animate([{ ...place(p.from), fontSize: p.sizes[0] }, { ...place(p.to), fontSize: p.sizes[1] }], move);
+      // A piece one layout leaves out fades where it is (or where it will be).
+      if (!shown(p.to)) {
+        if (p.from) Object.assign(p.x.style, place(p.from));
+        p.x.animate(fadeOut, fade);
+      } else if (!shown(p.from)) {
+        Object.assign(p.x.style, place(p.to), { fontSize: p.sizes[1] });
+        p.x.animate(fadeIn, fade);
+      } else p.x.animate([{ ...place(p.from), fontSize: p.sizes[0] }, { ...place(p.to), fontSize: p.sizes[1] }], move);
     }
   }
 
@@ -254,8 +328,16 @@ function morph(copy: HTMLElement, list: HTMLElement, delay: number) {
   // Above the rows: a piece in both lists built the same way (the search field and its filters,
   // say) moves as a whole, each part inside it to its own new spot, and the two cross over at the
   // very end; one that changes (the field giving way to the folder's name) or goes, fades.
-  const listAbove = [...list.children].filter((el): el is HTMLElement => el instanceof HTMLElement && !el.matches(".list-scroll"));
-  const nextAbove = [...next.children].filter((el): el is HTMLElement => el instanceof HTMLElement && !el.matches(".list-scroll"));
+  const above = (l: Element) => [...l.children].filter((el): el is HTMLElement => el instanceof HTMLElement && !el.matches(".list-scroll"));
+  const listAbove = above(list);
+  const nextAbove = above(next);
+  if (keep)
+    for (let i = listAbove.length - 1; i >= 0; i--)
+      if (listAbove[i].matches(keep)) {
+        nextAbove[i].style.visibility = "hidden";
+        listAbove.splice(i, 1);
+        nextAbove.splice(i, 1);
+      }
   const late = [{ opacity: 1 }, { opacity: 1, offset: 0.92 }, { opacity: 0 }];
   for (const el of was.above) {
     const i = listAbove.findIndex((to, j) => to.classList[0] === el.classList[0] && !nextAbove[j].dataset.paired);
