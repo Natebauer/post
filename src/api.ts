@@ -431,6 +431,15 @@ export const api = {
   askThread: (threadId: string, history: AskTurn[]) => invoke<string>("ask_thread", { threadId, history }),
   findEvent: (messageId: string, subject: string, from: string, received: number, text: string) =>
     invoke<EventIdea | null>("find_event", { messageId, subject, from, received, text }),
+  addCalendarEvent: (title: string, start: string, end: string, allDay: boolean, location: string, description: string) =>
+    invoke<{ status: "ok" | "needs_permission" | "error"; message: string; link: string }>("add_calendar_event", {
+      title,
+      start,
+      end,
+      allDay,
+      location,
+      description,
+    }),
   toneCheck: (text: string) => invoke<{ flag: boolean; note: string }>("tone_check", { text }),
   /** Ask Claude to do something with one email; `invites` lists invitations still to answer. */
   /** A question or an instruction for the AI assistant. */

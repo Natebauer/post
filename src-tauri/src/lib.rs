@@ -274,6 +274,7 @@ pub fn run() {
             commands::ask_inbox,
             commands::tone_check,
             commands::find_event,
+            commands::add_calendar_event,
             commands::category_mark,
             commands::category_classify,
             commands::home_summary,

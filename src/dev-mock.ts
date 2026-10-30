@@ -188,6 +188,7 @@ const settings: Settings = {
 const mockMembers = new Set<string>();
 /** Open the preview with ?signedout to walk through sign-in and the first-run extras. */
 let mockSignedIn = !new URLSearchParams(location.search).has("signedout") && !new URLSearchParams(location.search).has("firstrun");
+let mockCanAddEvents = false;
 /** ?firstrun starts before the Google client is set up (the whole onboarding). */
 let mockConfigured = !new URLSearchParams(location.search).has("firstrun");
 
@@ -202,7 +203,13 @@ export function installMock() {
         return null;
       case "sign_in":
         mockSignedIn = true;
+        mockCanAddEvents = true;
         return null;
+      // The first time, Post hasn't been allowed to add events; signing in again allows it.
+      case "add_calendar_event":
+        return mockCanAddEvents
+          ? { status: "ok", message: "", link: "https://calendar.google.com/calendar/event?eid=mock" }
+          : { status: "needs_permission", message: "Post needs your permission to add events to Google Calendar.", link: "" };
       case "set_ai_key":
         return null;
       case "get_app_state":

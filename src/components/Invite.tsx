@@ -159,15 +159,16 @@ export function InviteCard({ m }: { m: Message }) {
 /* ---------- an event an email mentions (no invite attached) ---------- */
 
 const EVENT_SEEN_KEY = "post.eventSeen";
-/** Suggestions you've added or waved away, by message (newest last, a few hundred kept). */
-function eventSeen(): Record<string, "added" | "dismissed"> {
+/** Suggestions you've added (with the event's link) or waved away, by message (newest last, a
+ *  few hundred kept). An entry of just "added" is from before Post added events itself. */
+function eventSeen(): Record<string, string> {
   try {
     return JSON.parse(localStorage.getItem(EVENT_SEEN_KEY) || "{}");
   } catch {
     return {};
   }
 }
-function markEvent(id: string, how: "added" | "dismissed") {
+function markEvent(id: string, how: string) {
   try {
     const all = eventSeen();
     delete all[id];
@@ -192,11 +193,16 @@ const gcalStamp = (d: Date, allDay: boolean) =>
     ? `${d.getFullYear()}${String(d.getMonth() + 1).padStart(2, "0")}${String(d.getDate()).padStart(2, "0")}`
     : d.toISOString().replace(/[-:]/g, "").replace(/\.\d{3}/, "");
 
-/** Google Calendar's "new event" page, filled in, for you to look over and save. */
+/** When an event ends: as the email says, else an hour on (or the next day, for an all-day one). */
+const endOf = (inv: Invite) =>
+  inv.end ?? (inv.allDay ? new Date(inv.start!.getFullYear(), inv.start!.getMonth(), inv.start!.getDate() + 1) : new Date(inv.start!.getTime() + 3_600_000));
+const eventNotes = (link: string, subject: string) => [link, `From the email “${subject}”`].filter(Boolean).join("\n\n");
+
+/** Google Calendar's "new event" page, filled in, for you to look over and save (when Post can't add it itself). */
 function gcalLink(inv: Invite, link: string, subject: string) {
   const start = inv.start!;
-  const end = inv.end ?? (inv.allDay ? new Date(start.getFullYear(), start.getMonth(), start.getDate() + 1) : new Date(start.getTime() + 3_600_000));
-  const details = [link, `From the email “${subject}”`].filter(Boolean).join("\n\n");
+  const end = endOf(inv);
+  const details = eventNotes(link, subject);
   const q = new URLSearchParams({
     action: "TEMPLATE",
     text: inv.summary,
@@ -216,6 +222,9 @@ export function EventSuggestion({ m, me }: { m: Message; me: string }) {
   const aiOn = useStore((s) => s.settings?.aiEnabled ?? false);
   const [idea, setIdea] = useState<EventIdea | null>(null);
   const [seen, setSeen] = useState(() => eventSeen()[m.id] ?? null);
+  const [adding, setAdding] = useState(false);
+  // Post can't add events yet (no permission, or Google said no): how to go on.
+  const [blocked, setBlocked] = useState<"permission" | "error" | null>(null);
   // Recent mail only: an old email's event is over, and isn't worth asking about.
   const eligible =
     aiOn && !m.ics && !m.isDraft && m.from.email.toLowerCase() !== me.toLowerCase() && Date.now() - m.date < 45 * 86_400_000 &&
@@ -251,11 +260,41 @@ export function EventSuggestion({ m, me }: { m: Message; me: string }) {
   // Already over: nothing to add.
   if ((inv.end ?? start).getTime() < Date.now() - (idea.allDay ? 86_400_000 : 0)) return null;
 
-  const add = () => {
-    void openUrl(gcalLink(inv, idea.link, m.subject));
-    markEvent(m.id, "added");
-    setSeen("added");
+  // Straight onto your Google Calendar; the first time, Google asks you to allow it.
+  const add = async () => {
+    setAdding(true);
+    setBlocked(null);
+    const day = (d: Date) => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+    const at = (d: Date) => (inv.allDay ? day(d) : d.toISOString());
+    try {
+      const r = await api.addCalendarEvent(inv.summary, at(start), at(endOf(inv)), inv.allDay, inv.location || idea.link, eventNotes(idea.link, m.subject));
+      if (r.status === "ok") {
+        markEvent(m.id, `added:${r.link}`);
+        setSeen(`added:${r.link}`);
+        useStore.getState().snack({ text: "Added to your calendar" });
+      } else {
+        setBlocked(r.status === "needs_permission" ? "permission" : "error");
+        if (r.status === "error") useStore.getState().snack({ text: r.message });
+      }
+    } catch (e) {
+      setBlocked("error");
+      useStore.getState().snack({ text: errText(e) });
+    } finally {
+      setAdding(false);
+    }
   };
+  const allow = async () => {
+    setAdding(true);
+    try {
+      await api.signIn();
+      await add();
+    } catch (e) {
+      setAdding(false);
+      useStore.getState().snack({ text: errText(e) });
+    }
+  };
+  const openInGoogle = () => void openUrl(gcalLink(inv, idea.link, m.subject));
+  const added = seen?.startsWith("added") ? seen.slice(6) || null : null;
   const dismiss = () => {
     markEvent(m.id, "dismissed");
     setSeen("dismissed");
@@ -284,14 +323,33 @@ export function EventSuggestion({ m, me }: { m: Message; me: string }) {
           </div>
         )}
         <div className="rsvp">
-          {seen === "added" ? (
+          {seen?.startsWith("added") ? (
             <span className="faint event-idea-done">
-              <Check size={14} /> Opened in Google Calendar to save
+              <Check size={14} /> {added === null ? "Opened in Google Calendar to save" : "Added to your calendar"}
+              {added && (
+                <button className="link-btn" onClick={() => void openUrl(added)}>
+                  Open
+                </button>
+              )}
             </span>
+          ) : blocked === "permission" ? (
+            <>
+              <span className="faint event-idea-note">Post needs your OK to add events to Google Calendar. You'll approve it once in your browser.</span>
+              <button className="btn primary" disabled={adding} onClick={() => void allow()}>
+                <CalendarPlus size={14} /> {adding ? "Waiting for your browser…" : "Allow and add"}
+              </button>
+            </>
           ) : (
-            <button className="btn outline" onClick={add} title="Opens Google Calendar with this filled in, to look over and save">
-              <CalendarPlus size={14} /> Add to calendar
-            </button>
+            <>
+              <button className="btn outline" disabled={adding} onClick={() => void add()}>
+                <CalendarPlus size={14} /> {adding ? "Adding…" : "Add to calendar"}
+              </button>
+              {blocked === "error" && (
+                <button className="link-btn" onClick={openInGoogle}>
+                  Open in Google Calendar instead
+                </button>
+              )}
+            </>
           )}
         </div>
       </div>

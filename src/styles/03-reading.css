@@ -422,6 +422,10 @@
   gap: 5px;
   font-size: var(--fs-2);
 }
+.event-idea-note {
+  flex-basis: 100%;
+  font-size: var(--fs-1);
+}
 
 /* hover card */
 .hovercard {

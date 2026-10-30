@@ -322,6 +322,11 @@ impl Gmail {
         self.get(url.as_str()).await
     }
 
+    /// Add an event to the user's main calendar; returns it as Google stored it (with its link).
+    pub async fn insert_event(&self, event: &Value) -> Result<Value> {
+        self.post("https://www.googleapis.com/calendar/v3/calendars/primary/events", event).await
+    }
+
     /// Addresses this account can send as (primary plus aliases).
     pub async fn send_as(&self) -> Result<Vec<crate::types::SendAs>> {
         let v = self.get(&format!("{BASE}/settings/sendAs")).await?;
