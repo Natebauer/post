@@ -47,12 +47,12 @@ const ROW = 68;
 /** The list adapts to its width: very narrow shows only each email's photo; narrow shows avatar,
  *  subject and date; wide becomes a one-row-per-email table. These are the widths where it
  *  switches, and each layout's row height. */
-type ListSize = "tiny" | "small" | "medium" | "large";
+export type ListSize = "tiny" | "small" | "medium" | "large";
 const TINY_BELOW = 160;
 const SMALL_BELOW = 380;
 const LARGE_FROM = 720;
 const ROW_H: Record<ListSize, number> = { tiny: 52, small: 52, medium: ROW, large: 40 };
-const sizeFor = (w: number): ListSize =>
+export const sizeFor = (w: number): ListSize =>
   w < TINY_BELOW ? "tiny" : w < SMALL_BELOW ? "small" : w >= LARGE_FROM ? "large" : "medium";
 /** Height of a date group label ("Today", "Yesterday", …) above the first row of each group. */
 const GROUP = 30;
