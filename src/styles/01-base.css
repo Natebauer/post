@@ -363,6 +363,11 @@ a:focus-visible {
   left: 0;
   z-index: 4;
   box-shadow: var(--shadow-2);
+  /* A see-through card frosts over what it covers, so the calendar and pinned emails behind it
+     become soft color instead of text read through the results. (A solid card just covers them.) */
+  background: linear-gradient(var(--surface), var(--surface)), var(--surface);
+  -webkit-backdrop-filter: blur(28px) saturate(1.3);
+  backdrop-filter: blur(28px) saturate(1.3);
 }
 .sheet.search-wide .list-pane {
   width: 100%;
