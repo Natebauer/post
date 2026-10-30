@@ -19,6 +19,7 @@ import {
   Sparkles,
   Trash2,
   MailCheck,
+  X,
 } from "lucide-react";
 import type { MailFolder, ThreadSummary } from "../api";
 import { api } from "../api";
@@ -464,6 +465,7 @@ function ListMenu({ anchor, onClose }: { anchor: HTMLElement; onClose: () => voi
 export function ThreadList() {
   const folder = useStore((s) => s.folder);
   const search = useStore((s) => s.search);
+  const unreadOnly = useStore((s) => s.unreadOnly);
   // Search lives in this header: a button (or / anywhere) opens the field in place of the
   // folder's name, and it folds back once it's left empty.
   const searchOpen = useStore((s) => s.searchOpen);
@@ -632,7 +634,7 @@ export function ThreadList() {
   const loadingList = useStore((s) => s.loadingList);
   useEffect(() => {
     const was = lastCount.current;
-    if (folder === "INBOX" && !search && !loadingList && was.folder === folder && was.n > 0 && items.length === 0)
+    if (folder === "INBOX" && !search && !unreadOnly && !loadingList && was.folder === folder && was.n > 0 && items.length === 0)
       setCleared((c) => c + 1);
     lastCount.current = { folder, n: items.length };
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -658,7 +660,7 @@ export function ThreadList() {
     ? (<><RollingCount value={items.length} />{search.remote === null ? "+" : ""} found</>)
     : checked.length
       ? `${checked.length} selected`
-      : unread
+      : unread || unreadOnly
         ? (<><RollingCount value={unread} /> unread</>)
         : "";
   const selIndex = items.findIndex((t) => t.threadId === selectedId);
@@ -685,18 +687,23 @@ export function ThreadList() {
             {/* The folder's own icon, in the accent, beside its name. */}
             {ICONS[folder as MailFolder] && <span className="lh-folder" aria-hidden>{ICONS[folder as MailFolder]}</span>}
             <h2>{title}</h2>
-            <span
-              className={cx("sub tnum", !checked.length && unread > 0 && "pill")}
-              aria-live="polite"
-              // The unread count takes you back to the top of the list, where new mail is; the cursor stays put.
-              title={!checked.length && unread > 0 ? "Back to the top" : undefined}
-              onClick={() => {
-                if (checked.length || !unread) return;
-                scrollRef.current?.scrollTo({ top: 0, behavior: scrollBehavior() });
-              }}
-            >
-              {sub}
-            </span>
+            {!checked.length && (unread > 0 || unreadOnly) ? (
+              // The unread count shows just the unread conversations; again shows everything.
+              <button
+                className={cx("sub tnum pill", unreadOnly && "on")}
+                aria-live="polite"
+                aria-pressed={unreadOnly}
+                title={unreadOnly ? "Show all mail" : "Show only unread"}
+                onClick={() => useStore.getState().setUnreadOnly(!unreadOnly)}
+              >
+                {sub}
+                {unreadOnly && <X size={12} aria-hidden />}
+              </button>
+            ) : (
+              <span className="sub tnum" aria-live="polite">
+                {sub}
+              </span>
+            )}
           </>
         )}
         {!search && !searchOpen && (
@@ -760,7 +767,19 @@ export function ThreadList() {
               </div>
             </div>
           ) : (
-            <EmptyState />
+            unreadOnly && !loadingList ? (
+              <div className="empty">
+                <div>
+                  <EmptyArt kind="inbox" />
+                  <div className="big">No unread mail</div>
+                  <button className="banner-btn" onClick={() => useStore.getState().setUnreadOnly(false)}>
+                    Show all mail
+                  </button>
+                </div>
+              </div>
+            ) : (
+              <EmptyState />
+            )
           )
         ) : (
           <>

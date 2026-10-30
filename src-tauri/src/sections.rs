@@ -72,10 +72,11 @@ impl Db {
         self.settings().sender_views.into_iter().find(|v| v.key() == key)
     }
 
-    /// Inbox conversations in a section, newest first.
-    pub fn list_section(&self, key: &str, offset: i64, limit: i64) -> Result<(Vec<ThreadSummary>, i64)> {
+    /// Inbox conversations in a section, newest first (just the unread ones with `unread_only`).
+    pub fn list_section(&self, key: &str, offset: i64, limit: i64, unread_only: bool) -> Result<(Vec<ThreadSummary>, i64)> {
         let Some(v) = self.section(key) else { return Ok((vec![], 0)) };
         let (cond, mut args) = section_where(&v);
+        let cond = if unread_only { format!("tf.unread = 1 AND {cond}") } else { cond };
         let c = self.r.lock().unwrap();
         let total: i64 = c.query_row(
             &format!("SELECT COUNT(*) FROM thread_folders tf WHERE {cond}"),
@@ -246,11 +247,11 @@ mod tests {
         };
         let views = db.settings().sender_views;
         t("list INBOX", &|| {
-            db.list_threads("INBOX", 0, 100).unwrap();
+            db.list_threads("INBOX", 0, 100, false).unwrap();
         });
         for v in &views {
             t(&format!("list sec:{}", v.key()), &|| {
-                db.list_threads(&format!("sec:{}", v.key()), 0, 100).unwrap();
+                db.list_threads(&format!("sec:{}", v.key()), 0, 100, false).unwrap();
             });
         }
         // A group using every kind of rule (domains and subject words can't use an index).

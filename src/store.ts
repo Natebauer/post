@@ -64,6 +64,8 @@ interface Store {
   /** Rows animating out before removal. */
   leaving: string[];
   thread: ThreadDetail | null;
+  /** The list shows only unread conversations (the "unread" pill beside the folder's name). */
+  unreadOnly: boolean;
   search: SearchState | null;
   /** The search field is open in the list's header (it may still be empty). */
   searchOpen: boolean;
@@ -106,6 +108,7 @@ interface Store {
   refreshInfo: () => Promise<void>;
   setFolder: (f: Folder) => void;
   loadThreads: (opts?: { more?: boolean }) => Promise<void>;
+  setUnreadOnly: (on: boolean) => void;
   select: (id: string | null) => void;
   move: (delta: number, open?: boolean) => void;
   visibleThreads: () => ThreadSummary[];
@@ -171,6 +174,7 @@ export const useStore = create<Store>((set, get) => ({
   anchorId: null,
   leaving: [],
   thread: null,
+  unreadOnly: false,
   search: null,
   searchOpen: false,
   recentSearches: loadRecent(),
@@ -225,12 +229,18 @@ export const useStore = create<Store>((set, get) => ({
   },
 
   setFolder: (f) => {
-    set({ folder: f, threads: [], total: 0, selectedId: null, cursorId: null, checked: [], search: null });
+    set({ folder: f, threads: [], total: 0, selectedId: null, cursorId: null, checked: [], search: null, unreadOnly: false });
+    void get().loadThreads();
+  },
+
+  setUnreadOnly: (on) => {
+    if (get().unreadOnly === on) return;
+    set({ unreadOnly: on, threads: [], total: 0, checked: [] });
     void get().loadThreads();
   },
 
   loadThreads: async (opts) => {
-    const { folder, threads } = get();
+    const { folder, threads, unreadOnly, selectedId } = get();
     const seq = ++listSeq;
     if (folder === "SCHEDULED") {
       const outbox = await api.listOutbox();
@@ -242,10 +252,17 @@ export const useStore = create<Store>((set, get) => ({
       // On refresh, reload everything currently shown so scroll position is kept.
       const offset = opts?.more ? threads.length : 0;
       const limit = opts?.more ? 100 : Math.max(100, threads.length);
-      const r = await api.listThreads(folder, offset, limit);
+      const r = await api.listThreads(folder, offset, limit, unreadOnly);
       if (seq !== listSeq) return;
       const leaving = get().leaving;
       const fresh = r.threads.filter((t) => !leaving.includes(t.threadId));
+      // Showing unread only: the email you're reading stays in the list once it's read, until you
+      // move on from it.
+      const open = unreadOnly && !opts?.more && threads.find((t) => t.threadId === selectedId);
+      if (open && !fresh.some((t) => t.threadId === open.threadId)) {
+        const at = fresh.findIndex((t) => t.date < open.date);
+        fresh.splice(at < 0 ? fresh.length : at, 0, { ...open, unread: false });
+      }
       set({
         threads: opts?.more ? [...threads, ...fresh] : fresh,
         total: r.total,

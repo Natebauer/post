@@ -257,13 +257,14 @@ export function installMock() {
             sec.subjects.some((w) => t.subject.toLowerCase().includes(w))
           );
         };
-        const list = f.startsWith("sec:")
+        const all = f.startsWith("sec:")
           ? threads.filter(inSec)
           : f === "INBOX"
             ? threads
             : f === "SENT"
               ? threads.slice(0, 8)
               : [];
+        const list = a.unreadOnly ? all.filter((t) => t.unread) : all;
         const off = a.offset as number;
         return { threads: list.slice(off, off + (a.limit as number)), total: list.length };
       }

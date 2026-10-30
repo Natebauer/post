@@ -241,24 +241,25 @@ impl Db {
         Ok(threads)
     }
 
-    pub fn list_threads(&self, folder: &str, offset: i64, limit: i64) -> Result<(Vec<ThreadSummary>, i64)> {
+    /// A folder's (or section's) conversations, newest first; `unread_only` keeps just the unread ones.
+    pub fn list_threads(&self, folder: &str, offset: i64, limit: i64, unread_only: bool) -> Result<(Vec<ThreadSummary>, i64)> {
         if let Some(key) = folder.strip_prefix("sec:") {
-            return self.list_section(key, offset, limit);
+            return self.list_section(key, offset, limit, unread_only);
         }
         let c = self.r.lock().unwrap();
         let total: i64 = c.query_row(
-            "SELECT COUNT(*) FROM thread_folders WHERE folder = ?1",
-            [folder],
+            "SELECT COUNT(*) FROM thread_folders WHERE folder = ?1 AND (?2 = 0 OR unread = 1)",
+            params![folder, unread_only],
             |r| r.get(0),
         )?;
         let mut st = c.prepare_cached(
             "SELECT tf.folder, tf.thread_id, tf.sort_date, tf.subject, tf.snippet, tf.participants_json, tf.msg_count,
                     tf.unread, tf.has_attachments, tf.avatar_email, s.until
              FROM thread_folders tf LEFT JOIN snoozes s ON s.thread_id = tf.thread_id
-             WHERE tf.folder = ?1 ORDER BY tf.sort_date DESC LIMIT ?2 OFFSET ?3",
+             WHERE tf.folder = ?1 AND (?4 = 0 OR tf.unread = 1) ORDER BY tf.sort_date DESC LIMIT ?2 OFFSET ?3",
         )?;
         let rows = st
-            .query_map(params![folder, limit, offset], row_to_summary)?
+            .query_map(params![folder, limit, offset, unread_only], row_to_summary)?
             .collect::<rusqlite::Result<Vec<_>>>()?;
         Ok((rows, total))
     }

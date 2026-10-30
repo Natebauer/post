@@ -5,8 +5,8 @@ use super::*;
 // ---------------- mailbox ----------------
 
 #[tauri::command]
-pub async fn list_threads(st: St<'_>, folder: String, offset: i64, limit: i64) -> R<Value> {
-    let (threads, total) = st.db.list_threads(&folder, offset, limit)?;
+pub async fn list_threads(st: St<'_>, folder: String, offset: i64, limit: i64, unread_only: Option<bool>) -> R<Value> {
+    let (threads, total) = st.db.list_threads(&folder, offset, limit, unread_only.unwrap_or(false))?;
     Ok(json!({ "threads": threads, "total": total }))
 }
 
