@@ -41,7 +41,7 @@ fn store_list_search_and_labels() {
     )
     .unwrap();
 
-    let (inbox, total) = db.list_threads("INBOX", 0, 50).unwrap();
+    let (inbox, total) = db.list_threads("INBOX", 0, 50, false).unwrap();
     assert_eq!(total, 2);
     assert_eq!(inbox[0].thread_id, "t2", "newest first");
     let t1 = inbox.iter().find(|t| t.thread_id == "t1").unwrap();
@@ -49,8 +49,11 @@ fn store_list_search_and_labels() {
     assert_eq!(t1.count, 2);
     assert_eq!(t1.avatar_email, "alice@acme.com");
     assert_eq!(db.inbox_unread(), 1);
-    assert_eq!(db.list_threads("SENT", 0, 50).unwrap().1, 1);
-    assert_eq!(db.list_threads("SPAM", 0, 50).unwrap().1, 1);
+    let (unread, unread_total) = db.list_threads("INBOX", 0, 50, true).unwrap();
+    assert_eq!((unread.len(), unread_total), (1, 1), "unread only");
+    assert_eq!(unread[0].thread_id, "t1");
+    assert_eq!(db.list_threads("SENT", 0, 50, false).unwrap().1, 1);
+    assert_eq!(db.list_threads("SPAM", 0, 50, false).unwrap().1, 1);
 
     // Search: free text, operators, and spam exclusion
     let r = db.search_local(&parse_query("budget"), 50).unwrap();
@@ -65,8 +68,8 @@ fn store_list_search_and_labels() {
     db.modify_thread_labels(&["t1".into()], &[], &["UNREAD"]).unwrap();
     assert_eq!(db.inbox_unread(), 0);
     db.modify_thread_labels(&["t2".into()], &["TRASH"], &["INBOX"]).unwrap();
-    assert_eq!(db.list_threads("INBOX", 0, 50).unwrap().1, 1);
-    assert_eq!(db.list_threads("TRASH", 0, 50).unwrap().1, 1);
+    assert_eq!(db.list_threads("INBOX", 0, 50, false).unwrap().1, 1);
+    assert_eq!(db.list_threads("TRASH", 0, 50, false).unwrap().1, 1);
 
     // Re-storing a message keeps FTS consistent (contentless delete)
     db.store_messages(&[msg("m3", "t2", now - 1000, "news@shop.com", &["INBOX"], "Big sale", "Everything is half off")], true)
@@ -77,7 +80,7 @@ fn store_list_search_and_labels() {
     db.set_labels(&[("m3".into(), vec!["INBOX".into(), "UNREAD".into()])]).unwrap();
     assert_eq!(db.inbox_unread(), 1);
     db.delete_messages(&["m3".into()]).unwrap();
-    assert_eq!(db.list_threads("INBOX", 0, 50).unwrap().1, 1);
+    assert_eq!(db.list_threads("INBOX", 0, 50, false).unwrap().1, 1);
     assert!(db.search_local(&parse_query("half"), 50).unwrap().is_empty());
 
     // Thread detail decompresses bodies
@@ -122,10 +125,10 @@ fn snooze_and_outbox() {
     let now = now_ms();
     db.store_messages(&[msg("m1", "t1", now, "bob@x.com", &["INBOX"], "Hi", "Hello")], false).unwrap();
     db.snooze("t1", now + 3_600_000).unwrap();
-    assert_eq!(db.list_threads("INBOX", 0, 10).unwrap().1, 0);
-    assert_eq!(db.list_threads("SNOOZED", 0, 10).unwrap().1, 1);
+    assert_eq!(db.list_threads("INBOX", 0, 10, false).unwrap().1, 0);
+    assert_eq!(db.list_threads("SNOOZED", 0, 10, false).unwrap().1, 1);
     db.unsnooze("t1", true).unwrap();
-    assert_eq!(db.list_threads("INBOX", 0, 10).unwrap().1, 1);
+    assert_eq!(db.list_threads("INBOX", 0, 10, false).unwrap().1, 1);
 
     let c = ComposeData { subject: "Later".into(), ..Default::default() };
     let id = db.outbox_add(&c, now - 1, "scheduled").unwrap();

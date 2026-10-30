@@ -354,8 +354,8 @@ export const api = {
   syncNow: () => invoke<void>("sync_now"),
   quit: () => invoke<void>("quit_app"),
 
-  listThreads: (folder: string, offset: number, limit: number) =>
-    invoke<{ threads: ThreadSummary[]; total: number }>("list_threads", { folder, offset, limit }),
+  listThreads: (folder: string, offset: number, limit: number, unreadOnly = false) =>
+    invoke<{ threads: ThreadSummary[]; total: number }>("list_threads", { folder, offset, limit, unreadOnly }),
   getThread: (threadId: string, folder: string) => invoke<ThreadDetail>("get_thread", { threadId, folder }),
   markRead: (threadIds: string[], read: boolean) => invoke<void>("mark_read", { threadIds, read }),
   trash: (threadIds: string[]) => invoke<void>("trash_threads", { threadIds }),

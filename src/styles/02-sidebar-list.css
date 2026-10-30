@@ -244,16 +244,29 @@
   white-space: nowrap;
   flex: 1;
 }
-/* "4 unread" as a small accent pill beside the folder's name (a click goes back to the top). */
+/* "4 unread" as a small accent pill beside the folder's name: a click shows only the unread
+   conversations (filled in the accent while it does), another shows everything again. */
 .list-head .sub.pill {
   cursor: pointer;
   flex: 0 0 auto;
   margin-right: auto;
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
   padding: 1px 8px;
   border-radius: 999px;
   font-weight: 600;
   color: var(--accent-text);
   background: var(--accent-soft);
+  transition: background var(--fast) var(--ease), color var(--fast) var(--ease);
+}
+.list-head .sub.pill:hover {
+  background: color-mix(in srgb, var(--accent) 22%, transparent);
+}
+.list-head .sub.pill.on {
+  padding-right: 6px;
+  color: var(--accent-ink);
+  background: var(--accent);
 }
 .list-scroll {
   flex: 1;
