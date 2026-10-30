@@ -131,7 +131,9 @@ export function useShortcuts() {
           st.select(null);
           return handled();
         case "Escape":
+          // One step back at a time: an email open from a search closes back to the results first.
           if (st.checked.length) st.clearChecks();
+          else if (st.search && st.selectedId) st.select(null);
           else if (st.search) st.setSearch(null);
           else st.select(null);
           return handled();

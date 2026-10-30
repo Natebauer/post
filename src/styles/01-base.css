@@ -347,18 +347,30 @@ a:focus-visible {
   position: relative;
   container-type: inline-size;
 }
-/* Searching with nothing open: the list takes the reading pane's place too. With an email open,
+/* Searching with nothing open: the list grows over Home (which stays put underneath, held in
+   place by a stand-in for the list), and folds back over it the same way. With an email open,
    the two share the space half and half. (Widths, not flex, so the change can glide.) */
+.sheet:is(.search-wide, .search-leaving)::before {
+  content: "";
+  flex: none;
+  order: -1;
+  width: var(--list-w, clamp(340px, 36%, 460px));
+}
+.sheet:is(.search-wide, .search-leaving) .list-pane {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  z-index: 4;
+  box-shadow: var(--shadow-2);
+}
 .sheet.search-wide .list-pane {
   width: 100%;
-}
-.sheet.search-wide .read-pane {
-  display: none;
 }
 .sheet.search-split .list-pane {
   width: calc(50% - var(--s-2) / 2);
 }
-.sheet:is(.search-wide, .search-split) .splitter {
+.sheet.search-split .splitter {
   display: none;
 }
 .sheet.search-split .read-pane {
@@ -811,8 +823,8 @@ body {
 /* ---------- search, spread wide: its controls laid out under the field ---------- */
 .search-panel {
   flex: none;
+  overflow: hidden;
   border-bottom: 1px solid var(--border);
-  animation: fade var(--med) var(--ease);
 }
 .sp {
   display: flex;

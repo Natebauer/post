@@ -1,10 +1,11 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import type React from "react";
 import { AtSign, Clock, Mail, Paperclip, Search, Send, Star, Type, X } from "lucide-react";
 import { api, type Contact } from "../api";
 import { useStore } from "../store";
 import { cx } from "../util";
+import { motionEase, motionMs, reduceMotion } from "../motionTokens";
 import { Avatar } from "./Avatar";
 
 /** The search field, in the list's header: it opens there in place of the folder's name, and the
@@ -135,6 +136,21 @@ export function SearchBox({
   const after = valueOf("after");
   const where = valueOf("in")?.toLowerCase() ?? null;
   const keep = (e: React.MouseEvent) => e.preventDefault();
+
+  // The controls unfold under the field as the list spreads out, one group after another.
+  useLayoutEffect(() => {
+    if (!panel || reduceMotion()) return;
+    const ease = motionEase("ease");
+    panel.animate([{ height: "0px" }, { height: `${panel.scrollHeight}px` }], { duration: motionMs("slow"), easing: ease });
+    panel.querySelectorAll(".sp-group, .sp-suggest").forEach((g, i) =>
+      g.animate([{ opacity: 0, transform: "translateY(-6px)" }, { opacity: 1, transform: "none" }], {
+        duration: motionMs("slow"),
+        delay: 80 + i * 45,
+        easing: ease,
+        fill: "backwards",
+      }),
+    );
+  }, [panel]);
 
   const forget = (value: string) => {
     const rest = useStore.getState().recentSearches.filter((r) => r !== value);
