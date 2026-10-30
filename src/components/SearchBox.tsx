@@ -262,10 +262,14 @@ export function SearchBox({
           onFocus={() => setFocused(true)}
           onBlur={() => {
             window.setTimeout(() => setFocused(false), 120);
-            // Left with nothing in it: back to the folder's name. (Checked once a picked
-            // suggestion has filled it, so choosing one doesn't fold the field away.)
+            // Left with nothing in it for somewhere else: back to the folder's name. (Checked once
+            // a picked suggestion has filled it; and staying within the list, opening an email
+            // from it included, keeps the search open.)
             window.setTimeout(() => {
-              if (!input.current?.value.trim() && !useStore.getState().search) onDone?.();
+              const st = useStore.getState();
+              if (input.current?.value.trim() || st.search || st.selectedId) return;
+              if (document.activeElement?.closest(".list-pane")) return;
+              onDone?.();
             }, 140);
           }}
           onChange={(e) => onChange(e.target.value)}

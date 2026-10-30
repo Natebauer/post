@@ -47,16 +47,21 @@ export function stillList(list: HTMLElement): HTMLElement | null {
 
 const timing = () => ({ duration: motionMs("emphasis"), easing: motionEase("ease-move") });
 
-/** The still copy closes to `width` from its left edge, fading as it lands on the real list. */
+/** The still copy closes to `width` from its left edge, clearing its frost and fading out over its
+ *  second half, so it never leaves a milky blur of the list underneath behind it. */
 export function shrinkStill(copy: HTMLElement, width: number) {
   const right = copy.getBoundingClientRect().width - width;
   const r = getComputedStyle(copy).borderTopLeftRadius;
+  const frost = getComputedStyle(copy).backdropFilter;
+  const clear = frost && frost !== "none" ? "blur(0px) saturate(1)" : "none";
   copy
     .animate(
       [
-        { clipPath: clip(0, r), opacity: 1 },
-        { clipPath: clip(right, r), opacity: 1, offset: 0.92 },
-        { clipPath: clip(right, r), opacity: 0 },
+        { clipPath: clip(0, r), opacity: 1, backdropFilter: frost },
+        // Halfway, it's mostly over the list itself: its frost clears and it fades from there, so
+        // its extra veil never sits on the list as a pale sheet.
+        { opacity: 1, backdropFilter: clear, offset: 0.5 },
+        { clipPath: clip(right, r), opacity: 0, backdropFilter: clear },
       ],
       { ...timing(), fill: "forwards" },
     )
