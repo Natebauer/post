@@ -4,7 +4,7 @@
  * its new size at once and only a clip moves.
  *   - Spreading out: the list is already full width, and its clip opens from where its edge was.
  *   - Coming back (search closed, or an email opened beside it): a still copy of the wide list
- *     stays on top and its clip closes to the new edge, over the list already in its new place.
+ *     stays on top and its clip closes to the new edge, where the list in its new place takes over.
  */
 
 import { motionEase, motionMs } from "./motionTokens";
@@ -47,25 +47,25 @@ export function stillList(list: HTMLElement): HTMLElement | null {
 
 const timing = () => ({ duration: motionMs("emphasis"), easing: motionEase("ease-move") });
 
-/** The still copy closes to `width` from its left edge, clearing its frost and fading out over its
- *  second half, so it never leaves a milky blur of the list underneath behind it. */
-export function shrinkStill(copy: HTMLElement, width: number) {
+/** The still copy closes to `width` from its left edge as one solid card, with the list under it
+ *  hidden so the two never stack into a pale double veil. As it lands, the copy lets go of its card
+ *  and the list's own card is there in the same spot, its contents crossfading with the copy's: one
+ *  card that shrinks and then changes what it shows, not one card fading out over another. */
+export function shrinkStill(copy: HTMLElement, width: number, list: HTMLElement) {
   const right = copy.getBoundingClientRect().width - width;
   const r = getComputedStyle(copy).borderTopLeftRadius;
-  const frost = getComputedStyle(copy).backdropFilter;
-  const clear = frost && frost !== "none" ? "blur(0px) saturate(1)" : "none";
+  const t = timing();
+  const swap = { duration: motionMs("med"), easing: motionEase("ease") };
+  list.animate([{ opacity: 0 }, { opacity: 0 }], { duration: t.duration });
+  for (const part of list.children) part.animate([{ opacity: 0 }, { opacity: 1 }], { ...swap, delay: t.duration, fill: "backwards" });
   copy
-    .animate(
-      [
-        { clipPath: clip(0, r), opacity: 1, backdropFilter: frost },
-        // Halfway, it's mostly over the list itself: its frost clears and it fades from there, so
-        // its extra veil never sits on the list as a pale sheet.
-        { opacity: 1, backdropFilter: clear, offset: 0.5 },
-        { clipPath: clip(right, r), opacity: 0, backdropFilter: clear },
-      ],
-      { ...timing(), fill: "forwards" },
-    )
-    .finished.finally(() => copy.remove());
+    .animate([{ clipPath: clip(0, r) }, { clipPath: clip(right, r) }], { ...t, fill: "forwards" })
+    .finished.then(() => {
+      Object.assign(copy.style, { background: "transparent", boxShadow: "none", backdropFilter: "none" });
+      copy.style.setProperty("-webkit-backdrop-filter", "none");
+      return copy.animate([{ opacity: 1 }, { opacity: 0 }], { ...swap, fill: "forwards" }).finished;
+    })
+    .finally(() => copy.remove());
 }
 
 /** The list, already at its new width, opens out from the edge it had at `from`. */

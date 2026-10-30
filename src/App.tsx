@@ -170,7 +170,7 @@ function MainView() {
     const list = paneRef.current?.parentElement?.querySelector<HTMLElement>(".list-pane");
     if (from === null || !list || reduceMotion()) return void still?.remove();
     const to = list.getBoundingClientRect().width;
-    if (still) shrinkStill(still, to);
+    if (still) shrinkStill(still, to, list);
     else if (searchAt === "wide") revealList(list, from);
     else if (Math.abs(to - from) > 1)
       list.animate([{ width: `${from}px` }, { width: `${to}px` }], { duration: motionMs("emphasis"), easing: motionEase("ease-move") });
