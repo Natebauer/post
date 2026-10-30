@@ -146,10 +146,12 @@ export function paneHasContent(s: Store) {
   return !!s.selectedId || s.checked.length > 1 || (!!s.compose && mode === "inline" && !inThread);
 }
 
-/** Searching with nothing open: the list spreads across the reading pane's space, with room for
- *  the search's controls. Opening an email gives the pane back. */
-export function searchWide(s: Store) {
-  return (!!s.search || s.searchOpen) && !paneHasContent(s);
+/** How a search lays out the window: with nothing open the list spreads across the reading
+ *  pane's space ("wide"); with an email open the two share it half and half ("split"). Both keep
+ *  the search's controls in full above the results. */
+export function searchLayout(s: Store): "wide" | "split" | null {
+  if (!s.search && !s.searchOpen) return null;
+  return paneHasContent(s) ? "split" : "wide";
 }
 
 export const useStore = create<Store>((set, get) => ({

@@ -22,7 +22,7 @@ import {
 } from "lucide-react";
 import type { MailFolder, ThreadSummary } from "../api";
 import { api } from "../api";
-import { searchWide, useStore } from "../store";
+import { searchLayout, useStore } from "../store";
 import { motionEase, motionMs, reduceMotion, scrollBehavior } from "../motionTokens";
 import { claimHighlight } from "../motion";
 import * as A from "../actions";
@@ -468,8 +468,8 @@ export function ThreadList() {
   // folder's name, and it folds back once it's left empty.
   const searchOpen = useStore((s) => s.searchOpen);
   const setSearchOpen = (open: boolean) => useStore.setState({ searchOpen: open });
-  // With nothing open, the list spreads across the window and the search's controls sit under the field.
-  const wide = useStore(searchWide);
+  // A search spreads the list out (or shares the window with an email), with its controls in full under the field.
+  const wide = useStore((s) => searchLayout(s) !== null);
   const [searchPanel, setSearchPanel] = useState<HTMLDivElement | null>(null);
   useEffect(() => {
     const open = () => setSearchOpen(true);
@@ -480,7 +480,8 @@ export function ThreadList() {
   const [unfolding, setUnfolding] = useState(false);
   const closing = useRef(false);
   const closeSearch = () => {
-    if (closing.current) return;
+    // Folding the field away while results are showing would leave no way out of them.
+    if (closing.current || useStore.getState().search) return;
     const done = () => {
       closing.current = false;
       setSearchOpen(false);

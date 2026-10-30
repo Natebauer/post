@@ -246,8 +246,11 @@ export function SearchBox({
           onFocus={() => setFocused(true)}
           onBlur={() => {
             window.setTimeout(() => setFocused(false), 120);
-            // Left with nothing in it: back to the folder's name.
-            if (!input.current?.value.trim()) window.setTimeout(() => onDone?.(), 140);
+            // Left with nothing in it: back to the folder's name. (Checked once a picked
+            // suggestion has filled it, so choosing one doesn't fold the field away.)
+            window.setTimeout(() => {
+              if (!input.current?.value.trim() && !useStore.getState().search) onDone?.();
+            }, 140);
           }}
           onChange={(e) => onChange(e.target.value)}
           onKeyDown={(e) => {

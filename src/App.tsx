@@ -1,7 +1,7 @@
 import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { listen } from "@tauri-apps/api/event";
 import { api, type ComposeData, type Settings, type SyncStatus } from "./api";
-import { paneHasContent, searchWide, useStore } from "./store";
+import { paneHasContent, searchLayout, useStore } from "./store";
 import { motionEase, motionMs, reduceMotion } from "./motionTokens";
 import { hideSplash } from "./splash";
 import { announceSent, newDraft, openCompose, type ComposeDraft, type SentInfo } from "./compose";
@@ -132,8 +132,8 @@ function MainView() {
   const paneComposer = compose && mode === "inline" && !composeInThread;
   // With nothing open, the reading pane drops its card and sits on the window background.
   const hasContent = !!selectedId || checked.length > 1 || !!paneComposer;
-  const wide = useStore(searchWide);
-  // The list's width just before it spreads out for a search or gives the space back.
+  const searchAt = useStore(searchLayout);
+  // The list's width just before a search spreads it out, splits it with an email, or gives the space back.
   const listFrom = useRef<number | null>(null);
 
   // Opening or closing an email fades the email card over Home (see paneFade.ts). The still copy
@@ -145,14 +145,16 @@ function MainView() {
       useStore.subscribe((s, prev) => {
         const was = paneHasContent(prev);
         const now = paneHasContent(s);
-        // A close that already faded the real email out (closeWithFade) needs no copy.
-        if (was !== now && !(was && isClosingWithFade())) finishFade.current = fadePane(paneRef.current, now);
-        if (searchWide(prev) !== searchWide(s))
+        // A close that already faded the real email out (closeWithFade) needs no copy, and neither
+        // does a search spread wide (Home is hidden behind it, and the list glides over the email).
+        const hidden = searchLayout(prev) === "wide" || searchLayout(s) === "wide";
+        if (was !== now && !(was && isClosingWithFade()) && !hidden) finishFade.current = fadePane(paneRef.current, now);
+        if (searchLayout(prev) !== searchLayout(s))
           listFrom.current = paneRef.current?.parentElement?.querySelector(".list-pane")?.getBoundingClientRect().width ?? null;
       }),
     [],
   );
-  // Spreading out and giving the space back both glide from the width the list had.
+  // Every change of width glides from the one the list had; the email slides in beside it.
   useLayoutEffect(() => {
     const from = listFrom.current;
     listFrom.current = null;
@@ -160,8 +162,8 @@ function MainView() {
     if (from === null || !list || reduceMotion()) return;
     const to = list.getBoundingClientRect().width;
     if (Math.abs(to - from) < 2) return;
-    list.animate([{ width: `${from}px` }, { width: `${to}px` }], { duration: motionMs("slow"), easing: motionEase("ease-move") });
-  }, [wide]);
+    list.animate([{ width: `${from}px` }, { width: `${to}px` }], { duration: motionMs("emphasis"), easing: motionEase("ease-move") });
+  }, [searchAt]);
   useLayoutEffect(() => {
     registerPane(paneRef.current);
   }, []);
@@ -176,7 +178,7 @@ function MainView() {
       <div className="body">
         <Sidebar />
         <main
-          className={cx("sheet", wide && "search-wide")}
+          className={cx("sheet", searchAt && `search-${searchAt}`)}
           aria-label="Mail"
           style={listWidth ? ({ "--list-w": `${listWidth}px` } as React.CSSProperties) : undefined}
         >

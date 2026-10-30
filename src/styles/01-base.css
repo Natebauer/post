@@ -347,14 +347,22 @@ a:focus-visible {
   position: relative;
   container-type: inline-size;
 }
-/* Searching with nothing open: the list takes the reading pane's place too. */
+/* Searching with nothing open: the list takes the reading pane's place too. With an email open,
+   the two share the space half and half. (Widths, not flex, so the change can glide.) */
 .sheet.search-wide .list-pane {
-  flex: 1;
-  width: auto;
-  min-width: 0;
+  width: 100%;
 }
-.sheet.search-wide :is(.splitter, .read-pane) {
+.sheet.search-wide .read-pane {
   display: none;
+}
+.sheet.search-split .list-pane {
+  width: calc(50% - var(--s-2) / 2);
+}
+.sheet:is(.search-wide, .search-split) .splitter {
+  display: none;
+}
+.sheet.search-split .read-pane {
+  margin-left: var(--s-2);
 }
 /* Opening and closing an email: the card fades in over Home and out over it (paneFade.ts). */
 .read-pane.pane-waiting {
