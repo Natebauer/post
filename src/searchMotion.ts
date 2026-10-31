@@ -179,9 +179,17 @@ export function growList(copy: HTMLElement, list: HTMLElement, from: number, bes
     if (el.matches(".list-head") && !searching) moves.push(el.animate([{ opacity: 0 }, { opacity: 0, offset: 0.3 }, { opacity: 1 }], { duration: t.duration }));
     else if (searching || !el.matches(".search-panel")) moves.push(el.animate([{ opacity: 0 }, { opacity: 0 }], { duration: t.duration }));
   if (beside) moves.push(...drawOut(beside, list, from, t));
-  // An email closing as the list spreads over it fades out under it, in step.
+  // An email closing as the list spreads over it fades, in step; the edge cuts it off rather than
+  // passing over it, or the frosted card would blur it into a white haze.
   if (under) {
-    const gone = under.animate([{ opacity: 1 }, { opacity: 0 }], { ...t, fill: "forwards" });
+    const u = under.getBoundingClientRect();
+    const l = list.getBoundingClientRect();
+    const ur = getComputedStyle(under).borderTopLeftRadius;
+    const cut = (edge: number) => `inset(0 0 0 ${Math.max(0, edge - u.left)}px round ${ur})`;
+    const gone = under.animate(
+      [{ opacity: 1, clipPath: cut(l.left + from) }, { opacity: 0, clipPath: cut(l.right) }],
+      { ...t, fill: "forwards" },
+    );
     gone.finished.finally(() => under.remove());
     moves.push(gone);
   }
@@ -197,10 +205,24 @@ export function relayoutList(copy: HTMLElement, list: HTMLElement) {
   together(copy, list, card, moves, d);
 }
 
-/** Once the list has looked the same for a few frames (its width shows a frame later, its new row
- *  layout a render after that, and its rows' positions one more). `laidOut` runs once the new
- *  layout is in, and may scroll, so the wait starts over after it. */
+/** Once the list is in its new layout. Usually that's straight away (the list takes it in the same
+ *  render), so things move from the very frame they were asked to; otherwise once it has looked the
+ *  same for a few frames. `laidOut` runs once the new layout is in, and may scroll, so the wait
+ *  starts over after it (newly scrolled-to rows render a frame later). */
 function whenSettled(list: HTMLElement, laidOut: () => void, go: () => void) {
+  const scroller = list.querySelector<HTMLElement>(":scope > .list-scroll");
+  const laid = () => list.classList.contains(`size-${sizeFor(list.getBoundingClientRect().width)}`);
+  // React finishes the layout's renders before this task ends.
+  queueMicrotask(() => {
+    if (!laid()) return wait(list, laidOut, go);
+    const top = scroller?.scrollTop;
+    laidOut();
+    if (scroller?.scrollTop === top) go();
+    else wait(list, () => {}, go);
+  });
+}
+
+function wait(list: HTMLElement, laidOut: () => void, go: () => void) {
   let last = "";
   let same = 0;
   let frames = 0;

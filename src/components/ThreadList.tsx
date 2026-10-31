@@ -542,6 +542,13 @@ export function ThreadList() {
     ro.observe(el);
     return () => ro.disconnect();
   }, []);
+  // A search changing the list's width takes its layout in the same frame, not one later, so the
+  // move into it can start at once (searchMotion.ts).
+  const searchAt = useStore(searchLayout);
+  useLayoutEffect(() => {
+    const el = paneRef.current;
+    if (el?.parentElement?.querySelector("[data-still-list]")) setListSize(sizeFor(el.getBoundingClientRect().width));
+  }, [searchAt]);
   // Crossing into another layout: rows take their new places at once (no row gliding to a new
   // height), and a copy of how they looked moves piece by piece into them.
   useLayoutEffect(() => {
@@ -568,8 +575,9 @@ export function ThreadList() {
     getItemKey: (i) => items[i].threadId,
   });
 
-  // Row heights change when group labels move (new mail, deletions, a different folder).
-  useEffect(() => {
+  // Row heights change when group labels move (new mail, deletions, a different folder), and with
+  // the layout (measured before it's shown, so the rows are in place in its first frame).
+  useLayoutEffect(() => {
     v.measure();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [groupKey, rowH]);
