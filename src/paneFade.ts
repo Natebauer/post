@@ -67,6 +67,22 @@ function stillCopy(pane: HTMLElement): HTMLElement | null {
   return copy;
 }
 
+function keepScroll(pane: HTMLElement, copy: HTMLElement) {
+  const scrolls = Array.from(pane.querySelectorAll<HTMLElement>("*")).map((el) => el.scrollTop);
+  copy.querySelectorAll<HTMLElement>("*").forEach((el, i) => scrolls[i] && (el.scrollTop = scrolls[i]));
+}
+
+/** The email as it is, kept on top for whatever closes over it to fade (searchMotion.ts). */
+export function keepPane(pane: HTMLElement | null): HTMLElement | null {
+  if (!pane || reduceMotion()) return null;
+  clearStills(pane.parentElement!);
+  const copy = stillCopy(pane);
+  if (!copy) return null;
+  pane.parentElement!.appendChild(copy);
+  keepScroll(pane, copy);
+  return copy;
+}
+
 function clearStills(sheet: HTMLElement) {
   sheet.querySelectorAll(".pane-still").forEach((el) => el.remove());
 }
@@ -90,8 +106,7 @@ export function fadePane(pane: HTMLElement | null, opening: boolean): (() => voi
     sheet.insertBefore(copy, pane);
   }
   else sheet.appendChild(copy);
-  const scrolls = Array.from(pane.querySelectorAll<HTMLElement>("*")).map((el) => el.scrollTop);
-  copy.querySelectorAll<HTMLElement>("*").forEach((el, i) => scrolls[i] && (el.scrollTop = scrolls[i]));
+  keepScroll(pane, copy);
 
   return () => {
     if (opening) {

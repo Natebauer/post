@@ -2,7 +2,7 @@ import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { listen } from "@tauri-apps/api/event";
 import { api, type ComposeData, type Settings, type SyncStatus } from "./api";
 import { paneHasContent, searchLayout, useStore } from "./store";
-import { motionEase, motionMs, reduceMotion } from "./motionTokens";
+import { reduceMotion } from "./motionTokens";
 import { hideSplash } from "./splash";
 import { announceSent, newDraft, openCompose, type ComposeDraft, type SentInfo } from "./compose";
 import { applyTheme, onSystemThemeChange } from "./theme";
@@ -10,8 +10,8 @@ import { updateBadge } from "./badge";
 import { useShortcuts } from "./keyboard";
 import { useNavHistory } from "./history";
 import { cx } from "./util";
-import { fadePane, isClosingWithFade, registerPane } from "./paneFade";
-import { growList, revealList, shrinkStill, stillList } from "./searchMotion";
+import { fadePane, isClosingWithFade, keepPane, registerPane } from "./paneFade";
+import { growList, shrinkStill, stillList } from "./searchMotion";
 import * as A from "./actions";
 import { TitleBar } from "./components/TitleBar";
 import { Sidebar } from "./components/Sidebar";
@@ -143,22 +143,25 @@ function MainView() {
   // has to be taken before React swaps the pane's content, so watch the store directly.
   const paneRef = useRef<HTMLDivElement>(null);
   const finishFade = useRef<(() => void) | null>(null);
+  const paneLeaving = useRef<HTMLElement | null>(null);
   useEffect(
     () =>
       useStore.subscribe((s, prev) => {
         const was = paneHasContent(prev);
         const now = paneHasContent(s);
         // A close that already faded the real email out (closeWithFade) needs no copy, and neither
-        // does an email opened from a wide search (the list's copy uncovers it).
+        // does an email opened from a wide search (the list's copy uncovers it). One closed beside a
+        // search fades as the list spreads over it, in step.
         const fromWide = searchLayout(prev) === "wide";
-        if (was !== now && !(was && isClosingWithFade()) && !fromWide) finishFade.current = fadePane(paneRef.current, now);
+        const underWide = was && !now && searchLayout(s) === "wide";
+        if (underWide) paneLeaving.current = keepPane(paneRef.current);
+        else if (was !== now && !(was && isClosingWithFade()) && !fromWide) finishFade.current = fadePane(paneRef.current, now);
         if (searchLayout(prev) !== searchLayout(s)) {
           const list = paneRef.current?.parentElement?.querySelector<HTMLElement>(".list-pane");
           listFrom.current = list?.getBoundingClientRect().width ?? null;
           listStill.current?.remove();
-          // Leaving wide, the copy carries the wide card; spreading out, the list brings its own.
-          const toWide = searchLayout(s) === "wide";
-          listStill.current = list && !reduceMotion() && (fromWide || toWide) ? stillList(list, fromWide) : null;
+          // Narrowing, the copy carries the card; opening out, the list brings its own.
+          listStill.current = list && !reduceMotion() ? stillList(list) : null;
         }
       }),
     [],
@@ -168,15 +171,16 @@ function MainView() {
   useLayoutEffect(() => {
     const from = listFrom.current;
     const still = listStill.current;
-    listFrom.current = listStill.current = null;
+    const leaving = paneLeaving.current;
+    listFrom.current = listStill.current = paneLeaving.current = null;
     const list = paneRef.current?.parentElement?.querySelector<HTMLElement>(".list-pane");
-    if (from === null || !list || reduceMotion()) return void still?.remove();
+    if (from === null || !list || reduceMotion()) return void (still?.remove(), leaving?.remove());
     const to = list.getBoundingClientRect().width;
-    if (still && searchAt === "wide") growList(still, list, from);
-    else if (still) shrinkStill(still, to, list, searchAt === "split" ? paneRef.current : null);
-    else if (searchAt === "wide") revealList(list, from);
-    else if (Math.abs(to - from) > 1)
-      list.animate([{ width: `${from}px` }, { width: `${to}px` }], { duration: motionMs("emphasis"), easing: motionEase("ease-move") });
+    // Beside an email (searching with one open, or closing that search), its edge keeps pace.
+    const pane = searchAt !== "wide" && !paneRef.current?.classList.contains("bare") ? paneRef.current : null;
+    if (!still) return void leaving?.remove();
+    if (to < from) shrinkStill(still, to, list, pane);
+    else growList(still, list, from, pane, leaving);
   }, [searchAt]);
   useLayoutEffect(() => {
     registerPane(paneRef.current);

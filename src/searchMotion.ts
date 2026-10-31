@@ -11,6 +11,8 @@
  *   - Coming back (search closed, or an email opened beside it): the copy carries the wide card
  *     and its clip closes to the new edge.
  *   - Dragged across a layout width: the card stays put and only what's in it moves.
+ * An email open beside the list keeps its edge the same distance from the list's: uncovered by the
+ * list's card as that closes, or drawn out to meet it as it opens.
  */
 
 import { motionEase, motionMs } from "./motionTokens";
@@ -97,10 +99,49 @@ export function shrinkStill(copy: HTMLElement, width: number, list: HTMLElement,
   const card = copy.animate([{ clipPath: clip(0, r) }, { clipPath: clip(right, r) }], { ...t, fill: "forwards" });
   const moves = [card, list.animate([{ opacity: 0 }, { opacity: 0 }], { duration: t.duration })];
   if (beside) {
-    const under = (edge: number) => `inset(0 0 0 ${Math.max(0, edge - beside.getBoundingClientRect().left)}px)`;
+    const p = beside.getBoundingClientRect();
+    const gap = Math.max(0, p.left - (c.left + width));
+    const pr = getComputedStyle(beside).borderTopLeftRadius;
+    const under = (edge: number) => `inset(0 0 0 ${Math.max(0, edge + gap - p.left)}px round ${pr})`;
     moves.push(beside.animate([{ clipPath: under(c.right) }, { clipPath: under(c.left + width) }], t));
   }
   together(copy, list, card, moves, t.duration);
+}
+
+/** The email beside a list that's opening out has already narrowed to its new place; a stand-in
+ *  of its card fills from where its edge was, and gives way as the list's edge comes across. */
+function drawOut(beside: HTMLElement, list: HTMLElement, from: number, t: KeyframeAnimationOptions): Animation[] {
+  const sheet = beside.parentElement;
+  const cs = getComputedStyle(beside);
+  if (!sheet || beside.classList.contains("bare")) return [];
+  const s = sheet.getBoundingClientRect();
+  const p = beside.getBoundingClientRect();
+  const l = list.getBoundingClientRect();
+  const was = l.left + from + (p.left - l.right);
+  const dx = p.left - was;
+  if (dx < 1) return [];
+  // It reaches just past the email's rounded corners, which it ends up matching.
+  const r = parseFloat(cs.borderTopLeftRadius) || 0;
+  const card = document.createElement("div");
+  Object.assign(card.style, {
+    position: "absolute",
+    left: `${was - s.left}px`,
+    top: `${p.top - s.top}px`,
+    width: `${dx + r + 2}px`,
+    height: `${p.height}px`,
+    background: cs.background,
+    border: cs.border,
+    borderRight: "none",
+    borderRadius: `${cs.borderTopLeftRadius} 0 0 ${cs.borderBottomLeftRadius}`,
+    boxShadow: cs.boxShadow,
+    zIndex: "3",
+    pointerEvents: "none",
+  });
+  sheet.appendChild(card);
+  const edge = (x: number) => `inset(-24px 0 -24px ${x === 0 ? -24 : x}px round ${cs.borderTopLeftRadius} 0 0 ${cs.borderBottomLeftRadius})`;
+  const a = card.animate([{ clipPath: edge(0) }, { clipPath: edge(dx) }], { ...t, fill: "forwards" });
+  a.finished.finally(() => card.remove());
+  return [a];
 }
 
 /** The list picks its row layout from its width a render or two later, and only then can its
@@ -122,17 +163,29 @@ function together(copy: HTMLElement, list: HTMLElement, card: Animation, moves: 
 /** The list, already full width for a search, opens out from the edge it had at `from`, and what
  *  was in it travels out to its one-line places as it does. Its header and filters are its own
  *  from the start (the field takes typing at once, the filters unfold themselves). */
-export function growList(copy: HTMLElement, list: HTMLElement, from: number) {
+export function growList(copy: HTMLElement, list: HTMLElement, from: number, beside?: HTMLElement | null, under?: HTMLElement | null) {
   const t = timing();
   const r = getComputedStyle(list).borderTopLeftRadius;
   const out = copy.getBoundingClientRect().width - list.getBoundingClientRect().width;
-  copy.style.overflow = "visible";
+  // The list's own card opens out; the copy only carries what's in it.
+  Object.assign(copy.style, { overflow: "visible", background: "none", borderColor: "transparent", boxShadow: "none", backdropFilter: "none" });
+  copy.style.setProperty("-webkit-backdrop-filter", "none");
   const card = copy.animate([{ clipPath: clip(0, r) }, { clipPath: clip(out, r) }], { ...t, fill: "forwards" });
   const moves = [card, revealList(list, from)];
+  // Already searching (beside an email), the field and filters it has travel with the rest;
+  // otherwise the list's own come in, so typing shows at once and the filters unfold themselves.
+  const searching = !!copy.querySelector(":scope > .search-panel");
   for (const el of list.children)
-    if (el.matches(".list-head")) moves.push(el.animate([{ opacity: 0 }, { opacity: 0, offset: 0.3 }, { opacity: 1 }], { duration: t.duration }));
-    else if (!el.matches(".search-panel")) moves.push(el.animate([{ opacity: 0 }, { opacity: 0 }], { duration: t.duration }));
-  together(copy, list, card, moves, t.duration, ".list-head, .search-panel");
+    if (el.matches(".list-head") && !searching) moves.push(el.animate([{ opacity: 0 }, { opacity: 0, offset: 0.3 }, { opacity: 1 }], { duration: t.duration }));
+    else if (searching || !el.matches(".search-panel")) moves.push(el.animate([{ opacity: 0 }, { opacity: 0 }], { duration: t.duration }));
+  if (beside) moves.push(...drawOut(beside, list, from, t));
+  // An email closing as the list spreads over it fades out under it, in step.
+  if (under) {
+    const gone = under.animate([{ opacity: 1 }, { opacity: 0 }], { ...t, fill: "forwards" });
+    gone.finished.finally(() => under.remove());
+    moves.push(gone);
+  }
+  together(copy, list, card, moves, t.duration, searching ? undefined : ".list-head, .search-panel");
 }
 
 /** The list was dragged across the width where its rows change layout: what's in it moves to its
