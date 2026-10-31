@@ -95,9 +95,12 @@ pub async fn trash_threads(app: AppHandle, st: St<'_>, thread_ids: Vec<String>) 
 pub async fn untrash_threads(app: AppHandle, st: St<'_>, thread_ids: Vec<String>) -> R<()> {
     st.db.modify_thread_labels(&thread_ids, &[], &["TRASH"])?;
     emit_changed(&app);
+    // Trashing took Inbox away here; Gmail knows where each message goes back to.
     for t in &thread_ids {
-        st.gmail.untrash_thread(t).await?;
+        let labels = st.gmail.untrash_thread(t).await?;
+        st.db.set_labels(&labels)?;
     }
+    emit_changed(&app);
     st.wake.notify_one();
     Ok(())
 }

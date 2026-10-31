@@ -416,9 +416,14 @@ impl Gmail {
         Ok(())
     }
 
-    pub async fn untrash_thread(&self, thread_id: &str) -> Result<()> {
-        self.post(&format!("{BASE}/threads/{thread_id}/untrash"), &json!({})).await?;
-        Ok(())
+    /// Out of the trash, back where it was. Returns each message's labels as Gmail now has them
+    /// (Inbox again, if that's where it came from).
+    pub async fn untrash_thread(&self, thread_id: &str) -> Result<Vec<(String, Vec<String>)>> {
+        let v = self.post(&format!("{BASE}/threads/{thread_id}/untrash"), &json!({})).await?;
+        Ok(v["messages"]
+            .as_array()
+            .map(|ms| ms.iter().map(|m| (m["id"].as_str().unwrap_or("").into(), str_vec(&m["labelIds"]))).collect())
+            .unwrap_or_default())
     }
 
     pub async fn send_raw(&self, raw: &[u8], thread_id: Option<&str>) -> Result<Value> {

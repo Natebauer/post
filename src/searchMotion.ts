@@ -91,20 +91,32 @@ const timing = () => ({ duration: motionMs("emphasis"), easing: motionEase("ease
  *  opening `beside` it is uncovered by that edge rather than showing through the frosted card. */
 export function shrinkStill(copy: HTMLElement, width: number, list: HTMLElement, beside?: HTMLElement | null) {
   const t = timing();
-  const start = performance.now();
   const c = copy.getBoundingClientRect();
   const right = c.width - width;
   const r = getComputedStyle(copy).borderTopLeftRadius;
-  copy
-    .animate([{ clipPath: clip(0, r) }, { clipPath: clip(right, r) }], { ...t, fill: "forwards" })
-    .finished.finally(() => copy.remove());
+  const card = copy.animate([{ clipPath: clip(0, r) }, { clipPath: clip(right, r) }], { ...t, fill: "forwards" });
+  const moves = [card, list.animate([{ opacity: 0 }, { opacity: 0 }], { duration: t.duration })];
   if (beside) {
     const under = (edge: number) => `inset(0 0 0 ${Math.max(0, edge - beside.getBoundingClientRect().left)}px)`;
-    beside.animate([{ clipPath: under(c.right) }, { clipPath: under(c.left + width) }], t);
+    moves.push(beside.animate([{ clipPath: under(c.right) }, { clipPath: under(c.left + width) }], t));
   }
-  list.animate([{ opacity: 0 }, { opacity: 0 }], { duration: t.duration });
-  // The list picks its row layout from its width a render or two later; measure it once it has.
-  whenSettled(list, () => keepPlace(copy, list), () => copy.isConnected && morph(copy, list, start - performance.now(), t.duration));
+  together(copy, list, card, moves, t.duration);
+}
+
+/** The list picks its row layout from its width a render or two later, and only then can its
+ *  pieces be measured; until they are, everything waits at its first frame, so the card and what's
+ *  in it start (and land) together as one motion. `card` ends it, taking the copy away. */
+function together(copy: HTMLElement, list: HTMLElement, card: Animation, moves: Animation[], D: number, keep?: string) {
+  moves.forEach((a) => a.pause());
+  card.finished.finally(() => copy.remove());
+  whenSettled(
+    list,
+    () => keepPlace(copy, list),
+    () => {
+      if (copy.isConnected) morph(copy, list, 0, D, keep);
+      moves.forEach((a) => a.play());
+    },
+  );
 }
 
 /** The list, already full width for a search, opens out from the edge it had at `from`, and what
@@ -112,32 +124,24 @@ export function shrinkStill(copy: HTMLElement, width: number, list: HTMLElement,
  *  from the start (the field takes typing at once, the filters unfold themselves). */
 export function growList(copy: HTMLElement, list: HTMLElement, from: number) {
   const t = timing();
-  const start = performance.now();
   const r = getComputedStyle(list).borderTopLeftRadius;
   const out = copy.getBoundingClientRect().width - list.getBoundingClientRect().width;
-  revealList(list, from);
   copy.style.overflow = "visible";
-  copy
-    .animate([{ clipPath: clip(0, r) }, { clipPath: clip(out, r) }], { ...t, fill: "forwards" })
-    .finished.finally(() => copy.remove());
+  const card = copy.animate([{ clipPath: clip(0, r) }, { clipPath: clip(out, r) }], { ...t, fill: "forwards" });
+  const moves = [card, revealList(list, from)];
   for (const el of list.children)
-    if (el.matches(".list-head")) el.animate([{ opacity: 0 }, { opacity: 0, offset: 0.3 }, { opacity: 1 }], { duration: t.duration });
-    else if (!el.matches(".search-panel")) el.animate([{ opacity: 0 }, { opacity: 0 }], { duration: t.duration });
-  whenSettled(
-    list,
-    () => keepPlace(copy, list),
-    () => copy.isConnected && morph(copy, list, start - performance.now(), t.duration, ".list-head, .search-panel"),
-  );
+    if (el.matches(".list-head")) moves.push(el.animate([{ opacity: 0 }, { opacity: 0, offset: 0.3 }, { opacity: 1 }], { duration: t.duration }));
+    else if (!el.matches(".search-panel")) moves.push(el.animate([{ opacity: 0 }, { opacity: 0 }], { duration: t.duration }));
+  together(copy, list, card, moves, t.duration, ".list-head, .search-panel");
 }
 
 /** The list was dragged across the width where its rows change layout: what's in it moves to its
  *  new places over its own card, quicker than a search spreading out. */
 export function relayoutList(copy: HTMLElement, list: HTMLElement) {
   const d = motionMs("emphasis") * 0.7;
-  const start = performance.now();
-  for (const el of list.children) el.animate([{ opacity: 0 }, { opacity: 0 }], { duration: d });
-  copy.animate([{ opacity: 1 }, { opacity: 1 }], { duration: d }).finished.finally(() => copy.remove());
-  whenSettled(list, () => keepPlace(copy, list), () => copy.isConnected && morph(copy, list, start - performance.now(), d));
+  const card = copy.animate([{ opacity: 1 }, { opacity: 1 }], { duration: d });
+  const moves = [card, ...[...list.children].map((el) => el.animate([{ opacity: 0 }, { opacity: 0 }], { duration: d }))];
+  together(copy, list, card, moves, d);
 }
 
 /** Once the list has looked the same for a few frames (its width shows a frame later, its new row
@@ -272,6 +276,7 @@ function pieces(copy: HTMLElement, list: HTMLElement, delay: number, D: number, 
   const nextPieces = [...next.querySelectorAll<HTMLElement>(":scope > .list-scroll :is(.row, .list-group)")];
   const listPieces = [...listScroll.querySelectorAll<HTMLElement>(".row, .list-group")];
   const twin = (el: HTMLElement) => nextPieces[listPieces.indexOf(el)];
+  const pairs: { i: number; a: Box; b: Box }[] = [];
 
   // Emails in both: each piece goes its own way, inside a row that reshapes around them.
   // Rows just past the bottom count too: the ones that slide out of sight go on sliding, not fading.
@@ -292,6 +297,7 @@ function pieces(copy: HTMLElement, list: HTMLElement, delay: number, D: number, 
       return [{ x, from: within(boxIn(x, base), a), to: within(boxIn(y, base), b), sizes: [getComputedStyle(x).fontSize, size] }];
     });
     const shown = (b: Box | null): b is Box => !!b && b.w > 0 && b.h > 0;
+    pairs.push({ i: listPieces.indexOf(to), a, b });
     twin(to)?.style.setProperty("visibility", "hidden");
     row.querySelector(".row-actions")?.remove();
     stage.appendChild(row);
@@ -319,10 +325,28 @@ function pieces(copy: HTMLElement, list: HTMLElement, delay: number, D: number, 
     const [to] = labels.splice(i, 1);
     const a = boxIn(g, base);
     const b = boxIn(to, base);
+    pairs.push({ i: listPieces.indexOf(to), a, b });
     twin(to)?.style.setProperty("visibility", "hidden");
     stage.appendChild(g);
     Object.assign(g.style, { ...place(a), right: "auto", margin: "0", transform: "none" });
     g.animate([place(a), place(b)], move);
+  }
+
+  // Emails that only come into view now (more fit, a line each) slide in from where they'd have
+  // been, keeping pace with the ones above, so the whole list moves as one.
+  const entering = new Set<HTMLElement>();
+  pairs.sort((p, q) => p.i - q.i);
+  const [first, last] = [pairs[0], pairs.at(-1)];
+  if (first && last) {
+    const k = last.b.y - first.b.y > 1 ? (last.a.y - first.a.y) / (last.b.y - first.b.y) : 1;
+    listPieces.forEach((el, i) => {
+      const t = nextPieces[i];
+      const near = i < first.i ? first : i > last.i ? last : null;
+      if (!t || !near || t.style.visibility === "hidden" || !inView(el, listScroll)) return;
+      const b = boxIn(el, base);
+      entering.add(t);
+      t.animate([{ translate: `0 ${near.a.y + (b.y - near.b.y) * k - b.y}px` }, { translate: "0 0" }], move);
+    });
   }
 
   // Above the rows: a piece in both lists built the same way (the search field and its filters,
@@ -359,13 +383,15 @@ function pieces(copy: HTMLElement, list: HTMLElement, delay: number, D: number, 
   }
   for (const el of nextAbove) if (!el.dataset.paired) el.animate(fadeIn, fade);
 
-  // Whatever is left behind in the wide list fades; whatever is new in the narrow one appears.
+  // Whatever is left behind in the old list fades; whatever else is new in this one appears.
   was.scroll.animate(fadeOut, fade);
-  next.querySelector(":scope > .list-scroll")?.animate(fadeIn, fade);
+  for (const el of next.querySelectorAll<HTMLElement>(":scope > .list-scroll > *"))
+    for (const p of el.querySelector(".row, .list-group") ? el.children : [el])
+      if (p instanceof HTMLElement && p.style.visibility !== "hidden" && !entering.has(p)) p.animate(fadeIn, fade);
 }
 
 /** The list, already at its new width, opens out from the edge it had at `from`. */
-export function revealList(list: HTMLElement, from: number) {
+export function revealList(list: HTMLElement, from: number): Animation {
   const r = getComputedStyle(list).borderTopLeftRadius;
-  list.animate([{ clipPath: clip(list.getBoundingClientRect().width - from, r) }, { clipPath: clip(0, r) }], timing());
+  return list.animate([{ clipPath: clip(list.getBoundingClientRect().width - from, r) }, { clipPath: clip(0, r) }], timing());
 }
