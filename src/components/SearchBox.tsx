@@ -183,6 +183,18 @@ export function SearchBox({
     );
   }, [panel]);
 
+  // A recent search let go of folds its pill away, and the ones after it close the gap.
+  const forgetPill = (value: string, pill: HTMLElement | null) => {
+    if (!pill || reduceMotion()) return forget(value);
+    pill.style.overflow = "hidden";
+    pill
+      .animate([{ opacity: 1, width: `${pill.offsetWidth}px` }, { opacity: 0, width: "0px", marginRight: "-6px" }], {
+        duration: motionMs("slow"),
+        easing: motionEase("ease"),
+        fill: "forwards",
+      })
+      .finished.then(() => forget(value), () => forget(value));
+  };
   const forget = (value: string) => {
     const rest = useStore.getState().recentSearches.filter((r) => r !== value);
     useStore.setState({ recentSearches: rest });
@@ -258,7 +270,7 @@ export function SearchBox({
                 {it.c ? `Mail from ${it.label}` : tinted(it.label)}
               </button>
               {it.kind === "recent" && (
-                <button className="sp-forget" aria-label={`Remove ${it.label} from recent searches`} title="Remove from recent searches" onMouseDown={keep} onClick={() => forget(it.value)}>
+                <button className="sp-forget" aria-label={`Remove ${it.label} from recent searches`} title="Remove from recent searches" onMouseDown={keep} onClick={(e) => forgetPill(it.value, e.currentTarget.closest(".sp-pill"))}>
                   <X size={12} />
                 </button>
               )}
