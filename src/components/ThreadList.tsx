@@ -765,13 +765,18 @@ export function ThreadList() {
       >
         {items.length === 0 ? (
           search ? (
-            <div className="empty">
-              <div>
-                {!search.loading && <EmptyArt kind="search" />}
-                <div className="big">{search.loading ? "Searching…" : "No matches"}</div>
-                {!search.loading && "Try different words, or from:, subject:, has:attachment"}
+            // Still asking Gmail: rows in the list's shape, until there's something (or nothing) to show.
+            search.loading ? (
+              <ListSkeleton />
+            ) : (
+              <div className="empty">
+                <div>
+                  <EmptyArt kind="search" />
+                  <div className="big">No matches</div>
+                  Try different words, or from:, subject:, has:attachment
+                </div>
               </div>
-            </div>
+            )
           ) : (
             unreadOnly && !loadingList ? (
               <div className="empty">
