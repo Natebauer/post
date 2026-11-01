@@ -44,6 +44,22 @@ const WHERE: [string, string | null][] = [
   ["With spam & trash", "anywhere"],
 ];
 
+/** One of a few (where, when), whose highlight slides to the chosen option as in Settings. */
+function SlideSeg({ label, value, children }: { label: string; value: string | null; children: React.ReactNode }) {
+  const ref = useRef<HTMLDivElement>(null);
+  const [pill, setPill] = useState<{ x: number; w: number } | null>(null);
+  useLayoutEffect(() => {
+    const on = ref.current?.querySelector<HTMLElement>(".sp-seg.on");
+    if (on) setPill({ x: on.offsetLeft, w: on.offsetWidth });
+  }, [value]);
+  return (
+    <div className="sp-group seg slide" role="radiogroup" aria-label={label} ref={ref}>
+      {pill && <span className="sp-seg-pill" style={{ transform: `translateX(${pill.x}px)`, width: pill.w }} aria-hidden />}
+      {children}
+    </div>
+  );
+}
+
 export function SearchBox({
   extra,
   onDone,
@@ -194,15 +210,15 @@ export function SearchBox({
           </button>
         ))}
       </div>
-      <div className="sp-group seg" role="radiogroup" aria-label="Where">
+      <SlideSeg label="Where" value={where}>
         {WHERE.map(([label, v]) => (
           <button key={label} role="radio" aria-checked={where === v} title={v ? `${label} (in:${v})` : undefined} className={cx("sp-seg", where === v && "on", v === null && "default")} onMouseDown={keep} onClick={() => setKey("in", v)}>
             {v === "sent" && <Send size={12} />}
             {label}
           </button>
         ))}
-      </div>
-      <div className="sp-group seg" role="radiogroup" aria-label="When">
+      </SlideSeg>
+      <SlideSeg label="When" value={after}>
         {WHEN.map(([label, days]) => {
           const on = days === null ? !after : after === since(days);
           return (
@@ -211,7 +227,7 @@ export function SearchBox({
             </button>
           );
         })}
-      </div>
+      </SlideSeg>
       <div className="sp-group" role="group" aria-label="Search by">
         {(
           [

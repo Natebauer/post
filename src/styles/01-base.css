@@ -856,6 +856,28 @@ body {
   background: var(--surface-2);
   border: 1px solid var(--border);
 }
+/* The chosen option's highlight slides between options. */
+.sp-group.seg.slide {
+  position: relative;
+  isolation: isolate;
+}
+.sp-seg-pill {
+  position: absolute;
+  left: 0;
+  top: 2px;
+  bottom: 2px;
+  z-index: -1;
+  border-radius: 12px;
+  background: var(--surface);
+  box-shadow: var(--shadow-1);
+  transition:
+    transform var(--slow) var(--ease-move),
+    width var(--slow) var(--ease-move);
+}
+.slide > .sp-seg.on {
+  background: transparent;
+  box-shadow: none;
+}
 .sp-seg {
   display: inline-flex;
   align-items: center;
