@@ -842,6 +842,13 @@ export function ThreadList() {
               That's everything · {total.toLocaleString()} conversations
             </div>
           )}
+          {/* And the end of a search's results, once Gmail has had its say. */}
+          {search && !search.loading && search.remote !== null && (
+            <div className="list-end" aria-hidden>
+              <Search size={14} />
+              {items.length === 1 ? "That's the only result" : `That's all ${items.length.toLocaleString()} results`}
+            </div>
+          )}
           </>
         )}
       </div>
