@@ -134,6 +134,9 @@ export function SearchBox({
   const setKey = (key: string, v: string | null) =>
     withWords([...words.filter((x) => !x.toLowerCase().startsWith(`${key}:`)), ...(v ? [`${key}:${v}`] : [])]);
   const after = valueOf("after");
+  // The words the controls above set (not the From/To/Subject ones, which carry what you typed).
+  const isFilter = (w: string) => /^(is:(unread|starred)|has:attachment|in:|after:)/i.test(w);
+  const filtered = words.some(isFilter);
   const where = valueOf("in")?.toLowerCase() ?? null;
   const keep = (e: React.MouseEvent) => e.preventDefault();
 
@@ -210,6 +213,12 @@ export function SearchBox({
           </button>
         ))}
       </div>
+      {filtered && (
+        <button className="sp-clear" onMouseDown={keep} onClick={() => withWords(words.filter((w) => !isFilter(w)))}>
+          <X size={12} />
+          Clear filters
+        </button>
+      )}
       {items.length > 0 && (
         <div className="sp-suggest">
           <span className="sp-label">{q.trim() ? "People" : "Recent"}</span>

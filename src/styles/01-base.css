@@ -872,6 +872,22 @@ body {
   color: var(--accent-text);
   box-shadow: var(--shadow-1);
 }
+/* Every filter off at once, keeping the words you typed. */
+.sp-clear {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  height: 26px;
+  padding: 0 8px;
+  border-radius: 13px;
+  font-size: var(--fs-1);
+  font-weight: 600;
+  color: var(--accent-text);
+  transition: background var(--fast) var(--ease);
+}
+.sp-clear:hover {
+  background: var(--accent-soft);
+}
 /* People and recent searches, as a row of pills across the bottom. */
 .sp-suggest {
   flex-basis: 100%;
