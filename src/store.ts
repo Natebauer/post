@@ -67,6 +67,8 @@ interface Store {
   /** The list shows only unread conversations (the "unread" pill beside the folder's name). */
   unreadOnly: boolean;
   search: SearchState | null;
+  /** The search field is open in the list's header (it may still be empty). */
+  searchOpen: boolean;
   recentSearches: string[];
   sendAs: SendAs[] | null;
 
@@ -140,6 +142,21 @@ function loadRecent(): string[] {
   }
 }
 
+/** Whether the reading pane shows something (an email, a selection or a composer) or Home. */
+export function paneHasContent(s: Store) {
+  const mode = s.composeForcedMode ?? s.settings?.composeMode ?? "inline";
+  const inThread = s.compose && s.compose.kind !== "new" && s.compose.threadId === s.selectedId;
+  return !!s.selectedId || s.checked.length > 1 || (!!s.compose && mode === "inline" && !inThread);
+}
+
+/** How a search lays out the window: with nothing open the list spreads across the reading
+ *  pane's space ("wide"); with an email open the two share it half and half ("split"). Both keep
+ *  the search's controls in full above the results. */
+export function searchLayout(s: Store): "wide" | "split" | null {
+  if (!s.search && !s.searchOpen) return null;
+  return paneHasContent(s) ? "split" : "wide";
+}
+
 export const useStore = create<Store>((set, get) => ({
   info: null,
   settings: null,
@@ -159,6 +176,7 @@ export const useStore = create<Store>((set, get) => ({
   thread: null,
   unreadOnly: false,
   search: null,
+  searchOpen: false,
   recentSearches: loadRecent(),
   sendAs: null,
   compose: null,
@@ -273,7 +291,8 @@ export const useStore = create<Store>((set, get) => ({
   select: (id) => {
     const apply = () => set({ selectedId: id, cursorId: id ?? get().cursorId, anchorId: id ?? get().anchorId });
     // Closing an email fades it out over Home first (paneFade.ts); anything else is immediate.
-    if (id === null && get().selectedId && closeWithFade(apply)) return;
+    // (Not beside a search: the list spreads back over it straight away, as the email fades.)
+    if (id === null && get().selectedId && searchLayout(get()) !== "split" && closeWithFade(apply)) return;
     cancelCloseFade();
     apply();
   },

@@ -29,7 +29,7 @@ import { EmailFrame, TextSizeMenuRow } from "./EmailFrame";
 import { Attachments } from "./Attachments";
 import { Popover } from "./Popover";
 import { Highlight } from "./Highlight";
-import { InviteCard } from "./Invite";
+import { EventSuggestion, InviteCard } from "./Invite";
 import { earlierLabel } from "../safeHtml";
 
 /**
@@ -439,6 +439,7 @@ export function MessageCard({
         <div>
           <div className="msg-body">
             <InviteCard m={m} />
+            <EventSuggestion m={m} me={me} />
             {m.html ? (
               <EmailFrame html={m.html} attachments={m.attachments} highlight={query} sender={m.from.email} messageId={m.id} />
             ) : (

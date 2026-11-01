@@ -175,7 +175,8 @@
   color: var(--text);
 }
 /* (Stronger than the dark theme's search-match highlight on mark.) */
-:root .search-mirror .search-tok {
+/* (Recent searches tint theirs the same way.) */
+:root :is(.search-mirror, .sp-pill) .search-tok {
   background: none;
   box-shadow: none;
   color: var(--accent-text);
@@ -211,6 +212,10 @@
   font-weight: 600;
   color: var(--accent-text);
   background: var(--accent-soft);
+}
+.found-pill .spin {
+  margin-right: 4px;
+  vertical-align: -1px;
 }
 .list-head .lh-clear {
   margin-left: auto;
@@ -265,8 +270,8 @@
 }
 .list-head .sub.pill.on {
   padding-right: 6px;
-  color: var(--accent-ink);
-  background: var(--accent);
+  color: var(--accent-fill-ink);
+  background: var(--accent-fill);
 }
 .list-scroll {
   flex: 1;

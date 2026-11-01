@@ -531,8 +531,8 @@ body.dragging-mail .sidebar-inner {
   font-size: var(--fs-2);
   font-weight: 600;
   font-variant-numeric: tabular-nums;
-  color: var(--accent-ink);
-  background: var(--accent);
+  color: var(--accent-fill-ink);
+  background: var(--accent-fill);
   box-shadow:
     var(--shadow-2),
     0 4px 14px color-mix(in srgb, var(--accent) 35%, transparent);

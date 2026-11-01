@@ -23,9 +23,10 @@ import {
 } from "lucide-react";
 import type { MailFolder, ThreadSummary } from "../api";
 import { api } from "../api";
-import { useStore } from "../store";
-import { motionEase, motionMs, reduceMotion, scrollBehavior } from "../motionTokens";
+import { searchLayout, useStore } from "../store";
+import { motionMs, reduceMotion, scrollBehavior } from "../motionTokens";
 import { claimHighlight } from "../motion";
+import { relayoutList, stillList } from "../searchMotion";
 import * as A from "../actions";
 import { cx, participantLine, shortDate, whenLabel } from "../util";
 import { Avatar } from "./Avatar";
@@ -47,12 +48,12 @@ const ROW = 68;
 /** The list adapts to its width: very narrow shows only each email's photo; narrow shows avatar,
  *  subject and date; wide becomes a one-row-per-email table. These are the widths where it
  *  switches, and each layout's row height. */
-type ListSize = "tiny" | "small" | "medium" | "large";
+export type ListSize = "tiny" | "small" | "medium" | "large";
 const TINY_BELOW = 160;
 const SMALL_BELOW = 380;
 const LARGE_FROM = 720;
 const ROW_H: Record<ListSize, number> = { tiny: 52, small: 52, medium: ROW, large: 40 };
-const sizeFor = (w: number): ListSize =>
+export const sizeFor = (w: number): ListSize =>
   w < TINY_BELOW ? "tiny" : w < SMALL_BELOW ? "small" : w >= LARGE_FROM ? "large" : "medium";
 /** Height of a date group label ("Today", "Yesterday", …) above the first row of each group. */
 const GROUP = 30;
@@ -317,7 +318,7 @@ function Row({
             {t.snippet && (
               <span className="snip">
                 {" · "}
-                <Highlight text={t.snippet} />
+                <Highlight text={t.snippet} near />
               </span>
             )}
           </span>
@@ -352,7 +353,7 @@ function Row({
             {t.snippet && (
               <span className="snip">
                 {" · "}
-                <Highlight text={t.snippet} />
+                <Highlight text={t.snippet} near />
               </span>
             )}
           </span>
@@ -468,33 +469,24 @@ export function ThreadList() {
   const unreadOnly = useStore((s) => s.unreadOnly);
   // Search lives in this header: a button (or / anywhere) opens the field in place of the
   // folder's name, and it folds back once it's left empty.
-  const [searchOpen, setSearchOpen] = useState(false);
+  const searchOpen = useStore((s) => s.searchOpen);
+  const setSearchOpen = (open: boolean) => useStore.setState({ searchOpen: open });
+  // A search spreads the list out (or shares the window with an email), with its controls in full under the field.
+  const wide = useStore((s) => searchLayout(s) !== null);
+  const [searchPanel, setSearchPanel] = useState<HTMLDivElement | null>(null);
   useEffect(() => {
     const open = () => setSearchOpen(true);
     window.addEventListener("post:focus-search", open);
     return () => window.removeEventListener("post:focus-search", open);
   }, []);
-  // Folding back: the field shrinks into the search button, then the folder's name fades in.
+  // Closing: the spread-out list closes back over Home (searchMotion.ts), and the folder's name fades in.
   const [unfolding, setUnfolding] = useState(false);
-  const closing = useRef(false);
   const closeSearch = () => {
-    if (closing.current) return;
-    const done = () => {
-      closing.current = false;
-      setSearchOpen(false);
-      setUnfolding(true);
-      window.setTimeout(() => setUnfolding(false), 400);
-    };
-    const w = document.querySelector<HTMLElement>(".list-head .search-wrap");
-    if (!w || reduceMotion()) return done();
-    closing.current = true;
-    w.animate(
-      [
-        { clipPath: "inset(0 0 0 0 round 8px)", opacity: 1 },
-        { clipPath: "inset(0 0 0 calc(100% - 64px) round 8px)", opacity: 0 },
-      ],
-      { duration: 200, easing: "cubic-bezier(0.4, 0, 1, 1)", fill: "forwards" },
-    ).finished.then(done, done);
+    // Folding the field away while results are showing would leave no way out of them.
+    if (useStore.getState().search) return;
+    setSearchOpen(false);
+    setUnfolding(true);
+    window.setTimeout(() => setUnfolding(false), 400);
   };
   useEffect(() => {
     // Cleared from elsewhere (Esc in the list): fold back unless you're still typing in it.
@@ -533,24 +525,42 @@ export function ThreadList() {
   // Measure the list's width to pick its layout (and the virtual list's row height).
   const paneRef = useRef<HTMLElement>(null);
   const [listSize, setListSize] = useState<ListSize>("medium");
+  const shownSize = useRef<ListSize | null>(null);
+  // How the list looked just before it was dragged into another layout (see searchMotion.ts).
+  const sizeStill = useRef<HTMLElement | null>(null);
   useEffect(() => {
     const el = paneRef.current;
     if (!el) return;
-    const ro = new ResizeObserver(() => setListSize(sizeFor(el.getBoundingClientRect().width)));
+    const ro = new ResizeObserver(() => {
+      const size = sizeFor(el.getBoundingClientRect().width);
+      // Not on first measuring, and not while a search spreading out or coming back moves it.
+      const busy = el.parentElement?.querySelector("[data-still-list]");
+      if (shownSize.current && size !== shownSize.current && !sizeStill.current && !busy && !reduceMotion())
+        sizeStill.current = stillList(el, false);
+      setListSize(size);
+    });
     ro.observe(el);
     return () => ro.disconnect();
   }, []);
-  // Crossing into another layout: rows take their new places at once and the list fades back in,
-  // rather than every row gliding to a new height.
-  const shownSize = useRef(listSize);
+  // A search changing the list's width takes its layout in the same frame, not one later, so the
+  // move into it can start at once (searchMotion.ts).
+  const searchAt = useStore(searchLayout);
   useLayoutEffect(() => {
-    if (shownSize.current === listSize) return;
+    const el = paneRef.current;
+    if (el?.parentElement?.querySelector("[data-still-list]")) setListSize(sizeFor(el.getBoundingClientRect().width));
+  }, [searchAt]);
+  // Crossing into another layout: rows take their new places at once (no row gliding to a new
+  // height), and a copy of how they looked moves piece by piece into them.
+  useLayoutEffect(() => {
+    const was = shownSize.current;
     shownSize.current = listSize;
+    const still = sizeStill.current;
+    sizeStill.current = null;
     const pane = paneRef.current;
-    if (!pane || reduceMotion()) return;
+    if (!was || was === listSize || !pane || reduceMotion()) return void still?.remove();
     pane.classList.add("relayout");
-    scrollRef.current?.animate([{ opacity: 0.4 }, { opacity: 1 }], { duration: motionMs("fast"), easing: motionEase("ease") });
     requestAnimationFrame(() => requestAnimationFrame(() => pane.classList.remove("relayout")));
+    if (still) relayoutList(still, pane);
   }, [listSize]);
   const rowH = ROW_H[listSize];
   const v = useVirtualizer({
@@ -565,8 +575,9 @@ export function ThreadList() {
     getItemKey: (i) => items[i].threadId,
   });
 
-  // Row heights change when group labels move (new mail, deletions, a different folder).
-  useEffect(() => {
+  // Row heights change when group labels move (new mail, deletions, a different folder), and with
+  // the layout (measured before it's shown, so the rows are in place in its first frame).
+  useLayoutEffect(() => {
     v.measure();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [groupKey, rowH]);
@@ -585,6 +596,18 @@ export function ThreadList() {
     }
     prev.current = { key, ids, top: threads[0]?.date ?? 0 };
   }, [threads, folder, search?.query]);
+  // Searching, what only Gmail found (older mail this computer doesn't keep) arrives the same way.
+  const remote = search?.remote;
+  useEffect(() => {
+    const s = useStore.getState().search;
+    if (!remote?.length || !s) return;
+    const here = new Set(s.local.map((t) => t.threadId));
+    const extra = remote.filter((t) => !here.has(t.threadId)).map((t) => t.threadId);
+    if (!extra.length || extra.length >= 20 || !claimHighlight(true)) return;
+    setFresh(new Set(extra));
+    const t = window.setTimeout(() => setFresh(new Set()), motionMs("highlight") + 100);
+    return () => window.clearTimeout(t);
+  }, [remote]);
 
   // Keep the keyboard cursor visible.
   useEffect(() => {
@@ -651,8 +674,11 @@ export function ThreadList() {
 
   const title = search ? "Results" : folderTitle(folder);
   const unread = search ? 0 : folder === "INBOX" || folder === "SPAM" || folder.startsWith("sec:") ? counts[folder] ?? 0 : 0;
+  // Nothing yet while Gmail is still being asked: say it's looking rather than "0+ found".
   const sub = search
-    ? (<><RollingCount value={items.length} />{search.remote === null ? "+" : ""} found</>)
+    ? search.loading && !items.length
+      ? (<><Loader2 size={11} className="spin" aria-hidden />Searching</>)
+      : (<><RollingCount value={items.length} />{search.remote === null ? "+" : ""} found</>)
     : checked.length
       ? `${checked.length} selected`
       : unread || unreadOnly
@@ -675,6 +701,7 @@ export function ThreadList() {
               )
             }
             onDone={closeSearch}
+            panel={wide ? searchPanel : null}
           />
         ) : (
           <>
@@ -712,6 +739,7 @@ export function ThreadList() {
           </button>
         )}
       </div>
+      {wide && <div className="search-panel" ref={setSearchPanel} />}
       {search && (
         <div className="search-banner" aria-live="polite">
           {search.loading ? (
@@ -752,13 +780,18 @@ export function ThreadList() {
       >
         {items.length === 0 ? (
           search ? (
-            <div className="empty">
-              <div>
-                {!search.loading && <EmptyArt kind="search" />}
-                <div className="big">{search.loading ? "Searching…" : "No matches"}</div>
-                {!search.loading && "Try different words, or from:, subject:, has:attachment"}
+            // Still asking Gmail: rows in the list's shape, until there's something (or nothing) to show.
+            search.loading ? (
+              <ListSkeleton />
+            ) : (
+              <div className="empty">
+                <div>
+                  <EmptyArt kind="search" />
+                  <div className="big">No matches</div>
+                  Try different words, or from:, subject:, has:attachment
+                </div>
               </div>
-            </div>
+            )
           ) : (
             unreadOnly && !loadingList ? (
               <div className="empty">
@@ -819,6 +852,13 @@ export function ThreadList() {
             <div className="list-end" aria-hidden>
               <MailCheck size={14} />
               That's everything · {total.toLocaleString()} conversations
+            </div>
+          )}
+          {/* And the end of a search's results, once Gmail has had its say. */}
+          {search && !search.loading && search.remote !== null && (
+            <div className="list-end" aria-hidden>
+              <Search size={14} />
+              {items.length === 1 ? "That's the only result" : `That's all ${items.length.toLocaleString()} results`}
             </div>
           )}
           </>

@@ -174,3 +174,51 @@ pub async fn attachment_thumbnail(st: St<'_>, message_id: String, part_id: Strin
 pub fn log_frontend(window: tauri::Window, message: String) {
     log::warn!("[ui:{}] {}", window.label(), message);
 }
+
+// ---------------- adding an event ----------------
+
+#[derive(Serialize)]
+#[serde(rename_all = "camelCase")]
+pub struct AddedEvent {
+    /// "ok" | "needs_permission" | "error"
+    status: String,
+    message: String,
+    /// The event in Google Calendar, to open it.
+    link: String,
+}
+
+/// Put an event on the user's main Google Calendar. `start` and `end` are RFC 3339 instants, or
+/// dates ("2026-11-03") with `all_day`. Without permission to add events yet (it came with a later
+/// version of Post), says so, so the user can allow it once.
+#[tauri::command]
+pub async fn add_calendar_event(
+    st: St<'_>,
+    title: String,
+    start: String,
+    end: String,
+    all_day: bool,
+    location: String,
+    description: String,
+) -> R<AddedEvent> {
+    let at = |s: &str| if all_day { json!({ "date": s }) } else { json!({ "dateTime": s }) };
+    let event = json!({
+        "summary": title,
+        "location": location,
+        "description": description,
+        "start": at(&start),
+        "end": at(&end),
+    });
+    match st.gmail.insert_event(&event).await {
+        Ok(v) => Ok(AddedEvent {
+            status: "ok".into(),
+            message: String::new(),
+            link: v["htmlLink"].as_str().unwrap_or("").to_string(),
+        }),
+        Err(e) if matches!(crate::gmail::api_status(&e), Some(401) | Some(403)) => Ok(AddedEvent {
+            status: "needs_permission".into(),
+            message: "Post needs your permission to add events to Google Calendar.".into(),
+            link: String::new(),
+        }),
+        Err(e) => Ok(AddedEvent { status: "error".into(), message: format!("{e}"), link: String::new() }),
+    }
+}

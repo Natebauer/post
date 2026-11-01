@@ -111,3 +111,16 @@ pub async fn ai_assist(
 pub async fn tone_check(st: St<'_>, text: String) -> R<crate::ai::ToneNote> {
     Ok(crate::ai::tone_check(&st, &text).await?)
 }
+
+/// An event an email confirms or schedules, to offer adding it to the calendar.
+#[tauri::command]
+pub async fn find_event(
+    st: St<'_>,
+    message_id: String,
+    subject: String,
+    from: String,
+    received: i64,
+    text: String,
+) -> R<Option<crate::ai::EventIdea>> {
+    Ok(crate::ai::find_event(&st, &message_id, &subject, &from, received, &text).await?)
+}

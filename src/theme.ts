@@ -73,8 +73,12 @@ function paint(s: Settings | null, t: "light" | "dark") {
   if (s?.mood === "auto")
     autoTimer = window.setTimeout(() => applyTheme(s, { slow: true }), nextAutoChange().getTime() - Date.now() + 1000);
   root.style.setProperty("--accent", accent);
-  // Text on the accent (buttons, badges) is dark when the accent is light, so it stays readable.
+  // Text on the accent (badges, marks) is dark when the accent is light, so it stays readable.
   root.style.setProperty("--accent-ink", isLight(accent) ? "#1b1c1f" : "#ffffff");
+  // Buttons filled with the accent keep white text: the fill deepens just enough for it to read.
+  const fill = accentFill(accent);
+  root.style.setProperty("--accent-fill", fill.bg);
+  root.style.setProperty("--accent-fill-ink", fill.ink);
   root.style.setProperty("--av-l", t === "dark" ? "30%" : "88%");
   root.style.setProperty("--av-t", t === "dark" ? "82%" : "32%");
   try {
@@ -337,6 +341,24 @@ export function luminance(hex: string): number {
     return v <= 0.03928 ? v / 12.92 : Math.pow((v + 0.055) / 1.055, 2.4);
   };
   return 0.2126 * lin((n >> 16) & 255) + 0.7152 * lin((n >> 8) & 255) + 0.0722 * lin(n & 255);
+}
+
+/**
+ * A button's fill for an accent: the accent deepened just enough for white text to read clearly
+ * (4.5:1), so a mid-tone accent doesn't end up as a mid-tone button with dark text on it. A very
+ * pale accent (a yellow) would turn muddy that deep, so it keeps its color and takes dark text.
+ */
+export function accentFill(hex: string): { bg: string; ink: string } {
+  const m = /^#?([0-9a-f]{6})$/i.exec(hex.trim());
+  if (!m) return { bg: hex, ink: "#ffffff" };
+  const n = parseInt(m[1], 16);
+  const rgb = [(n >> 16) & 255, (n >> 8) & 255, n & 255];
+  const at = (k: number) => `#${rgb.map((c) => Math.round(c * k).toString(16).padStart(2, "0")).join("")}`;
+  for (let k = 1; k >= 0.6; k -= 0.02) {
+    const bg = at(k);
+    if (1.05 / (luminance(bg) + 0.05) >= 4.5) return { bg, ink: "#ffffff" };
+  }
+  return { bg: hex, ink: "#1b1c1f" };
 }
 
 /** Relative luminance above which white text stops being readable on a color. */

@@ -395,6 +395,37 @@
 .invite .rsvp.faint {
   font-size: var(--fs-1);
 }
+/* An event Post spotted in an email without an invite: the invite card, with a small label
+   saying it's a suggestion, and a way to wave it off. */
+.invite.event-idea {
+  position: relative;
+}
+.event-idea-kicker {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  margin-bottom: 2px;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--accent-text);
+}
+.event-idea-x {
+  position: absolute;
+  top: var(--s-2);
+  right: var(--s-2);
+}
+.event-idea-done {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: var(--fs-2);
+}
+.event-idea-note {
+  flex-basis: 100%;
+  font-size: var(--fs-1);
+}
 
 /* hover card */
 .hovercard {

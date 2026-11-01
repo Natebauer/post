@@ -29,7 +29,7 @@ export async function trash(ids = selectedIds()) {
     await api.trash(ids);
     S().snack({
       text: ids.length === 1 ? "Conversation moved to Trash" : `${ids.length} conversations moved to Trash`,
-      action: { label: "Undo", run: () => void api.untrash(ids).then(() => S().loadThreads()) },
+      action: { label: "Undo", run: () => void api.untrash(ids).then(() => S().loadThreads(), fail) },
     });
   } catch (e) {
     fail(e);
