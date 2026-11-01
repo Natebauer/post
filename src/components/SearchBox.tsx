@@ -184,7 +184,7 @@ export function SearchBox({
       </div>
       <div className="sp-group seg" role="radiogroup" aria-label="Where">
         {WHERE.map(([label, v]) => (
-          <button key={label} role="radio" aria-checked={where === v} className={cx("sp-seg", where === v && "on")} onMouseDown={keep} onClick={() => setKey("in", v)}>
+          <button key={label} role="radio" aria-checked={where === v} className={cx("sp-seg", where === v && "on", v === null && "default")} onMouseDown={keep} onClick={() => setKey("in", v)}>
             {v === "sent" && <Send size={12} />}
             {label}
           </button>
@@ -194,7 +194,7 @@ export function SearchBox({
         {WHEN.map(([label, days]) => {
           const on = days === null ? !after : after === since(days);
           return (
-            <button key={label} role="radio" aria-checked={on} className={cx("sp-seg", on && "on")} onMouseDown={keep} onClick={() => setKey("after", days === null ? null : since(days))}>
+            <button key={label} role="radio" aria-checked={on} className={cx("sp-seg", on && "on", days === null && "default")} onMouseDown={keep} onClick={() => setKey("after", days === null ? null : since(days))}>
               {label}
             </button>
           );

@@ -868,6 +868,10 @@ body {
   color: var(--text-2);
   transition: background var(--fast) var(--ease), color var(--fast) var(--ease);
 }
+/* All mail, Any time: chosen, but not narrowing anything, so not in the accent. */
+.sp-seg.on.default {
+  color: var(--text);
+}
 .sp-seg:hover {
   color: var(--text);
 }
