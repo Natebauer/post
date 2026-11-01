@@ -1,7 +1,7 @@
 import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import type React from "react";
-import { AtSign, Clock, Mail, Paperclip, Search, Send, Star, Type, X } from "lucide-react";
+import { AtSign, Check, Clock, Mail, Paperclip, Search, Send, Star, Type, X } from "lucide-react";
 import { api, type Contact } from "../api";
 import { useStore } from "../store";
 import { cx } from "../util";
@@ -176,7 +176,8 @@ export function SearchBox({
           ] as const
         ).map(([w, label, icon]) => (
           <button key={w} className={cx("search-chip", hasWord(w) && "on")} aria-pressed={hasWord(w)} onMouseDown={keep} onClick={() => toggleWord(w)}>
-            {icon}
+            {/* On, it wears a check, so it reads as on rather than just pointed at. */}
+            {hasWord(w) ? <Check size={13} strokeWidth={2.5} /> : icon}
             {label}
           </button>
         ))}

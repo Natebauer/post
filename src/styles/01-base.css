@@ -818,11 +818,15 @@ body {
     color var(--fast) var(--ease),
     border-color var(--fast) var(--ease);
 }
-.search-chip:hover,
+.search-chip:hover {
+  background: color-mix(in srgb, var(--accent-soft) 50%, var(--surface-2));
+  color: var(--text);
+}
 .search-chip.on {
   background: var(--accent-soft);
-  border-color: color-mix(in srgb, var(--accent) 35%, transparent);
+  border-color: color-mix(in srgb, var(--accent) 45%, transparent);
   color: var(--accent-text);
+  font-weight: 650;
 }
 
 /* ---------- search, spread wide: its controls laid out under the field ---------- */
