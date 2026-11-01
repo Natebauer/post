@@ -86,7 +86,7 @@ export function stillList(list: HTMLElement, card = true): HTMLElement | null {
   return copy;
 }
 
-const timing = () => ({ duration: motionMs("emphasis"), easing: motionEase("ease-move") });
+const timing = () => ({ duration: motionMs("search-move"), easing: motionEase("ease-move") });
 
 /** The still copy closes to `width` from its left edge as one card, while what's inside it moves
  *  to where it sits in the list underneath (hidden until then, so the two never stack). An email
@@ -199,7 +199,7 @@ export function growList(copy: HTMLElement, list: HTMLElement, from: number, bes
 /** The list was dragged across the width where its rows change layout: what's in it moves to its
  *  new places over its own card, quicker than a search spreading out. */
 export function relayoutList(copy: HTMLElement, list: HTMLElement) {
-  const d = motionMs("emphasis") * 0.7;
+  const d = motionMs("search-move") * 0.8;
   const card = copy.animate([{ opacity: 1 }, { opacity: 1 }], { duration: d });
   const moves = [card, ...[...list.children].map((el) => el.animate([{ opacity: 0 }, { opacity: 0 }], { duration: d }))];
   together(copy, list, card, moves, d);

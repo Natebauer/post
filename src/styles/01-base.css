@@ -95,6 +95,8 @@
   --slow-out: 170ms;
   /* Something the app did on its own (a new section, a pinned email) that's worth a glance. */
   --emphasis: 420ms;
+  /* The list spreading out for a search, coming back, or making room for an email (searchMotion.ts). */
+  --search-move: 300ms;
   /* The one soft highlight on something new or changed. */
   --highlight: 900ms;
   /* Endless loops: a spinner, a loading placeholder breathing. */

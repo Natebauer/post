@@ -176,7 +176,7 @@ export function SearchBox({
     panel.querySelectorAll(".sp-group, .sp-suggest").forEach((g, i) =>
       g.animate([{ opacity: 0, transform: "translateY(-6px)" }, { opacity: 1, transform: "none" }], {
         duration: motionMs("slow"),
-        delay: 80 + i * 45,
+        delay: 40 + i * 30,
         easing: ease,
         fill: "backwards",
       }),

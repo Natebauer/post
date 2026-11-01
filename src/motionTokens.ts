@@ -14,6 +14,7 @@ const FALLBACK_MS: Record<string, number> = {
   "med-out": 130,
   "slow-out": 170,
   emphasis: 420,
+  "search-move": 300,
   highlight: 900,
 };
 
