@@ -300,11 +300,13 @@ export function SearchBox({
           aria-label="Search mail"
           autoFocus
           onFocus={() => setFocused(true)}
-          onBlur={() => {
+          onBlur={(e) => {
             window.setTimeout(() => setFocused(false), 120);
             // Left with nothing in it for somewhere else: back to the folder's name. (Checked once
             // a picked suggestion has filled it; and staying within the list, opening an email
-            // from it included, keeps the search open.)
+            // from it included, keeps the search open. So does going to the email beside it, even
+            // to close it: the search then spreads wide.)
+            if ((e.relatedTarget as Element | null)?.closest(".read-pane")) return;
             window.setTimeout(() => {
               const st = useStore.getState();
               if (input.current?.value.trim() || st.search || st.selectedId) return;
