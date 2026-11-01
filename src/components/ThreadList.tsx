@@ -662,8 +662,11 @@ export function ThreadList() {
 
   const title = search ? "Results" : folderTitle(folder);
   const unread = search ? 0 : folder === "INBOX" || folder === "SPAM" || folder.startsWith("sec:") ? counts[folder] ?? 0 : 0;
+  // Nothing yet while Gmail is still being asked: say it's looking rather than "0+ found".
   const sub = search
-    ? (<><RollingCount value={items.length} />{search.remote === null ? "+" : ""} found</>)
+    ? search.loading && !items.length
+      ? (<><Loader2 size={11} className="spin" aria-hidden />Searching</>)
+      : (<><RollingCount value={items.length} />{search.remote === null ? "+" : ""} found</>)
     : checked.length
       ? `${checked.length} selected`
       : unread || unreadOnly

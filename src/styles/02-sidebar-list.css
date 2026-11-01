@@ -212,6 +212,10 @@
   color: var(--accent-text);
   background: var(--accent-soft);
 }
+.found-pill .spin {
+  margin-right: 4px;
+  vertical-align: -1px;
+}
 .list-head .lh-clear {
   margin-left: auto;
 }
