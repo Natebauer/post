@@ -14,6 +14,18 @@ import { Avatar } from "./Avatar";
 /** Words that narrow a search (from:, has:…), as typed in the field. */
 const FILTER_WORD = /^-?(from|to|cc|subject|has|is|in|label|before|after|older_than|newer_than):/i;
 
+/** Words as typed, with the filter words marked to show in the accent. */
+const tinted = (text: string) =>
+  text.split(/(\s+)/).map((w, i) =>
+    FILTER_WORD.test(w) ? (
+      <mark key={i} className="search-tok">
+        {w}
+      </mark>
+    ) : (
+      w
+    ),
+  );
+
 /** "after:" a number of days ago, as Gmail writes dates. */
 const since = (days: number) => {
   const d = new Date(Date.now() - days * 86_400_000);
@@ -227,7 +239,7 @@ export function SearchBox({
             <span key={it.value} className={cx("sp-pill", it.kind)}>
               <button onMouseDown={keep} onClick={() => run(it.value)} title={it.c ? it.c.email : undefined}>
                 {it.c ? <Avatar email={it.c.email} name={it.label} size="xs" /> : <Clock size={13} />}
-                {it.c ? `Mail from ${it.label}` : it.label}
+                {it.c ? `Mail from ${it.label}` : tinted(it.label)}
               </button>
               {it.kind === "recent" && (
                 <button className="sp-forget" aria-label={`Remove ${it.label} from recent searches`} title="Remove from recent searches" onMouseDown={keep} onClick={() => forget(it.value)}>
@@ -248,17 +260,7 @@ export function SearchBox({
         {/* The typed words over the field, so filter words (from:, has:…) can show in the accent. */}
         <span className="search-field">
         <span className="search-mirror" ref={mirror} aria-hidden>
-          <span>
-          {q.split(/(\s+)/).map((w, i) =>
-            FILTER_WORD.test(w) ? (
-              <mark key={i} className="search-tok">
-                {w}
-              </mark>
-            ) : (
-              w
-            ),
-          )}
-          </span>
+          <span>{tinted(q)}</span>
         </span>
         <input
           ref={input}

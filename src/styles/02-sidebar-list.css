@@ -175,7 +175,8 @@
   color: var(--text);
 }
 /* (Stronger than the dark theme's search-match highlight on mark.) */
-:root .search-mirror .search-tok {
+/* (Recent searches tint theirs the same way.) */
+:root :is(.search-mirror, .sp-pill) .search-tok {
   background: none;
   box-shadow: none;
   color: var(--accent-text);
