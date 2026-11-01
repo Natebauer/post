@@ -2,11 +2,19 @@ import { Fragment } from "react";
 import { useStore } from "../store";
 import { highlightRegex, searchTerms } from "../hooks";
 
-/** Render text with the current search terms marked. */
-export function Highlight({ text }: { text: string }) {
+/** Render text with the current search terms marked. `near`: a long text (a preview line) whose
+ *  first match is well along starts a few words before it, so the match isn't cut off. */
+export function Highlight({ text, near }: { text: string; near?: boolean }) {
   const q = useStore((s) => s.search?.query);
   const re = highlightRegex(searchTerms(q));
   if (!re || !text) return <>{text}</>;
+  if (near) {
+    const at = text.search(new RegExp(re.source, "i"));
+    if (at > 40) {
+      const from = text.lastIndexOf(" ", at - 20);
+      if (from > 0) text = `…${text.slice(from + 1)}`;
+    }
+  }
   const parts = text.split(re);
   return (
     <>

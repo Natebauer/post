@@ -318,7 +318,7 @@ function Row({
             {t.snippet && (
               <span className="snip">
                 {" · "}
-                <Highlight text={t.snippet} />
+                <Highlight text={t.snippet} near />
               </span>
             )}
           </span>
@@ -353,7 +353,7 @@ function Row({
             {t.snippet && (
               <span className="snip">
                 {" · "}
-                <Highlight text={t.snippet} />
+                <Highlight text={t.snippet} near />
               </span>
             )}
           </span>
