@@ -175,7 +175,7 @@ export function SearchBox({
             ["has:attachment", "Has attachment", <Paperclip size={13} key="a" />],
           ] as const
         ).map(([w, label, icon]) => (
-          <button key={w} className={cx("search-chip", hasWord(w) && "on")} aria-pressed={hasWord(w)} onMouseDown={keep} onClick={() => toggleWord(w)}>
+          <button key={w} className={cx("search-chip", hasWord(w) && "on")} aria-pressed={hasWord(w)} title={`${label} (${w})`} onMouseDown={keep} onClick={() => toggleWord(w)}>
             {/* On, it wears a check, so it reads as on rather than just pointed at. */}
             {hasWord(w) ? <Check size={13} strokeWidth={2.5} /> : icon}
             {label}
@@ -184,7 +184,7 @@ export function SearchBox({
       </div>
       <div className="sp-group seg" role="radiogroup" aria-label="Where">
         {WHERE.map(([label, v]) => (
-          <button key={label} role="radio" aria-checked={where === v} className={cx("sp-seg", where === v && "on", v === null && "default")} onMouseDown={keep} onClick={() => setKey("in", v)}>
+          <button key={label} role="radio" aria-checked={where === v} title={v ? `${label} (in:${v})` : undefined} className={cx("sp-seg", where === v && "on", v === null && "default")} onMouseDown={keep} onClick={() => setKey("in", v)}>
             {v === "sent" && <Send size={12} />}
             {label}
           </button>
@@ -208,7 +208,7 @@ export function SearchBox({
             ["subject:", "Subject…", <Type size={13} key="s" />],
           ] as const
         ).map(([token, label, icon]) => (
-          <button key={token} className="search-chip" onMouseDown={keep} onClick={() => addFilter(token)}>
+          <button key={token} className="search-chip" title={`${label.replace("…", "")} (${token})`} onMouseDown={keep} onClick={() => addFilter(token)}>
             {icon}
             {label}
           </button>
