@@ -596,6 +596,18 @@ export function ThreadList() {
     }
     prev.current = { key, ids, top: threads[0]?.date ?? 0 };
   }, [threads, folder, search?.query]);
+  // Searching, what only Gmail found (older mail this computer doesn't keep) arrives the same way.
+  const remote = search?.remote;
+  useEffect(() => {
+    const s = useStore.getState().search;
+    if (!remote?.length || !s) return;
+    const here = new Set(s.local.map((t) => t.threadId));
+    const extra = remote.filter((t) => !here.has(t.threadId)).map((t) => t.threadId);
+    if (!extra.length || extra.length >= 20 || !claimHighlight(true)) return;
+    setFresh(new Set(extra));
+    const t = window.setTimeout(() => setFresh(new Set()), motionMs("highlight") + 100);
+    return () => window.clearTimeout(t);
+  }, [remote]);
 
   // Keep the keyboard cursor visible.
   useEffect(() => {
