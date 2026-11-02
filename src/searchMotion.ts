@@ -97,7 +97,7 @@ export function shrinkStill(copy: HTMLElement, width: number, list: HTMLElement,
   const right = c.width - width;
   const r = getComputedStyle(copy).borderTopLeftRadius;
   const card = copy.animate([{ clipPath: clip(0, r) }, { clipPath: clip(right, r) }], { ...t, fill: "forwards" });
-  const moves = [card, list.animate([{ opacity: 0 }, { opacity: 0 }], { duration: t.duration, fill: "forwards" })];
+  const moves = [card, list.animate([{ opacity: 0 }, { opacity: 0 }], { duration: t.duration, fill: "forwards" }), ...becomeList(copy, list, t)];
   if (beside) {
     const p = beside.getBoundingClientRect();
     const gap = Math.max(0, p.left - (c.left + width));
@@ -106,6 +106,45 @@ export function shrinkStill(copy: HTMLElement, width: number, list: HTMLElement,
     moves.push(beside.animate([{ clipPath: under(c.right) }, { clipPath: under(c.left + width) }], t));
   }
   together(copy, list, card, moves, t.duration);
+}
+
+/** One color for a card's background as it looks: the wide list lays its surface over itself
+ *  (01-base.css), which only shows when that surface is see-through. */
+function flatColor(cs: CSSStyleDeclaration): string {
+  const g = document.createElement("canvas").getContext("2d", { willReadFrequently: true });
+  if (!g) return cs.backgroundColor;
+  g.canvas.width = g.canvas.height = 1;
+  g.fillStyle = cs.backgroundColor;
+  g.fillRect(0, 0, 1, 1);
+  if (cs.backgroundImage.includes("gradient")) g.fillRect(0, 0, 1, 1);
+  const [r, gr, b, a] = g.getImageData(0, 0, 1, 1).data;
+  return `rgb(${r} ${gr} ${b} / ${a / 255})`;
+}
+
+type Look = { backgroundColor: string; backdropFilter: string };
+const lookOf = (el: Element): Look => {
+  const cs = getComputedStyle(el);
+  return { backgroundColor: flatColor(cs), backdropFilter: cs.backdropFilter };
+};
+const sameLook = (a: Look, b: Look) => a.backgroundColor === b.backgroundColor && a.backdropFilter === b.backdropFilter;
+
+/** The copy carries the wide card's look (a doubled surface, frosted) as it closes; a see-through
+ *  card would show the change as it hands over to the list, so it turns into the list's on the way. */
+function becomeList(copy: HTMLElement, list: HTMLElement, t: KeyframeAnimationOptions): Animation[] {
+  const from = lookOf(copy);
+  const to = lookOf(list);
+  if (sameLook(from, to)) return [];
+  copy.style.backgroundImage = "none";
+  copy.style.backgroundColor = from.backgroundColor;
+  return [copy.animate([from, to], { ...t, fill: "forwards" })];
+}
+
+/** Spreading out, the list takes the wide card's look at once; it eases into it from the one it
+ *  had instead, as one color (the same as the doubled surface it lands on). */
+function becomeWide(list: HTMLElement, was: Look, t: KeyframeAnimationOptions): Animation[] {
+  const to = lookOf(list);
+  if (sameLook(was, to)) return [];
+  return [list.animate([{ ...was, backgroundImage: "none" }, { ...to, backgroundImage: "none" }], t)];
 }
 
 /** The email beside a list that's opening out has already narrowed to its new place; a stand-in
@@ -176,11 +215,12 @@ export function growList(copy: HTMLElement, list: HTMLElement, from: number, bes
   const t = timing();
   const r = getComputedStyle(list).borderTopLeftRadius;
   const out = copy.getBoundingClientRect().width - list.getBoundingClientRect().width;
+  const was = lookOf(copy);
   // The list's own card opens out; the copy only carries what's in it.
   Object.assign(copy.style, { overflow: "visible", background: "none", borderColor: "transparent", boxShadow: "none", backdropFilter: "none" });
   copy.style.setProperty("-webkit-backdrop-filter", "none");
   const card = copy.animate([{ clipPath: clip(0, r) }, { clipPath: clip(out, r) }], { ...t, fill: "forwards" });
-  const moves = [card, revealList(list, from)];
+  const moves = [card, revealList(list, from), ...becomeWide(list, was, t)];
   // Already searching (beside an email), the field and filters it has travel with the rest;
   // otherwise the list's own come in, so typing shows at once and the filters unfold themselves.
   const searching = !!copy.querySelector(":scope > .search-panel");
