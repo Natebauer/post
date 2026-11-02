@@ -97,7 +97,7 @@ export function shrinkStill(copy: HTMLElement, width: number, list: HTMLElement,
   const right = c.width - width;
   const r = getComputedStyle(copy).borderTopLeftRadius;
   const card = copy.animate([{ clipPath: clip(0, r) }, { clipPath: clip(right, r) }], { ...t, fill: "forwards" });
-  const moves = [card, list.animate([{ opacity: 0 }, { opacity: 0 }], { duration: t.duration })];
+  const moves = [card, list.animate([{ opacity: 0 }, { opacity: 0 }], { duration: t.duration, fill: "forwards" })];
   if (beside) {
     const p = beside.getBoundingClientRect();
     const gap = Math.max(0, p.left - (c.left + width));
@@ -146,10 +146,19 @@ function drawOut(beside: HTMLElement, list: HTMLElement, from: number, t: Keyfra
 
 /** The list picks its row layout from its width a render or two later, and only then can its
  *  pieces be measured; until they are, everything waits at its first frame, so the card and what's
- *  in it start (and land) together as one motion. `card` ends it, taking the copy away. */
+ *  in it start (and land) together as one motion. `card` ends it, taking the copy away. The list
+ *  stays hidden until then and shows in the same step: left to end by themselves, its fade (run
+ *  apart from the page) and the copy's going can miss each other by a frame, and a see-through
+ *  card shows it, both at once (lighter) or neither. */
 function together(copy: HTMLElement, list: HTMLElement, card: Animation, moves: Animation[], D: number, keep?: string) {
   moves.forEach((a) => a.pause());
-  card.finished.finally(() => copy.remove());
+  card.finished.finally(() => {
+    copy.remove();
+    for (const a of moves) {
+      const el = (a.effect as KeyframeEffect | null)?.target;
+      if (a !== card && el && list.contains(el)) a.cancel();
+    }
+  });
   whenSettled(
     list,
     () => keepPlace(copy, list),
@@ -176,8 +185,8 @@ export function growList(copy: HTMLElement, list: HTMLElement, from: number, bes
   // otherwise the list's own come in, so typing shows at once and the filters unfold themselves.
   const searching = !!copy.querySelector(":scope > .search-panel");
   for (const el of list.children)
-    if (el.matches(".list-head") && !searching) moves.push(el.animate([{ opacity: 0 }, { opacity: 0, offset: 0.3 }, { opacity: 1 }], { duration: t.duration }));
-    else if (searching || !el.matches(".search-panel")) moves.push(el.animate([{ opacity: 0 }, { opacity: 0 }], { duration: t.duration }));
+    if (el.matches(".list-head") && !searching) moves.push(el.animate([{ opacity: 0 }, { opacity: 0, offset: 0.3 }, { opacity: 1 }], { duration: t.duration, fill: "forwards" }));
+    else if (searching || !el.matches(".search-panel")) moves.push(el.animate([{ opacity: 0 }, { opacity: 0 }], { duration: t.duration, fill: "forwards" }));
   if (beside) moves.push(...drawOut(beside, list, from, t));
   // An email closing as the list spreads over it fades, in step; the edge cuts it off rather than
   // passing over it, or the frosted card would blur it into a white haze.
@@ -201,7 +210,7 @@ export function growList(copy: HTMLElement, list: HTMLElement, from: number, bes
 export function relayoutList(copy: HTMLElement, list: HTMLElement) {
   const d = motionMs("search-move") * 0.8;
   const card = copy.animate([{ opacity: 1 }, { opacity: 1 }], { duration: d });
-  const moves = [card, ...[...list.children].map((el) => el.animate([{ opacity: 0 }, { opacity: 0 }], { duration: d }))];
+  const moves = [card, ...[...list.children].map((el) => el.animate([{ opacity: 0 }, { opacity: 0 }], { duration: d, fill: "forwards" }))];
   together(copy, list, card, moves, d);
 }
 
